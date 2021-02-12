@@ -1,0 +1,67 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../static/css/style.css"/>
+        <title>Easy EasyPower</title>
+    </head>
+
+    <body>
+        <header>
+            <div id="logo">
+                <img src="../static/img/icone_3E.png" alt="icone 3E ing"/>
+            </div>
+            <div id="titre_principal">
+                <h1>Easy EasyPower</h1>
+                <h2>Génération de tableau de court-circuit depuis EasyPower</h2>
+            </div>
+        </header>
+
+        <div id="bloc_page">
+            <nav id="barre-nav">
+                <ul>
+                    <li><a href="accueil.html">Accueil</a> </li>
+                    <li><a href="easy_power.html">Easy EasyPower</a> </li>
+
+                </ul>
+
+            </nav>
+
+            <section id="intro">
+                <p>
+                    Bienvenu dans ce petit outil d'aide à la rédaction de rapport <br/>
+
+                    Pour l'utiliser vous devez tout d'abord générer les fichiers de courts-circuits depuis EasyPower.<br/>
+
+                    Pour cela, aller dans le mode <em>Short-circuit</em> et lancer la simulation.<br/>
+
+                    Puis, générer les fichiers pour les deux fenêtres <em>LV Momentary Report</em> et <em>30 Cycle Report</em>
+                    en cliquant droit dans la fenêtre et en sélectionnant : <em>Export to Microsoft Excel</em> ou <em>Export to CSV</em>
+                </p>
+                <p>
+                    Renommer les fichiers pour qu'il finnissent par le numéro du scénario tel que : <br/>
+
+                    <div class="code">
+
+                        <code>
+                            NomDuProjetEasyPower-LM_scen1.csv <br/>
+                            NomDuProjetEasyPower-30 Cycle Report_scen4.xlsx <br/>
+                        </code><br/>
+
+                    </div>
+                    Répeter cela pour tous les scénarios souhaités <br/>
+                    Une fois que les fichiers sont prêt, placez les ci-dessous <br/>
+                </p>
+
+                <div id="file_selector">
+                    <form method="POST" action="" enctype="multipart/form-data">
+                        <p><input type="file" name="file" multiple accept=".xslx,.csv"></p>
+                        <p><input type="submit" value="Soumettre"></p>
+                    </form>
+                </div>
+
+            </section>
+        </div>
+
+    </body>
+</html>

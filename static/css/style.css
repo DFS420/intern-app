@@ -1,0 +1,108 @@
+﻿em
+{
+    color: Aqua;
+}
+
+
+body
+{
+    font-family: Arial, sans-serif;
+    background-color: SteelBlue;
+    color: White;
+}
+
+/* page principale */
+
+#bloc_page
+{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+#code
+{
+    width: 250px;
+    height: 110px;
+    text-align: justify;
+    border: 1px solid black;
+    overflow: auto;
+}
+
+/* Header */
+header
+{
+    display: flex;
+    justify-content: flex-start;
+    flex-direction: row;
+    border-style: groove;
+}
+
+#logo
+{
+    display: flex;
+    align-items: center;
+}
+
+#titre_principal
+{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100;
+}
+
+
+#logo img
+{
+    width: 59px;
+    height: 60px;
+}
+
+header h1
+{
+    font-family: Arial, sans-serif;
+    font-size: 2.5em;
+    font-weight: normal;
+    margin: 0 0 0 10px;
+}
+
+header h2
+{
+    font-family: Arial, sans-serif;
+    font-size: 1.1em;
+    margin-top: 0px;
+    margin-left: 10px;
+    font-weight: normal;
+}
+
+/* navigation*/
+
+nav ul
+{
+    display: flex;
+    flex-direction: column;
+    justify-items: flex-start;
+    float: left;
+    border-style: groove;
+    width: 150px;
+    height: 300px;
+}
+
+nav li
+{
+
+}
+
+nav a:hover
+{
+    color: Aqua;
+}
+
+/* sections */
+
+section
+{
+    margin-left : 10px;
+}
