@@ -28,7 +28,7 @@ def eepower():
                         abort(Response("Les fichiers reçus ne sont des fichiers .csv ou .xlsx"))
                     uploaded_file.save(os.path.join(app.config['UPLOAD_PATH'], filename))
                     #valide en ouvrant les fichier si le contenue est bon
-                    if validate(os.path.join(app.config['UPLOAD_PATH'], 'eepower', filename)) != 0:
+                    if validate(os.path.join(app.config['UPLOAD_PATH'], filename)) != 0:
                         abort(Response("Les fichiers reçus ne contiennent pas les informations nécessaires ou n'ont "
                                        "pas le bon format"))
             return  redirect(url_for('eepower'))
