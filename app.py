@@ -29,12 +29,13 @@ def eepower():
                     uploaded_file.save(os.path.join(app.config['UPLOAD_PATH'], filename))
                     #valide en ouvrant les fichier si le contenue est bon
                     if validate(os.path.join(app.config['UPLOAD_PATH'], filename)) != 0:
+                        os.remove(os.path.join(app.config['UPLOAD_PATH'], filename))
                         abort(Response("Les fichiers reçus ne contiennent pas les informations nécessaires ou n'ont "
                                        "pas le bon format"))
             return  redirect(url_for('eepower'))
 
         elif request.form['btn_id'] == 'purger':
-            purger_upload(os.path.join(app.config['UPLOAD_PATH'], 'eepower'))
+            purger_upload(app.config['UPLOAD_PATH'])
             return redirect(url_for('eepower'))
 
     return render_template('easy_power.html', uploaded_files=uploaded_files)

@@ -18,7 +18,7 @@ def uploads_files(dir_name=r'./uploads'):
 
 def purger_upload(dir_name=r'./uploads'):
     for file in uploads_files(dir_name):
-        rmtree(os.path.join(dir_name, file))
+        os.remove(os.path.join(dir_name, file))
 
 def validate_file_epow(file):
     col30 = set(['Bus kV', 'Sym Amps'])
