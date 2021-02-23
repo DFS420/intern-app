@@ -20,8 +20,8 @@
         <div id="bloc_page">
             <nav id="barre-nav">
                 <ul>
-                    <li><a href="accueil.html">Accueil</a> </li>
-                    <li><a href="easy_power.html">Easy EasyPower</a> </li>
+                    <li><a href="/">Accueil</a> </li>
+                    <li><a href="/eepower">Easy EasyPower</a> </li>
 
                 </ul>
 
@@ -55,9 +55,31 @@
 
                 <div id="file_selector">
                     <form method="POST" action="" enctype="multipart/form-data">
-                        <p><input type="file" name="file" multiple accept=".xslx,.csv"></p>
+                        <p><input type="file" name="file" multiple accept=".csv,.xlsx"></p>
                         <p><input type="submit" value="Soumettre"></p>
+                        <input type="hidden" name="btn_id" value="soumettre_fichier">
                     </form>
+                </div>
+
+                <div class="container", id="files">
+                    {% if uploaded_files == [] %}
+                        Aucun fichier téléversé
+                    {% else %}
+                        Les fichiers téléversé sont les suivants :
+                        <ul>
+                            {% for file in uploaded_files %}
+                                <li>{{ file }} </li>
+                            {% endfor %}
+                        </ul>
+                        <div id="purge">
+                            <form method="POST">
+                                <input type="submit" value="Purger les fichiers">
+                                <input type="hidden" name="btn_id" value="purger">
+                            </form>
+
+                        </div>
+                    {% endif %}
+
                 </div>
 
             </section>
