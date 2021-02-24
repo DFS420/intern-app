@@ -53,11 +53,19 @@ header
     height: 100;
 }
 
+/* images */
 
 #logo img
 {
     width: 59px;
     height: 60px;
+}
+
+#exemple_bus
+{
+    display: flex;
+    width: 200px;
+    height: 200px;
 }
 
 header h1
