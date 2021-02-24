@@ -3,7 +3,7 @@ import os
 from shutil import rmtree
 
 
-def uploads_files(dir_name=r'./uploads'):
+def get_uploads_files(dir_name=r'./uploads'):
     if os.path.exists(dir_name) and os.path.isdir(dir_name):
         if not os.listdir(dir_name):
             print("Directory is empty")
@@ -17,8 +17,9 @@ def uploads_files(dir_name=r'./uploads'):
 
 
 def purger_upload(dir_name=r'./uploads'):
-    for file in uploads_files(dir_name):
+    for file in get_uploads_files(dir_name):
         os.remove(os.path.join(dir_name, file))
+
 
 def validate_file_epow(file):
     col30 = set(['Bus kV', 'Sym Amps'])

@@ -36,7 +36,7 @@
                     Pour cela, aller dans le mode <em>Short-circuit</em> et lancer la simulation.<br/>
 
                     Puis, générer les fichiers pour les deux fenêtres <em>LV Momentary Report</em> et <em>30 Cycle Report</em>
-                    en cliquant droit dans la fenêtre et en sélectionnant : <em>Export to Microsoft Excel</em> ou <em>Export to CSV</em>
+                    en cliquant droit dans la fenêtre et en sélectionnant : <br/> <em>Export to Microsoft Excel</em> ou <em>Export to CSV</em>
                 </p>
                 <p>
                     Renommer les fichiers pour qu'il finnissent par le numéro du scénario tel que : <br/>
@@ -50,7 +50,7 @@
 
                     </div>
                     Répeter cela pour tous les scénarios souhaités <br/>
-                    Une fois que les fichiers sont prêt, placez les ci-dessous <br/>
+                    Une fois que les fichiers sont prêt, téleversez les <br/>
                 </p>
 
                 <div id="file_selector">
@@ -59,13 +59,25 @@
                         <p><input type="submit" value="Soumettre"></p>
                         <input type="hidden" name="btn_id" value="soumettre_fichier">
                     </form>
+
+                    <div id="message">
+                        {% with messages = get_flashed_messages() %}
+                            {% if messages %}
+                                <ul class=flashes>
+                                    {% for message in messages %}
+                                        <em>{{ message }}</em>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
                 </div>
 
                 <div class="container", id="files">
                     {% if uploaded_files == [] %}
                         Aucun fichier téléversé
                     {% else %}
-                        Les fichiers téléversé sont les suivants :
+                        Les fichiers téléversés sont les suivants :
                         <ul>
                             {% for file in uploaded_files %}
                                 <li>{{ file }} </li>
@@ -83,6 +95,7 @@
                 </div>
 
             </section>
+
         </div>
 
     </body>
