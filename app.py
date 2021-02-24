@@ -11,6 +11,8 @@ app.config['UPLOAD_EXTENSIONS'] = ['.csv', '.xlsx', '.xls']
 app.config['UPLOAD_PATH'] = 'uploads'
 app.config['UPLOAD_PATH_EPOW'] = r'uploads/eepower'
 
+BUS_EXCLUS = []
+
 @app.route('/')
 def index():
     return render_template('accueil.html')
@@ -41,9 +43,23 @@ def eepower():
             return redirect(url_for('eepower'))
 
         elif request.form['btn_id'] == 'suivant':
-            return redirect(url_for('index'))
+            return redirect(url_for('eepower_traitement'))
 
     return render_template('easy_power.html', uploaded_files=uploaded_files)
+
+@app.route('/eepower-2', methods=['GET','POST'])
+def eepower_traitement():
+    uploaded_files = get_uploads_files(app.config['UPLOAD_PATH_EPOW'])
+    fileNameTuple = [name.split('/')[-1].split('.')[0] for name in uploaded_files]
+    scenarios = set([int(name[(-1)]) for name in fileNameTuple if 'scen' in name])
+    nb_scen= len(scenarios)
+
+    if request.method == 'POST':
+        if request.form['btn_id'] == 'ajouter_bus':
+            if request.form['bus'] != '':
+                BUS_EXCLUS.append(request.form['bus'])
+
+    return render_template('easy_power_traitement.html', nb_scen=nb_scen, bus_exclus=BUS_EXCLUS)
 
 if __name__ == "__main__":
     app.run(debug=True)
