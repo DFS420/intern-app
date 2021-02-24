@@ -40,6 +40,9 @@ def eepower():
             purger_upload(app.config['UPLOAD_PATH_EPOW'])
             return redirect(url_for('eepower'))
 
+        elif request.form['btn_id'] == 'suivant':
+            return redirect(url_for('index'))
+
     return render_template('easy_power.html', uploaded_files=uploaded_files)
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 <html lang="fr">
     <head>
         <meta charset="UTF-8">
-        <link rel="stylesheet" href="../static/css/style.css"/>
+        <link rel="stylesheet" href="static/css/style.css/">
         <title>Easy EasyPower</title>
     </head>
 
@@ -27,31 +27,34 @@
 
             </nav>
 
-            <section id="intro">
-                <p>
-                    Bienvenu dans ce petit outil d'aide à la rédaction de rapport <br/>
+            <div id="contenu">
 
-                    Pour l'utiliser vous devez tout d'abord générer les fichiers de courts-circuits depuis EasyPower.<br/>
+                <section id="intro">
+                    <p>
+                        Bienvenu dans ce petit outil d'aide à la rédaction de rapport <br/>
 
-                    Pour cela, aller dans le mode <em>Short-circuit</em> et lancer la simulation.<br/>
+                        Pour l'utiliser vous devez tout d'abord générer les fichiers de courts-circuits depuis EasyPower.<br/>
 
-                    Puis, générer les fichiers pour les deux fenêtres <em>LV Momentary Report</em> et <em>30 Cycle Report</em>
-                    en cliquant droit dans la fenêtre et en sélectionnant : <br/> <em>Export to Microsoft Excel</em> ou <em>Export to CSV</em>
-                </p>
-                <p>
-                    Renommer les fichiers pour qu'il finnissent par le numéro du scénario tel que : <br/>
+                        Pour cela, aller dans le mode <em>Short-circuit</em> et lancer la simulation.<br/>
 
-                    <div class="code">
+                        Puis, générer les fichiers pour les deux fenêtres <em>LV Momentary Report</em> et <em>30 Cycle Report</em>
+                        en cliquant droit dans la fenêtre et en sélectionnant : <br/> <em>Export to Microsoft Excel</em> ou <em>Export to CSV</em>
+                    </p>
+                    <p>
+                        Renommer les fichiers pour qu'il finnissent par le numéro du scénario tel que : <br/>
 
-                        <code>
-                            NomDuProjetEasyPower-LM_scen1.csv <br/>
-                            NomDuProjetEasyPower-30 Cycle Report_scen4.xlsx <br/>
-                        </code><br/>
+                        <div class="code">
 
-                    </div>
-                    Répeter cela pour tous les scénarios souhaités <br/>
-                    Une fois que les fichiers sont prêt, téleversez les <br/>
-                </p>
+                            <code>
+                                NomDuProjetEasyPower-LM_scen1.csv <br/>
+                                NomDuProjetEasyPower-30 Cycle Report_scen4.xlsx <br/>
+                            </code><br/>
+
+                        </div>
+                        Répeter cela pour tous les scénarios souhaités <br/>
+                        Une fois que les fichiers sont prêt, téleversez les <br/>
+                    </p>
+                </section>
 
                 <div id="file_selector">
                     <form method="POST" action="" enctype="multipart/form-data">
@@ -91,10 +94,18 @@
 
                         </div>
                     {% endif %}
-
                 </div>
 
-            </section>
+                <div>
+                    {% if uploaded_files != [] %}
+                        <form method="POST" action="">
+                            <p><input type="submit" value="Suivant"></p>
+                            <input type="hidden" name="btn_id" value="suivant">
+                        </form>
+                    {% endif %}
+                </div>
+
+            </div>
 
         </div>
 

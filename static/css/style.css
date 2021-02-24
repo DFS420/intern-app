@@ -100,14 +100,9 @@ nav a:hover
     color: Aqua;
 }
 
-/* sections */
+/* contenu */
 
-section
+#contenu
 {
     margin-left : 10px;
-}
-
-#message
-{
-
 }
