@@ -8,25 +8,11 @@
     </head>
 
     <body>
-        <header>
-            <div id="logo">
-                <img src="../static/img/icone_3E.png" alt="icone 3E ing"/>
-            </div>
-            <div id="titre_principal">
-                <h1>3E ing</h1>
-                <h2>Outils internes</h2>
-            </div>
-        </header>
+        {% include "header.html" %}
 
         <div id="bloc_page">
-            <nav id="barre-nav">
-                <ul>
-                    <li><a href="/">Accueil</a> </li>
-                    <li><a href="/eepower">Easy EasyPower</a> </li>
 
-                </ul>
-
-            </nav>
+            {% include "nav_barre.html" %}
 
             <section id="intro">
                 <p>
