@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 from shutil import rmtree
+from glob import glob
 
 
 def get_uploads_files(dir_name=r'./uploads'):
@@ -37,6 +38,9 @@ def validate_file_epow(file):
     else:
         return -1
 
+
+def full_paths(upload_dir):
+    return glob(os.path.join(upload_dir, "*"))
 
 if __name__ == "__main__":
     purger_upload(r'../uploads')
