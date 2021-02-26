@@ -2,7 +2,7 @@ import pandas as pd
 import os
 from shutil import rmtree
 from glob import glob
-
+from pathlib import Path
 
 def get_uploads_files(dir_name=r'./uploads'):
     if os.path.exists(dir_name) and os.path.isdir(dir_name):
@@ -43,5 +43,7 @@ def validate_file_epow(file):
 def full_paths(upload_dir):
     return glob(os.path.join(upload_dir, "*"))
 
-if __name__ == "__main__":
-    purger_upload(r'../uploads')
+def create_dir_if_dont_exist(dir_name):
+    Path(dir_name).mkdir(parents=True, exist_ok=True)
+    return dir_name
+

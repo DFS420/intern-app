@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
-import os
+import os, secrets
 from flask import Flask, render_template, request, redirect, url_for, abort, Response, flash, send_from_directory
 from werkzeug.utils import secure_filename
-from utils.File import validate_file_epow as validate, get_uploads_files, purge_file, full_paths
+from utils.File import validate_file_epow as validate, get_uploads_files, purge_file, full_paths, \
+    create_dir_if_dont_exist as create_dir
 
 import utils.eep_traitement as eep
 
 app = Flask(__name__)
-app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
+app.secret_key = secrets.token_bytes()
 app.config['MAX_CONTENT_LENGTH'] = 3072 * 3072
 app.config['UPLOAD_EXTENSIONS'] = ['.csv', '.xlsx', '.xls']
-app.config['UPLOAD_PATH'] = 'uploads'
-app.config['UPLOAD_PATH_EPOW'] = r'uploads/eepower'
-app.config['GENERATED_PATH'] = r'generated'
+app.config['UPLOAD_PATH'] = create_dir('uploads')
+app.config['UPLOAD_PATH_EPOW'] = create_dir(r'uploads/eepower')
+app.config['GENERATED_PATH'] = create_dir(r'generated')
 app.config['CURRENT_OUTPUT_FILE'] = ''
 
 eep_data = {}
@@ -72,7 +73,7 @@ def eepower_traitement():
                 eep_data["BUS_EXCLUS"].append(str.upper(request.form['bus']))
 
         elif request.form['btn_id'] == 'suivant':
-            output_path, app.config['CURRENT_OUTPUT_FILE'] = eep.report(eep_data, os.path.join(app.config['GENERATED_PATH'],'eepower'))
+            output_path, app.config['CURRENT_OUTPUT_FILE'] = eep.report(eep_data, create_dir(os.path.join(app.config['GENERATED_PATH'],'eepower')))
             return render_template('easy_power_traitement.html', nb_scen=eep_data["NB_SCEN"],
                                    bus_exclus=eep_data["BUS_EXCLUS"],
                                    file_ready=1)
