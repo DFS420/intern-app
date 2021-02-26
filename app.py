@@ -2,7 +2,7 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, abort, Response, flash, send_from_directory
 from werkzeug.utils import secure_filename
-from utils.File import validate_file_epow as validate, get_uploads_files, purger_upload, full_paths
+from utils.File import validate_file_epow as validate, get_uploads_files, purge_file, full_paths
 
 import utils.eep_traitement as eep
 
@@ -50,8 +50,7 @@ def eepower():
             return  redirect(url_for('eepower'))
 
         elif request.form['btn_id'] == 'purger':
-            purger_upload(app.config['UPLOAD_PATH_EPOW'])
-            return redirect(url_for('eepower'))
+            return redirect(url_for('purge', app_name='eepower'))
 
         elif request.form['btn_id'] == 'suivant':
             return redirect(url_for('eepower_traitement'))
@@ -73,7 +72,7 @@ def eepower_traitement():
                 eep_data["BUS_EXCLUS"].append(str.upper(request.form['bus']))
 
         elif request.form['btn_id'] == 'suivant':
-            output_path, app.config['CURRENT_OUTPUT_FILE'] = eep.report(eep_data, app.config['GENERATED_PATH'])
+            output_path, app.config['CURRENT_OUTPUT_FILE'] = eep.report(eep_data, os.path.join(app.config['GENERATED_PATH'],'eepower'))
             return render_template('easy_power_traitement.html', nb_scen=eep_data["NB_SCEN"],
                                    bus_exclus=eep_data["BUS_EXCLUS"],
                                    file_ready=1)
@@ -81,12 +80,24 @@ def eepower_traitement():
         elif request.form['btn_id'] == 'telecharger':
             return redirect(url_for('download',app_name='eepower',filename=app.config['CURRENT_OUTPUT_FILE']))
 
+        elif request.form['btn_id'] == 'terminer':
+            return redirect(url_for('purge', app_name='eepower'))
+
+
     return render_template('easy_power_traitement.html', nb_scen=eep_data["NB_SCEN"], bus_exclus=eep_data["BUS_EXCLUS"],
                            file_ready=file_ready)
 
 @app.route('/<app_name>/<filename>', methods=['GET', 'POST'])
 def download(app_name,filename):
+    dir = os.path.join(app.config['GENERATED_PATH'], app_name)
     return send_from_directory(directory=app.config['GENERATED_PATH'], filename=filename)
+
+@app.route('/purge/<app_name>', methods=['GET', 'POST'])
+def purge(app_name):
+    purge_file(os.path.join(app.config['UPLOAD_PATH'],app_name))
+    purge_file(os.path.join(app.config['GENERATED_PATH'], app_name))
+    return redirect(url_for(app_name))
+
 
 if __name__ == "__main__":
     app.run(debug=True)

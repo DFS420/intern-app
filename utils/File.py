@@ -17,9 +17,10 @@ def get_uploads_files(dir_name=r'./uploads'):
         return []
 
 
-def purger_upload(dir_name=r'./uploads'):
-    for file in get_uploads_files(dir_name):
-        os.remove(os.path.join(dir_name, file))
+def purge_file(dir_name=r'./uploads'):
+    if get_uploads_files(dir_name) != []:
+        for file in get_uploads_files(dir_name):
+            os.remove(os.path.join(dir_name, file))
 
 
 def validate_file_epow(file):
