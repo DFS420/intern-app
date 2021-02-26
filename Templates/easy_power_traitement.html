@@ -71,6 +71,15 @@
                         </form>
                      </div>
 
+                    <div id="telecharger">
+                        {% if file_ready == 1 %}
+                            Fichier prêt !
+                            <form method="POST" action="">
+                                <p><input type="submit" value="Télécharger"></p>
+                                <input type="hidden" name="btn_id" value="telecharger">
+                            </form>
+                        {% endif %}
+                    </div>
 
                 </section>
 

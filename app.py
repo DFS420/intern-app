@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-from flask import Flask, render_template, request, redirect, url_for, abort, Response, flash
+from flask import Flask, render_template, request, redirect, url_for, abort, Response, flash, send_from_directory
 from werkzeug.utils import secure_filename
 from utils.File import validate_file_epow as validate, get_uploads_files, purger_upload, full_paths
 
@@ -12,12 +12,16 @@ app.config['MAX_CONTENT_LENGTH'] = 3072 * 3072
 app.config['UPLOAD_EXTENSIONS'] = ['.csv', '.xlsx', '.xls']
 app.config['UPLOAD_PATH'] = 'uploads'
 app.config['UPLOAD_PATH_EPOW'] = r'uploads/eepower'
+app.config['GENERATED_PATH'] = r'generated'
+app.config['CURRENT_OUTPUT_FILE'] = ''
 
 eep_data = {}
 eep_data["BUS_EXCLUS"] = []
 eep_data["FILE_PATHS"] = []
 eep_data["FILE_NAME"] = []
 eep_data["NB_SCEN"] = 0
+
+
 
 
 @app.route('/')
@@ -61,6 +65,7 @@ def eepower_traitement():
     scenarios = set([int(name[(-1)]) for name in eep_data["FILE_NAME"] if 'scen' in name])
     eep_data["FILE_PATHS"] = full_paths(app.config['UPLOAD_PATH_EPOW'])
     eep_data["NB_SCEN"]= len(scenarios)
+    file_ready = 0
 
     if request.method == 'POST':
         if request.form['btn_id'] == 'ajouter_bus':
@@ -68,9 +73,20 @@ def eepower_traitement():
                 eep_data["BUS_EXCLUS"].append(str.upper(request.form['bus']))
 
         elif request.form['btn_id'] == 'suivant':
-            output_path = eep.report(eep_data)
+            output_path, app.config['CURRENT_OUTPUT_FILE'] = eep.report(eep_data, app.config['GENERATED_PATH'])
+            return render_template('easy_power_traitement.html', nb_scen=eep_data["NB_SCEN"],
+                                   bus_exclus=eep_data["BUS_EXCLUS"],
+                                   file_ready=1)
 
-    return render_template('easy_power_traitement.html', nb_scen=eep_data["NB_SCEN"], bus_exclus=eep_data["BUS_EXCLUS"])
+        elif request.form['btn_id'] == 'telecharger':
+            return redirect(url_for('download',app_name='eepower',filename=app.config['CURRENT_OUTPUT_FILE']))
+
+    return render_template('easy_power_traitement.html', nb_scen=eep_data["NB_SCEN"], bus_exclus=eep_data["BUS_EXCLUS"],
+                           file_ready=file_ready)
+
+@app.route('/<app_name>/<filename>', methods=['GET', 'POST'])
+def download(app_name,filename):
+    return send_from_directory(directory=app.config['GENERATED_PATH'], filename=filename)
 
 if __name__ == "__main__":
     app.run(debug=True)

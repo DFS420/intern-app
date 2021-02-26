@@ -45,7 +45,7 @@ def simple_report(rap_30, rap_1, typefile='csv', bus_excluded=None):
     peak = pd.DataFrame(rap['Asym Amps'] * sqrt(2)).round(1)
     rap.insert(4, 'I Peak', peak)
 
-    return rap
+    return rap.dropna()
 
 def group_by_scenario(filepathTuple, fileNameTuple, scenario):
     groupedFiles =[]

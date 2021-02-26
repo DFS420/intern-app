@@ -1,9 +1,10 @@
 from utils.eepower_utils import simple_report, group_by_scenario, pire_cas
 from pandas import ExcelWriter
+from os.path import join
 
-OUTPUT_PATH = 'generated/eepower/output.xlsx'
+FILE_NAME = 'eep-output.xlsx'
 
-def report(data):
+def report(data,target):
     """
     Generate a xlsx report for easy power
     :param data: a dictionary that contains all information for the processs
@@ -16,11 +17,14 @@ def report(data):
     :type data["FILE_NAME"]: list of str
     :param data["NB_SCEN"]: number of scenario
     :type data["NB_SCEN"]: list of str
-    :return: a path to the generated file
-    :rtype: path
+    :param target: the path to the target path
+    :type target: str
+    :return: a path to the directory and the name of generated file
+    :rtype: tuple of path
     """
     reports = []
-    writer = ExcelWriter(OUTPUT_PATH)
+    output_path = join(target, FILE_NAME)
+    writer = ExcelWriter(output_path)
     scenarios = list(range(1,data["NB_SCEN"]+1))
     for scenario in scenarios:
         group = group_by_scenario(data["FILE_PATHS"], data["FILE_NAME"], scenario)
@@ -45,7 +49,8 @@ def report(data):
         for i in scenarios:
             reports[(i - 1)].to_excel(writer, sheet_name=('Scénario {0}'.format(i)))
         writer.save()
-        return OUTPUT_PATH
+        #on retourne le repertoire et le fichier séparément
+        return target, FILE_NAME
 
     except PermissionError:
         print("Le fichier choisis est déjà ouvert ou vous n'avez pas la permission de l'écrire")
