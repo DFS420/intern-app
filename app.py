@@ -91,7 +91,7 @@ def eepower_traitement():
 @app.route('/<app_name>/<filename>', methods=['GET', 'POST'])
 def download(app_name,filename):
     dir = os.path.join(app.config['GENERATED_PATH'], app_name)
-    return send_from_directory(directory=app.config['GENERATED_PATH'], filename=filename)
+    return send_from_directory(directory=dir, filename=filename)
 
 @app.route('/purge/<app_name>', methods=['GET', 'POST'])
 def purge(app_name):
