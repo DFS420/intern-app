@@ -65,7 +65,7 @@ def eepower_traitement():
     if request.method == 'POST':
         if request.form['btn_id'] == 'ajouter_bus':
             if request.form['bus'] != '':
-                eep_data["BUS_EXCLUS"].append(request.form['bus'])
+                eep_data["BUS_EXCLUS"].append(str.upper(request.form['bus']))
 
         elif request.form['btn_id'] == 'suivant':
             output_path = eep.report(eep_data)

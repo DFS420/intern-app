@@ -13,6 +13,9 @@ def simple_report(rap_30, rap_1, typefile='csv', bus_excluded=None):
     :return:
     :rtype:
     """
+    bus_excluded = [str.upper(bus) for bus in bus_excluded]
+    #ajouté pour être sur de dropper les lignes voulues (easypower donne des noms en capitale)
+
     if typefile == 'csv':
         rapport_30cycles = pd.DataFrame(pd.read_csv(rap_30, skiprows=1, index_col=0))
         rapport_1cycle = pd.DataFrame(pd.read_csv(rap_1, skiprows=1, index_col=0))
@@ -26,6 +29,9 @@ def simple_report(rap_30, rap_1, typefile='csv', bus_excluded=None):
     else:
         temp1 = rapport_1cycle
         temp30 = rapport_30cycles
+
+    temp1.dropna()
+    temp30.dropna()
 
     temp30 = temp30.rename(columns={'Sym Amps': 'I Sym 30'})
     rap = pd.concat([temp1,temp30['I Sym 30']], axis=1)

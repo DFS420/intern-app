@@ -21,7 +21,7 @@ def report(data):
     """
     reports = []
     writer = ExcelWriter(OUTPUT_PATH)
-    scenarios = list(range(1,data["NB_SCEN"]))
+    scenarios = list(range(1,data["NB_SCEN"]+1))
     for scenario in scenarios:
         group = group_by_scenario(data["FILE_PATHS"], data["FILE_NAME"], scenario)
         for path, name in group:
@@ -41,10 +41,10 @@ def report(data):
     pire_cas_rap = pire_cas(reports, scenarios)
 
     try:
-        pire_cas.to_excel(output_writer, sheet_name='Pire Cas')
+        pire_cas_rap.to_excel(writer, sheet_name='Pire Cas')
         for i in scenarios:
-            reports[(i - 1)].to_excel(output_writer, sheet_name=('Scénario {0}'.format(i)))
-        output_writer.save()
+            reports[(i - 1)].to_excel(writer, sheet_name=('Scénario {0}'.format(i)))
+        writer.save()
         return OUTPUT_PATH
 
     except PermissionError:
