@@ -6,6 +6,7 @@ WORKDIR /home/eeeing
 
 RUN apk update
 RUN apk add make automake gcc g++ subversion python3-dev
+RUN apk add --no-cache libressl-dev musl-dev libffi-dev
 
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
