@@ -88,6 +88,10 @@ def eepower_traitement():
     return render_template('easy_power_traitement.html', nb_scen=eep_data["NB_SCEN"], bus_exclus=eep_data["BUS_EXCLUS"],
                            file_ready=file_ready)
 
+@app.route('/change_points', methods=['GET','POST'])
+def ML_change_pt():
+    return render_template('change_points.html')
+
 @app.route('/<app_name>/<filename>', methods=['GET', 'POST'])
 def download(app_name,filename):
     dir = os.path.join(app.config['GENERATED_PATH'], app_name)
