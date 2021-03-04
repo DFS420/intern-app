@@ -1,23 +1,24 @@
-FROM python:3.8-alpine
+FROM tiangolo/uvicorn-gunicorn:python3.8-slim
 
-RUN adduser -D eeeing
+#RUN adduser -D eeeing
 
-WORKDIR /home/eeeing
+#WORKDIR /home/eeeing
 
-RUN apk update
-RUN apk add make automake gcc g++ subversion python3-dev
-RUN apk add --no-cache libressl-dev musl-dev libffi-dev
+#RUN apk update
+#RUN apk add make automake gcc g++ subversion python3-dev
+#RUN apk add --no-cache libressl-dev musl-dev libffi-dev
 
+RUN python -m pip install --upgrade pip
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
 COPY . ./app
-RUN chmod +x start.sh
+#RUN chmod +x start.sh
 
 ENV FLASK_APP main.py
 
-RUN chown -R eeeing:eeeing ./
-USER eeeing
+#RUN chown -R eeeing:eeeing ./
+#USER eeeing
 
-EXPOSE 5000
-ENTRYPOINT ["./start.sh"]
+#EXPOSE 5000
+#ENTRYPOINT ["./start.sh"]
