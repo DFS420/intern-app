@@ -104,6 +104,6 @@ if __name__ == "__main__":
 
     Tk().withdraw()
     file_path = askopenfilenames()[0]
-    paths_out = change_points(file_path,r"../generated/Ml")
+    paths_out = change_points(file_path, r"../generated/ML")
 
 
