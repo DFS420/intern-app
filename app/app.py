@@ -73,6 +73,9 @@ def eepower_traitement():
         if request.form['btn_id'] == 'ajouter_bus':
             if request.form['bus'] != '':
                 eep_data["BUS_EXCLUS"].append(str.upper(request.form['bus']))
+                render_template('easy_power_traitement.html', nb_scen=eep_data["NB_SCEN"],
+                                bus_exclus=eep_data["BUS_EXCLUS"],
+                                file_ready=1)
 
         elif request.form['btn_id'] == 'suivant':
             output_path, app.config['CURRENT_OUTPUT_FILE'] = eep.report(eep_data, create_dir(os.path.join(app.config['GENERATED_PATH'],'eepower')))
@@ -81,14 +84,14 @@ def eepower_traitement():
                                    file_ready=1)
 
         elif request.form['btn_id'] == 'telecharger':
-            return redirect(url_for('download',app_name='eepower',filename=app.config['CURRENT_OUTPUT_FILE']))
+            return redirect(url_for('download', app_name='eepower', filename=app.config['CURRENT_OUTPUT_FILE']))
 
         elif request.form['btn_id'] == 'terminer':
             return redirect(url_for('purge', app_name='eepower'))
 
-
     return render_template('easy_power_traitement.html', nb_scen=eep_data["NB_SCEN"], bus_exclus=eep_data["BUS_EXCLUS"],
                            file_ready=file_ready)
+
 
 @app.route('/change_points', methods=['GET','POST'])
 def ML_change_pt():
@@ -121,10 +124,12 @@ def ML_change_pt():
 
     return render_template('change_points.html', uploaded_files=uploaded_files, file_ready=0)
 
+
 @app.route('/<app_name>/<filename>', methods=['GET', 'POST'])
-def download(app_name,filename):
-    dir = os.path.join(app.config['GENERATED_PATH'], app_name)
-    return send_from_directory(directory=dir, filename=filename)
+def download(app_name, filename):
+    directory = os.path.abspath(os.path.join(app.config['GENERATED_PATH'], app_name))
+    return send_from_directory(directory=directory, filename=filename, as_attachment=True)
+
 
 @app.route('/purge/<app_name>', methods=['GET', 'POST'])
 def purge(app_name):
