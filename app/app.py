@@ -111,16 +111,17 @@ def ML_change_pt():
             return redirect(url_for('ML_change_pt'))
 
         elif request.form['btn_id'] == 'suivant':
-            app.config['CURRENT_OUTPUT_FILE'] = create_dir(os.path.join(app.config['GENERATED_PATH'],'ML'))
+            output_path = create_dir(os.path.join(app.config['GENERATED_PATH'],'ML'))
             uploaded_file = uploaded_files[0] # le format est une liste mais il n'y a qu'un seul fichier
             input_path = os.path.join(app.config['UPLOAD_PATH_ML'], uploaded_file)
-            outputs = change_points(input_path, app.config['CURRENT_OUTPUT_FILE'])
+            outputs = change_points(input_path, output_path)
+            return render_template('change_points.html', uploaded_files=uploaded_files, file_ready=1)
 
         elif request.form['btn_id'] == 'purger':
             return redirect(url_for('purge', app_name='ML_change_pt'))
 
         elif request.form['btn_id'] == 'telecharger':
-            return redirect(url_for('download',app_name='ML_change_pt',filename=app.config['CURRENT_OUTPUT_FILE']))
+            return redirect(url_for('download', app_name='ML_change_pt', filename=app.config['CURRENT_OUTPUT_FILE']))
 
     return render_template('change_points.html', uploaded_files=uploaded_files, file_ready=0)
 

@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-from shutil import rmtree
+from shutil import make_archive, move
 from glob import glob
 from pathlib import Path
 
@@ -47,3 +47,10 @@ def create_dir_if_dont_exist(dir_name):
     Path(dir_name).mkdir(parents=True, exist_ok=True)
     return dir_name
 
+def zip_dir(dir_path, file_name=''):
+    """zip a directory"""
+    if file_name == '':
+        file_name = os.path.split(dir_path)[-1]
+    file = make_archive(base_name=file_name, format='zip', root_dir=dir_path, base_dir=dir_path)
+    move(file, dir_path)
+    return file
