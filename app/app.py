@@ -2,11 +2,11 @@
 import os, secrets
 from flask import Flask, render_template, request, redirect, url_for, abort, Response, flash, send_from_directory
 from werkzeug.utils import secure_filename
-from intern_app.utils.File import validate_file_epow as validate, get_uploads_files, purge_file, full_paths, \
+from app.utils.File import validate_file_epow as validate, get_uploads_files, purge_file, full_paths, \
     create_dir_if_dont_exist as create_dir
-from intern_app.ML_Scripts.pelt_cpd import change_points
+from app.ML_Scripts.pelt_cpd import change_points
 
-from  intern_app.utils import eep_traitement as eep
+from  app.utils import eep_traitement as eep
 
 app = Flask(__name__)
 app.secret_key = secrets.token_bytes()
