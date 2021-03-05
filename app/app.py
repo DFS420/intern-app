@@ -6,7 +6,7 @@ from app.utils.File import validate_file_epow as validate, get_uploads_files, pu
     create_dir_if_dont_exist as create_dir
 from app.ML_Scripts.pelt_cpd import change_points
 
-from  app.utils import eep_traitement as eep
+from app.utils import eep_traitement as eep
 
 app = Flask(__name__)
 app.secret_key = secrets.token_bytes()
@@ -134,4 +134,4 @@ def purge(app_name):
 
 
 if __name__ == "__main__":
-    app.run(debug=False)
+    app.run(debug=True)
