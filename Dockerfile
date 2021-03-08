@@ -9,5 +9,5 @@ COPY main.py ./main.py
 
 ENV FLASK_APP main.py
 
-EXPOSE 80
-ENTRYPOINT ["gunicorn","-w", "4", "-b", ":80", "main:intern_app",   "--reload"]
+EXPOSE 5000
+ENTRYPOINT ["gunicorn","-w", "4", "-b", ":5000", "main:intern_app",   "--reload"]
