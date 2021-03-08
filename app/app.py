@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, redirect, url_for, abort, Res
 from werkzeug.utils import secure_filename
 from .utils import eep_traitement as eep
 from .utils.File import validate_file_epow as validate, get_uploads_files, purge_file, full_paths, \
-    create_dir_if_dont_exist as create_dir
+    create_dir_if_dont_exist as create_dir, zip_files, decode_str_filename
 from .ML_Scripts.pelt_cpd import change_points
 
 
@@ -14,7 +14,7 @@ app.config['MAX_CONTENT_LENGTH'] = 3072 * 3072
 app.config['UPLOAD_EXTENSIONS'] = ['.csv', '.xlsx', '.xls']
 app.config['UPLOAD_PATH'] = create_dir('uploads')
 app.config['UPLOAD_PATH_EPOW'] = create_dir(r'uploads/eepower')
-app.config['UPLOAD_PATH_ML'] = create_dir(r'uploads/ML')
+app.config['UPLOAD_PATH_ML'] = create_dir(r'uploads/ML_change_pt')
 app.config['GENERATED_PATH'] = create_dir(r'generated')
 app.config['CURRENT_OUTPUT_FILE'] = ''
 
@@ -107,14 +107,15 @@ def ML_change_pt():
                 if file_ext not in app.config['UPLOAD_EXTENSIONS']:
                     flash("Les fichiers reçus ne sont des fichiers .csv ou .xlsx", 'error')
                 file.save(os.path.join(app.config['UPLOAD_PATH_ML'], filename))
-                return redirect(url_for('ML_change_pt',uploaded_files=uploaded_files, file_ready=0))
+                return redirect(url_for('ML_change_pt', uploaded_files=uploaded_files, file_ready=0))
             return redirect(url_for('ML_change_pt'))
 
         elif request.form['btn_id'] == 'suivant':
-            output_path = create_dir(os.path.join(app.config['GENERATED_PATH'],'ML'))
+            output_path = create_dir(os.path.join(app.config['GENERATED_PATH'], 'ML_change_pt'))
             uploaded_file = uploaded_files[0] # le format est une liste mais il n'y a qu'un seul fichier
             input_path = os.path.join(app.config['UPLOAD_PATH_ML'], uploaded_file)
             outputs = change_points(input_path, output_path)
+            app.config['CURRENT_OUTPUT_FILE'] = outputs
             return render_template('change_points.html', uploaded_files=uploaded_files, file_ready=1)
 
         elif request.form['btn_id'] == 'purger':
@@ -126,8 +127,11 @@ def ML_change_pt():
     return render_template('change_points.html', uploaded_files=uploaded_files, file_ready=0)
 
 
-@app.route('/<app_name>/<filename>', methods=['GET', 'POST'])
+@app.route('/<app_name>/<filename>/<file_nb>', methods=['GET', 'POST'])
 def download(app_name, filename):
+    filename, type = decode_str_filename(filename)
+    if type == 'list':
+        filename = os.path.basename(zip_files(filename, zip_file_name=app_name + '_result'))
     directory = os.path.abspath(os.path.join(app.config['GENERATED_PATH'], app_name))
     return send_from_directory(directory=directory, filename=filename, as_attachment=True)
 
