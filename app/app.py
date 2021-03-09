@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, redirect, url_for, abort, Res
 from werkzeug.utils import secure_filename
 from .utils import eep_traitement as eep
 from .utils.File import validate_file_epow as validate, get_uploads_files, purge_file, full_paths, \
-    create_dir_if_dont_exist as create_dir, zip_files, decode_str_filename
+    create_dir_if_dont_exist as create_dir, zip_files, decode_str_filename, add_to_list_file, get_items_from_file
 from .ML_Scripts.pelt_cpd import change_points
 
 
@@ -18,8 +18,9 @@ app.config['UPLOAD_PATH_ML'] = create_dir(r'uploads/ML_change_pt')
 app.config['GENERATED_PATH'] = create_dir(r'generated')
 app.config['CURRENT_OUTPUT_FILE'] = ''
 
+BUSES_FILE = os.path.join(app.config['UPLOAD_PATH_EPOW'], r'bus_exclus')
 eep_data = {}
-eep_data["BUS_EXCLUS"] = []
+eep_data["BUS_EXCLUS"] = get_items_from_file(BUSES_FILE)
 eep_data["FILE_PATHS"] = []
 eep_data["FILE_NAME"] = []
 eep_data["NB_SCEN"] = 0
@@ -50,7 +51,7 @@ def eepower():
                         os.remove(os.path.join(app.config['UPLOAD_PATH_EPOW'], filename))
                         flash("Les fichiers reçus ne contiennent pas les informations nécessaires ou n'ont "
                                        "pas le bon format", 'error')
-            return  redirect(url_for('eepower'))
+            return redirect(url_for('eepower'))
 
         elif request.form['btn_id'] == 'purger':
             return redirect(url_for('purge', app_name='eepower'))
@@ -72,7 +73,8 @@ def eepower_traitement():
     if request.method == 'POST':
         if request.form['btn_id'] == 'ajouter_bus':
             if request.form['bus'] != '':
-                eep_data["BUS_EXCLUS"].append(str.upper(request.form['bus']))
+                add_to_list_file(BUSES_FILE, str.upper(request.form['bus']))
+                eep_data["BUS_EXCLUS"] = get_items_from_file(BUSES_FILE)
                 render_template('easy_power_traitement.html', nb_scen=eep_data["NB_SCEN"],
                                 bus_exclus=eep_data["BUS_EXCLUS"],
                                 file_ready=1)
@@ -127,7 +129,7 @@ def ML_change_pt():
     return render_template('change_points.html', uploaded_files=uploaded_files, file_ready=0)
 
 
-@app.route('/<app_name>/<filename>/<file_nb>', methods=['GET', 'POST'])
+@app.route('/<app_name>/<filename>/', methods=['GET', 'POST'])
 def download(app_name, filename):
     filename, type = decode_str_filename(filename)
     if type == 'list':

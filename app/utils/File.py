@@ -103,5 +103,22 @@ def decode_str_filename(str_filename):
         return str_filename, 'str'
 
 
+def add_to_list_file(filename, *items):
+    with open(filename, 'a') as file:
+        for item in items:
+            file.write(item)
+            file.write('\n')
+    file.close()
 
+
+def get_items_from_file(filename):
+    if os.path.exists(filename):
+        with open(filename, 'r') as file:
+            lines = [line.rstrip('\n') for line in file]
+        file.close()
+
+        return lines
+
+    else:
+        return []
 
