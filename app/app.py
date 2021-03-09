@@ -97,6 +97,7 @@ def eepower_traitement():
 
 @app.route('/change_points', methods=['GET','POST'])
 def ML_change_pt():
+    app_name = 'ML_change_pt'
     uploaded_files = get_uploads_files(app.config['UPLOAD_PATH_ML'])
     if request.method == 'POST':
         # ajout de fichier pour analyse
@@ -117,7 +118,7 @@ def ML_change_pt():
             uploaded_file = uploaded_files[0] # le format est une liste mais il n'y a qu'un seul fichier
             input_path = os.path.join(app.config['UPLOAD_PATH_ML'], uploaded_file)
             outputs = change_points(input_path, output_path)
-            app.config['CURRENT_OUTPUT_FILE'] = outputs
+            app.config['CURRENT_OUTPUT_FILE'] = os.path.basename(zip_files(outputs, zip_file_name=app_name + '_result'))
             return render_template('change_points.html', uploaded_files=uploaded_files, file_ready=1)
 
         elif request.form['btn_id'] == 'purger':
