@@ -12,6 +12,7 @@ def get_uploads_files(dir_name=r'./uploads'):
         else:
             print("Directory is not empty")
             return os.listdir(dir_name)
+
     else:
         print("Given directory doesn't exist")
         return []
@@ -24,8 +25,8 @@ def purge_file(dir_name=r'./uploads'):
 
 
 def validate_file_epow(file):
-    col30 = set(['Bus kV', 'Sym Amps'])
-    col1 = set(["Bus kV","Sym Amps","X/R Ratio","Mult Factor","Asym Amps","Equip Type","Duty Amps"])
+    col30 = {'Bus kV', 'Sym Amps'}
+    col1 = {"Bus kV", "Sym Amps", "X/R Ratio", "Mult Factor", "Asym Amps", "Equip Type", "Duty Amps"}
     try:
         df = pd.DataFrame(pd.read_csv(file, skiprows=1, index_col=0))
     except:
@@ -48,18 +49,6 @@ def full_paths(upload_dir):
 def create_dir_if_dont_exist(dir_name):
     Path(dir_name).mkdir(parents=True, exist_ok=True)
     return dir_name
-
-# def zip_dir(dir_path, file_name=''):
-#     """
-#     zip a directory
-#     :return path to the zipped file
-#     :rtype str
-#     """
-#     if file_name == '':
-#         file_name = os.path.split(dir_path)[-1]
-#     file = make_archive(base_name=file_name, format='zip', root_dir=dir_path, base_dir=dir_path)
-#     move(file, dir_path)
-#     return file
 
 
 def zip_files(list_of_files, zip_file_name=''):

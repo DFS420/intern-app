@@ -131,8 +131,8 @@ def ML_change_pt():
 
 @app.route('/<app_name>/<filename>/', methods=['GET', 'POST'])
 def download(app_name, filename):
-    filename, type = decode_str_filename(filename)
-    if type == 'list':
+    filename, _type = decode_str_filename(filename)
+    if _type == 'list':
         filename = os.path.basename(zip_files(filename, zip_file_name=app_name + '_result'))
     directory = os.path.abspath(os.path.join(app.config['GENERATED_PATH'], app_name))
     return send_from_directory(directory=directory, filename=filename, as_attachment=True)
