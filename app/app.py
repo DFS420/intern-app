@@ -6,6 +6,7 @@ from .utils import eep_traitement as eep
 from .utils.File import validate_file_epow as validate, get_uploads_files, purge_file, full_paths, \
     create_dir_if_dont_exist as create_dir, zip_files, decode_str_filename, add_to_list_file, get_items_from_file
 from .ML_Scripts.pelt_cpd import change_points
+from .linepole.KMLHandler import KMLHandler
 
 
 app = Flask(__name__)
@@ -15,6 +16,7 @@ app.config['UPLOAD_EXTENSIONS'] = ['.csv', '.xlsx', '.xls']
 app.config['UPLOAD_PATH'] = create_dir('uploads')
 app.config['UPLOAD_PATH_EPOW'] = create_dir(r'uploads/eepower')
 app.config['UPLOAD_PATH_ML'] = create_dir(r'uploads/ML_change_pt')
+app.config['UPLOAD_PATH_LP'] = create_dir(r'uploads/linepole_generator')
 app.config['GENERATED_PATH'] = create_dir(r'generated')
 app.config['CURRENT_OUTPUT_FILE'] = ''
 
@@ -32,14 +34,14 @@ eep_data["NB_SCEN"] = 0
 def index():
     return render_template('accueil.html')
 
-@app.route('/eepower', methods=['GET','POST'])
+@app.route('/eepower', methods=['GET', 'POST'])
 def eepower():
     uploaded_files = get_uploads_files(app.config['UPLOAD_PATH_EPOW'])
     if request.method == 'POST':
         #ajout de fichier pour analyse
         if request.form['btn_id'] == 'soumettre_fichier':
             for uploaded_file in request.files.getlist('file'):
-                filename = uploaded_file.filename
+                filename = secure_filename(uploaded_file.filename)
                 if filename != '':
                     file_ext = os.path.splitext(filename)[1]
                     #valide si l'extension des fichier est bonne
@@ -61,7 +63,7 @@ def eepower():
 
     return render_template('easy_power.html', uploaded_files=uploaded_files)
 
-@app.route('/eepower-2', methods=['GET','POST'])
+@app.route('/eepower-2', methods=['GET', 'POST'])
 def eepower_traitement():
     uploaded_files = get_uploads_files(app.config['UPLOAD_PATH_EPOW'])
     eep_data["FILE_NAME"] = [name.split('/')[-1].split('.')[0] for name in uploaded_files]
@@ -95,7 +97,7 @@ def eepower_traitement():
                            file_ready=file_ready)
 
 
-@app.route('/change_points', methods=['GET','POST'])
+@app.route('/change_points', methods=['GET', 'POST'])
 def ML_change_pt():
     app_name = 'ML_change_pt'
     uploaded_files = get_uploads_files(app.config['UPLOAD_PATH_ML'])
@@ -103,12 +105,12 @@ def ML_change_pt():
         # ajout de fichier pour analyse
         if request.form['btn_id'] == 'soumettre_fichier':
             file = request.files['file']
-            filename = file.filename
+            filename = secure_filename(file.filename)
             if filename != '':
                 file_ext = os.path.splitext(filename)[1]
                 # valide si l'extension des fichier est bonne
                 if file_ext not in app.config['UPLOAD_EXTENSIONS']:
-                    flash("Les fichiers reçus ne sont des fichiers .csv ou .xlsx", 'error')
+                    flash("Le fichier reçu n'est pas un fichier .csv ou .xlsx", 'error')
                 file.save(os.path.join(app.config['UPLOAD_PATH_ML'], filename))
                 return redirect(url_for('ML_change_pt', uploaded_files=uploaded_files, file_ready=0))
             return redirect(url_for('ML_change_pt'))
@@ -128,6 +130,41 @@ def ML_change_pt():
             return redirect(url_for('download', app_name='ML_change_pt', filename=app.config['CURRENT_OUTPUT_FILE']))
 
     return render_template('change_points.html', uploaded_files=uploaded_files, file_ready=0)
+
+
+@app.route('/linepole_generator', methods=['GET', 'POST'])
+def linepole_generator():
+    app_name = 'linepole_generator'
+    uploaded_files = get_uploads_files(app.config['UPLOAD_PATH_LP'])
+
+    if request.method == 'POST':
+        # ajout de fichier pour analyse
+        if request.form['btn_id'] == 'soumettre_fichier':
+            file = request.files['file']
+            filename = secure_filename(file.filename)
+
+            if filename != '':
+                file_ext = os.path.splitext(filename)[1]
+                # valide si l'extension des fichier est bonne
+                if file_ext != '.kml':
+                    flash("Le fichier reçu n'est pas un fichier .kml", 'error')
+
+                file.save(os.path.join(app.config['UPLOAD_PATH_LP'], filename))
+                return redirect(url_for('linepole_generator', uploaded_files=uploaded_files, file_ready=0))
+
+            return redirect(url_for('linepole_generator', uploaded_files=uploaded_files, file_ready=0, file_submit=1))
+
+        elif request.form['btn_id'] == 'analyze':
+            output_path = create_dir(os.path.join(app.config['GENERATED_PATH'], app_name))
+            global handle
+            handle = KMLHandler(os.path.join(app.config["UPLOAD_PATH_LP"], uploaded_files[0]))
+            return render_template('linepole.html', uploaded_files=uploaded_files, file_ready=0, file_submit=1,
+                                   loader=1, pole=1, parallele=0)
+
+        elif request.form['btn_id'] == 'purger':
+            return redirect(url_for('purge', app_name=app_name, file_submit=0))
+
+    return render_template('linepole.html', uploaded_files=uploaded_files, file_ready=0, file_submit=0, loader=0)
 
 
 @app.route('/<app_name>/<filename>/', methods=['GET', 'POST'])

@@ -114,3 +114,42 @@ nav a:hover
 {
     margin-left : 10px;
 }
+
+/*bouton de générateur de lignes */
+#traitement_lp
+{
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+}
+
+#pole
+{
+    display: flex;
+    flex-direction: column;
+    float: left;
+    border-style: groove;
+    width:300px;
+    align-items: center;
+}
+
+#parallele
+{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    float: left;
+    border-style: groove;
+}
+
+.b_traitement
+{
+    display: flex;
+    flex-direction: column;
+    justify-self: center;
+}
+
+.mesure
+{
+    width: 50px;
+}
