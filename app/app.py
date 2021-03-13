@@ -2,11 +2,13 @@
 import os, secrets
 from flask import Flask, render_template, request, redirect, url_for, abort, Response, flash, send_from_directory
 from werkzeug.utils import secure_filename
+from flaskthreads import AppContextThread as thread
 from .utils import eep_traitement as eep
 from .utils.File import validate_file_epow as validate, get_uploads_files, purge_file, full_paths, \
     create_dir_if_dont_exist as create_dir, zip_files, decode_str_filename, add_to_list_file, get_items_from_file
 from .ML_Scripts.pelt_cpd import change_points
 from .linepole.KMLHandler import KMLHandler
+from .linepole import settings as kml_settings
 
 
 app = Flask(__name__)
@@ -157,7 +159,18 @@ def linepole_generator():
         elif request.form['btn_id'] == 'analyze':
             output_path = create_dir(os.path.join(app.config['GENERATED_PATH'], app_name))
             global handle
+            kml_settings.init()
             handle = KMLHandler(os.path.join(app.config["UPLOAD_PATH_LP"], uploaded_files[0]))
+            return render_template('linepole.html', uploaded_files=uploaded_files, file_ready=0, file_submit=1,
+                                   loader=0, pole=0, parallele=0)
+
+        elif request.form['btn_id'] == 'pole':
+            render_template('linepole.html', uploaded_files=uploaded_files, file_ready=0, file_submit=1,
+                                   loader=1, pole=1, parallele=0)
+            kml_settings.space_by_type['custom'] = request.form.get('dist_pole', type=int)
+            global th_pole
+            th_pole = thread(target=handle.generatePoles)
+            th_pole.start()
             return render_template('linepole.html', uploaded_files=uploaded_files, file_ready=0, file_submit=1,
                                    loader=1, pole=1, parallele=0)
 
