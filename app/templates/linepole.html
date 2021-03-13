@@ -2,7 +2,7 @@
 <html lang="fr">
     <head>
         <meta charset="UTF-8">
-        <link rel="stylesheet" href="../static/css/style.css?7987645">
+        <link rel="stylesheet" href="../static/css/style.css?9987849">
         <title>Générateur de poteaux électriques</title>
     </head>
 
@@ -86,38 +86,41 @@
                                 <form class="b_traitement" method="POST" action="">
                                     <p><input type="submit" value="Générer la position des poteaux"></p>
                                     <input type="hidden" name="btn_id" value="pole">
-                                </form>
-                                <form class="b_traitement" method="POST" action="">
-                                    <p>Espacement entre les poteaux</p>
-                                    <p><input class="mesure" name="dist_pole" value="100" min="10" max="500" step="1" type="number"> m</p>
+
+                                    <label>Espacement entre les poteaux</label>
+                                    <p><input class="mesure" id="dist_pole" name="dist_pole" value="100" min="10" max="500" step="1"
+                                              type="number"> m</p>
                                 </form>
 
-                                <div class="loader">
-                                    {% if loader and pole %}
-                                        {% include "loader.html" %}
-                                    {% endif %}
-                                </div>
+                            <p>
+                                {% if pole and loader %}
+                                    <div class="loader"></div>
+                                {% endif %}
+                            </p>
                         </div>
 
                         <br/>
 
                         <div id="parallele">
+
                             <form class="b_traitement" method="POST" action="">
                                 <p><input type="submit" value="Générer des lignes parallèles"></p>
                                 <input type="hidden" name="btn_id" value="parallele">
-                            </form>
-                            <form class="b_traitement" method="POST" action="">
-                                <p>Espacement entre les lignes parallèles</p>
-                                <p><input class="mesure" name="dist_line" value="2" min="1" max="50" step="1" type="number"> m</p> <br/>
-                                <p>Distance maximale entre la ligne centrale et la dernière ligne parallèle </p>
-                                <p><input class="mesure" name="dist_max_line" value="2" min="1" max="100" step="1" type="number"> m</p> <br/>
+
+                                <label>Espacement entre les lignes parallèles</label>
+                                <p><input class="mesure" id="dist_line" name="dist_line" value="2" min="1" max="50" step="1"
+                                          type="number"> m</p> <br/>
+                                <label>Distance maximale entre la ligne centrale et la dernière ligne parallèle </label>
+                                <p><input class="mesure" id="dist_max_line" name="dist_max_line" value="2" min="1" max="100" step="1"
+                                          type="number"> m</p> <br/>
                             </form>
 
-                            <div class="loader">
-                                {% if loader and parallele %}
-                                    {% include "loader.html" %}
+                            <p>
+                                {% if parallele and loader %}
+                                    <div class="loader"></div>
                                 {% endif %}
-                            </div>
+                            </p>
+
 
                         </div>
 
