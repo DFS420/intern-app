@@ -447,7 +447,7 @@ class Line(LineSection):
 
         self.df = self._set_dataframe(list_of_coord)
         func = lambda row: self.distance_from_origine([row.lat, row.long, row.alt])
-        self.df['dist_from_origin'] = self.df.progress_apply(func,axis=1)
+        self.df['dist_from_origin'] = self.df.apply(func,axis=1)
         self.df['dist_from_prev'] = list(map(self.dist_from_prev, range(len(self.df))))
         self._set_prev_azi_angles()
         self._set_prev_hor_angles()
