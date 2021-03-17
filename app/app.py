@@ -2,7 +2,6 @@
 import os, secrets
 from flask import Flask, render_template, request, redirect, url_for, abort, Response, flash, send_from_directory
 from werkzeug.utils import secure_filename
-from flaskthreads import AppContextThread as thread
 from .utils import eep_traitement as eep
 from .utils.File import validate_file_epow as validate, get_uploads_files, purge_file, full_paths, \
     create_dir_if_dont_exist as create_dir, zip_files, decode_str_filename, add_to_list_file, get_items_from_file
@@ -138,6 +137,7 @@ def ML_change_pt():
 def linepole_generator():
     app_name = 'linepole_generator'
     uploaded_files = get_uploads_files(app.config['UPLOAD_PATH_LP'])
+    output_path = create_dir(os.path.join(app.config['GENERATED_PATH'], app_name))
 
     if request.method == 'POST':
         # ajout de fichier pour analyse
@@ -157,7 +157,6 @@ def linepole_generator():
             return redirect(url_for('linepole_generator', uploaded_files=uploaded_files, file_ready=0, file_submit=1))
 
         elif request.form['btn_id'] == 'analyze':
-            output_path = create_dir(os.path.join(app.config['GENERATED_PATH'], app_name))
             global handle
             kml_settings.init()
             handle = KMLHandler(os.path.join(app.config["UPLOAD_PATH_LP"], uploaded_files[0]))
@@ -165,17 +164,36 @@ def linepole_generator():
                                    loader=0, pole=0, parallele=0)
 
         elif request.form['btn_id'] == 'pole':
-            render_template('linepole.html', uploaded_files=uploaded_files, file_ready=0, file_submit=1,
-                                   loader=1, pole=1, parallele=0)
             kml_settings.space_by_type['custom'] = request.form.get('dist_pole', type=int)
-            global th_pole
-            th_pole = thread(target=handle.generatePoles)
-            th_pole.start()
-            return render_template('linepole.html', uploaded_files=uploaded_files, file_ready=0, file_submit=1,
-                                   loader=1, pole=1, parallele=0)
+            handle.generatePoles()
+            handle.generateOutput()
+
+            #create the kml with poles
+            kml_file_name = os.path.join(output_path,"augmented_kml.kml")
+            kml_file = open(kml_file_name, "w+")
+            kml_file.write(repr(handle))
+            kml_file.close()
+
+            #create a csv in the camelia format
+            camelia = handle.camelia
+            cam_file_name = os.path.join(output_path, "camelia_output.csv")
+            camelia.to_csv(cam_file_name)
+
+            #generate a csv containing all generated data
+            csv_name = os.path.join(output_path, "all_data.csv")
+            handle.outputdf.to_csv(csv_name)
+
+            outputs = [kml_file_name, cam_file_name, csv_name]
+
+            app.config['CURRENT_OUTPUT_FILE'] = os.path.basename(zip_files(outputs, zip_file_name=app_name + '_result'))
+            return render_template('linepole.html', uploaded_files=uploaded_files, file_ready=1, file_submit=1,
+                                   pole=1, parallele=0)
 
         elif request.form['btn_id'] == 'purger':
             return redirect(url_for('purge', app_name=app_name, file_submit=0))
+
+        elif request.form['btn_id'] == 'telecharger':
+            return redirect(url_for('download', app_name=app_name, filename=app.config['CURRENT_OUTPUT_FILE']))
 
     return render_template('linepole.html', uploaded_files=uploaded_files, file_ready=0, file_submit=0, loader=0)
 

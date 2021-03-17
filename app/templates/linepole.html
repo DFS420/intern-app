@@ -92,11 +92,16 @@
                                               type="number"> m</p>
                                 </form>
 
-                            <p>
-                                {% if pole and loader %}
-                                    <div class="loader"></div>
-                                {% endif %}
-                            </p>
+                                <div class="telecharger">
+                                    {% if file_ready and pole %}
+                                        Fichier prêt !
+                                        <form method="POST" action="">
+                                            <p><input type="submit" value="Télécharger"></p>
+                                            <input type="hidden" name="btn_id" value="telecharger">
+                                        </form>
+                                    {% endif %}
+                                </div>
+
                         </div>
 
                         <br/>
@@ -115,11 +120,15 @@
                                           type="number"> m</p> <br/>
                             </form>
 
-                            <p>
-                                {% if parallele and loader %}
-                                    <div class="loader"></div>
-                                {% endif %}
-                            </p>
+                                <div class="telecharger">
+                                    {% if file_ready and parallele %}
+                                        Fichier prêt !
+                                        <form method="POST" action="">
+                                            <p><input type="submit" value="Télécharger"></p>
+                                            <input type="hidden" name="btn_id" value="telecharger">
+                                        </form>
+                                    {% endif %}
+                                </div>
 
 
                         </div>
