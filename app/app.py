@@ -189,11 +189,37 @@ def linepole_generator():
             return render_template('linepole.html', uploaded_files=uploaded_files, file_ready=1, file_submit=1,
                                    pole=1, parallele=0)
 
+        elif request.form['btn_id'] == 'parallele':
+            offset = request.form.get('dist_line', type=int)
+            max_dist = request.form.get('dist_max_line', type=int)
+
+            handle.generateOffset(offset, max_dist)
+            handle.generateOutput()
+
+            # create the kml with poles
+            kml_file_name = os.path.join(output_path, "augmented_kml.kml")
+            kml_file = open(kml_file_name, "w+")
+            kml_file.write(repr(handle))
+            kml_file.close()
+
+            # generate a csv containing all generated data
+            csv_name = os.path.join(output_path, "all_data.csv")
+            handle.outputdf.to_csv(csv_name)
+
+            outputs = [kml_file_name, csv_name]
+
+            app.config['CURRENT_OUTPUT_FILE'] = os.path.basename(zip_files(outputs, zip_file_name=app_name + '_result'))
+            return render_template('linepole.html', uploaded_files=uploaded_files, file_ready=1, file_submit=1,
+                                   pole=0, parallele=1)
+
         elif request.form['btn_id'] == 'purger':
             return redirect(url_for('purge', app_name=app_name, file_submit=0))
 
         elif request.form['btn_id'] == 'telecharger':
             return redirect(url_for('download', app_name=app_name, filename=app.config['CURRENT_OUTPUT_FILE']))
+
+        elif request.form['btn_id'] == 'terminer':
+            return redirect(url_for('purge', app_name=app_name))
 
     return render_template('linepole.html', uploaded_files=uploaded_files, file_ready=0, file_submit=0, loader=0)
 
