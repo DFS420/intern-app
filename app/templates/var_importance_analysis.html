@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="static/css/style.css/">
+        <title>Points de changement</title>
+    </head>
+
+    <body>
+
+    {% include "header.html" %}
+
+    <div id="bloc_page">
+
+        {% include "nav_barre.html" %}
+
+        <div id="contenu">
+
+            <section id="intro">
+                <h1>Outil d'analyse de d'importance de variables</h1>
+                <p>
+                    Bienvenu dans l'outil d'analyse d'importance de variables <br>
+                    Il analyse de l'importance d'un ensemble de variables (inputs) pour prédire un résultat (output).<br/>
+                    La méthode d'analyse utilisée par ce bloc consiste à enlever et remettre séquentiellement
+                    les variables dans un ensemble de données (inputs) et d'évaluer l'impact du retrait de la variable
+                    sur la prédiction d'un résultat (output)<br/>
+                <br/>
+                    Il prend en entrée un fichier <em>.csv</em>
+                </p>
+            </section>
+
+        <div id="file_selector">
+            <form method="POST" action="" enctype="multipart/form-data">
+                <p><input type="file" name="file" accept=".csv"></p>
+                <p><input type="submit" value="Soumettre"></p>
+                <input type="hidden" name="btn_id" value="soumettre_fichier">
+          </form>
+       </div>
+
+        <div id="message">
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul class=flashes>
+                {% for message in messages %}
+                <em>{{ message }}</em>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endwith %}
+        </div>
+
+        <div class="container", id="files">
+            {% if uploaded_files == [] %}
+                Aucun fichier téléversé
+            {% else %}
+                Les fichiers téléversés sont les suivants :
+                <ul>
+                    {% for file in uploaded_files %}
+                        <li>{{ file }} </li>
+                    {% endfor %}
+                </ul>
+                <div id="purge">
+                    <form method="POST">
+                        <input type="submit" value="Purger les fichiers">
+                        <input type="hidden" name="btn_id" value="purger">
+                    </form>
+
+                </div>
+            {% endif %}
+        </div>
+
+        <div id="bouton suivant">
+            {% if uploaded_files != [] %}
+                <form method="POST" action="">
+                    <p><input type="submit" value="Suivant"></p>
+                    <input type="hidden" name="btn_id" value="suivant">
+                </form>
+            {% endif %}
+        </div>
+
+        <div id="telecharger">
+            {% if file_ready == 1 %}
+                Fichier prêt !
+                <form method="POST" action="">
+                    <p><input type="submit" value="Télécharger"></p>
+                    <input type="hidden" name="btn_id" value="telecharger">
+                </form>
+            {% endif %}
+        </div>
+
+
+      </div>
+
+    </div>
+
+  </body>
+
+</html>
