@@ -113,6 +113,7 @@ nav a:hover
 #contenu
 {
     margin-left : 10px;
+    width:1000px;
 }
 
 /*bouton de générateur de lignes */
