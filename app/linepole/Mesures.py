@@ -1,15 +1,9 @@
 # -*- coding: utf-8 -*-
-import requests
-from itertools import repeat
-import pandas as pd
-import json
-from geopy import distance
 import math
-from scipy.optimize import fsolve
 import subprocess
-import time
+from itertools import repeat
+from geopy import distance
 from shapely.geometry import LineString, MultiPoint
-from shapely.ops import split
 
 r_earth = 6371.009
 

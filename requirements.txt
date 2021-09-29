@@ -32,3 +32,7 @@ zipp>=3.4.0
 ruptures
 openpyxl
 sklearn
+geopy
+shapely
+fastkml
+colour
