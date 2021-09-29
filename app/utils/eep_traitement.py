@@ -29,16 +29,17 @@ def report(data,target):
     for scenario in scenarios:
         group = group_by_scenario(data["FILE_PATHS"], data["FILE_NAME"], scenario)
         for path, name in group:
-            if '30 Cycle Report' in name:
+            if '30_Cycle_Report' in name:
                 file30 = path
-            if 'LM' in name:
+            elif 'LV' in name:
                 file1 = path
             if '.csv' in path:
                 _type = 'csv'
-            else:
-                if not '.xlsx':
-                    if '.xls' in path:
-                        _type = 'xlsx'
+            elif '.xls' in path:
+                _type = 'xlsx'
+
+        if not '_type' in locals() or not 'file1' in locals() or not 'file1' in locals():
+            raise Exception(FILE_NAME)
 
         reports.append(simple_report(file30, file1, typefile=_type, bus_excluded=data["BUS_EXCLUS"]))
 
