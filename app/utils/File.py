@@ -31,7 +31,7 @@ def validate_file_epow(file):
         df = pd.DataFrame(pd.read_csv(file, skiprows=1, index_col=0))
     except:
         try:
-            df = pd.DataFrame(pd.read_excel(file, skiprows=5, index_col=0, engine='openpyxl'))
+            df = pd.DataFrame(pd.read_excel(file, skiprows=7, index_col=0, engine='openpyxl'))
         except openpyxl.utils.exceptions.InvalidFileException as notXL:
             return -1
 
@@ -88,7 +88,7 @@ def decode_str_filename(str_filename):
             return test_str, 'list'
         else:
             return str_filename, 'str'
-    except NameError:
+    except NameError or IndexError:
         return str_filename, 'str'
 
 

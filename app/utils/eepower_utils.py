@@ -20,8 +20,8 @@ def simple_report(rap_30, rap_1, typefile='csv', bus_excluded=None):
         rapport_30cycles = pd.DataFrame(pd.read_csv(rap_30, skiprows=1, index_col=0))
         rapport_1cycle = pd.DataFrame(pd.read_csv(rap_1, skiprows=1, index_col=0))
     elif typefile == 'xlsx':
-        rapport_30cycles = pd.DataFrame(pd.read_excel(rap_30, skiprows=5, index_col=0, engine='openpyxl'))
-        rapport_1cycle = pd.DataFrame(pd.read_excel(rap_1, skiprows=5, index_col=0, engine='openpyxl'))
+        rapport_30cycles = pd.DataFrame(pd.read_excel(rap_30, skiprows=7, index_col=0, engine='openpyxl'))
+        rapport_1cycle = pd.DataFrame(pd.read_excel(rap_1, skiprows=7, index_col=0, engine='openpyxl'))
 
     if bus_excluded != None and bus_excluded != []:
         temp1 = rapport_1cycle[~rapport_1cycle.index.str.contains('|'.join(bus_excluded))]
@@ -34,9 +34,13 @@ def simple_report(rap_30, rap_1, typefile='csv', bus_excluded=None):
     temp30.dropna()
 
     temp30 = temp30.rename(columns={'Sym Amps': 'I Sym 30'})
-    rap = pd.concat([temp1,temp30['I Sym 30']], axis=1)
+    rap = pd.concat([temp1, temp30['I Sym 30']], axis=1)
 
-    rap = rap.drop(['Mult Factor', 'Equip Type', 'Duty Amps'], axis=1)
+    column_to_remove = set(['Mult Factor', 'Equip Type', 'Duty Amps'])
+    column_existing = set(rap.columns.to_list())
+    column_to_drop = list(column_to_remove - (column_to_remove - column_existing))
+
+    rap = rap.drop(column_to_drop, axis=1)
     rap = rap.rename(columns={'Bus kV': 'Bus V'})
     rap['Bus V'] = rap['Bus V'] * 1000
 
