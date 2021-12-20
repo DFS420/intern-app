@@ -83,7 +83,13 @@ def eepower_traitement():
                                 file_ready=1)
 
         elif request.form['btn_id'] == 'suivant':
-            output_path, app.config['CURRENT_OUTPUT_FILE'] = eep.report(eep_data, create_dir(os.path.join(app.config['GENERATED_PATH'],'eepower')))
+            try:
+                output_path, app.config['CURRENT_OUTPUT_FILE'] = eep.report(eep_data, create_dir(os.path.join(app.config['GENERATED_PATH'],'eepower')))
+            except FileNotFoundError:
+                flash("Les fichiers reçus ne contiennent pas les informations nécessaires ou n'ont "
+                      "pas le bon format", 'error')
+                return redirect(url_for('eepower-2'))
+
             return render_template('easy_power_traitement.html', nb_scen=eep_data["NB_SCEN"],
                                    bus_exclus=eep_data["BUS_EXCLUS"],
                                    file_ready=1)

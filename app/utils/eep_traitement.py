@@ -38,8 +38,8 @@ def report(data,target):
             elif '.xls' in path:
                 _type = 'xlsx'
 
-        if not '_type' in locals() or not 'file1' in locals() or not 'file1' in locals():
-            raise Exception(FILE_NAME)
+        if not '_type' in locals() or not 'file1' in locals() or not 'file30' in locals():
+            raise Exception(FileNotFoundError)
 
         reports.append(simple_report(file30, file1, typefile=_type, bus_excluded=data["BUS_EXCLUS"]))
 
