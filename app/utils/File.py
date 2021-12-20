@@ -4,21 +4,21 @@ import zipfile
 from glob import glob
 from pathlib import Path
 
-def get_uploads_files(dir_name=r'./uploads'):
+def get_uploads_files(dir_name=r'.\uploads'):
     if os.path.exists(dir_name) and os.path.isdir(dir_name):
         if not os.listdir(dir_name):
-            print("Directory is empty")
+            print("Directory ", dir_name, " is empty")
             return []
         else:
-            print("Directory is not empty")
+            print("Directory ", dir_name, " is not empty")
             return os.listdir(dir_name)
 
     else:
-        print("Given directory doesn't exist")
+        print("Directory ", dir_name, " doesn't exist")
         return []
 
 
-def purge_file(dir_name=r'./uploads'):
+def purge_file(dir_name=r'.\uploads'):
     if get_uploads_files(dir_name) != []:
         for file in get_uploads_files(dir_name):
             os.remove(os.path.join(dir_name, file))
