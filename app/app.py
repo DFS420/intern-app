@@ -86,13 +86,17 @@ def eepower_traitement():
             try:
                 output_path, app.config['CURRENT_OUTPUT_FILE'] = eep.report(eep_data, create_dir(os.path.join(app.config['GENERATED_PATH'],'eepower')))
             except FileNotFoundError:
-                flash("Les fichiers reçus ne contiennent pas les informations nécessaires ou n'ont "
-                      "pas le bon format", 'error')
-                return redirect(url_for('eepower-2'))
+                flash("Il faut au moins un fichiers 30s et un fichier instantané", 'error')
+                return render_template('easy_power_traitement.html', nb_scen=eep_data["NB_SCEN"],
+                                       bus_exclus=eep_data["BUS_EXCLUS"],
+                                       file_ready=file_ready)
 
             return render_template('easy_power_traitement.html', nb_scen=eep_data["NB_SCEN"],
                                    bus_exclus=eep_data["BUS_EXCLUS"],
                                    file_ready=1)
+
+        elif request.form['btn_id'] == 'retour':
+            return redirect(url_for('eepower'))
 
         elif request.form['btn_id'] == 'telecharger':
             return redirect(url_for('download', app_name='eepower', filename=app.config['CURRENT_OUTPUT_FILE']))
@@ -109,6 +113,7 @@ def linepole_generator():
     app_name = 'linepole_generator'
     uploaded_files = get_uploads_files(app.config['UPLOAD_PATH_LP'])
     output_path = create_dir(os.path.join(app.config['GENERATED_PATH'], app_name))
+    print(output_path)
 
     if request.method == 'POST':
         # ajout de fichier pour analyse

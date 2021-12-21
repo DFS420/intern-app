@@ -39,7 +39,7 @@ def report(data,target):
                 _type = 'xlsx'
 
         if not '_type' in locals() or not 'file1' in locals() or not 'file30' in locals():
-            raise Exception(FileNotFoundError)
+            raise FileNotFoundError("Il faut au moins un fichiers 30s et un fichier instanné")
 
         reports.append(simple_report(file30, file1, typefile=_type, bus_excluded=data["BUS_EXCLUS"]))
 
@@ -54,7 +54,6 @@ def report(data,target):
         return target, FILE_NAME
 
     except PermissionError:
-        print("Le fichier choisis est déjà ouvert ou vous n'avez pas la permission de l'écrire")
-        return -1
+        raise PermissionError("Le fichier choisis est déjà ouvert ou vous n'avez pas la permission de l'écrire")
     except ValueError:
-        return -1
+        raise ValueError

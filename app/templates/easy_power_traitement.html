@@ -64,12 +64,31 @@
                         </ul>
                     </div>
 
+                    <div id="message">
+                        {% with messages = get_flashed_messages() %}
+                            {% if messages %}
+                                <ul class=flashes>
+                                    {% for message in messages %}
+                                        <em>{{ message }}</em>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+
                     <div id="bouton suivant">
                         <form method="POST" action="">
                             <p><input type="submit" value="Suivant"></p>
                             <input type="hidden" name="btn_id" value="suivant">
                         </form>
                      </div>
+
+                    <div id="bouton retour">
+                        <form method="POST" action="">
+                            <p><input type="submit" value="Retour"></p>
+                            <input type="hidden" name="btn_id" value="retour">
+                        </form>
+                    </div>
 
                     {% if file_ready == 1 %}
                     <div id="telecharger">
