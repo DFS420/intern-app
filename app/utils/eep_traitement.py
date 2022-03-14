@@ -25,13 +25,13 @@ def report(data,target):
     reports = []
     output_path = join(target, FILE_NAME)
     writer = ExcelWriter(output_path)
-    scenarios = list(range(1,data["NB_SCEN"]+1))
+    scenarios = list(range(1, data["NB_SCEN"]+1))
     for scenario in scenarios:
         group = group_by_scenario(data["FILE_PATHS"], data["FILE_NAME"], scenario)
         for path, name in group:
             if '30_Cycle_Report' in name:
                 file30 = path
-            elif 'LV' in name:
+            elif 'LM' in name:
                 file1 = path
             if '.csv' in path:
                 _type = 'csv'
