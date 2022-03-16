@@ -29,7 +29,7 @@ def report(data,target):
     for scenario in scenarios:
         group = group_by_scenario(data["FILE_PATHS"], data["FILE_NAME"], scenario)
         for path, name in group:
-            if '30_Cycle_Report' in name:
+            if '30_Cycle_Report' in name or '30 Cycle'in name:
                 file30 = path
             elif 'LV' in name or 'LM' in name:
                 file1 = path
