@@ -31,7 +31,7 @@ def report(data,target):
         for path, name in group:
             if '30_Cycle_Report' in name:
                 file30 = path
-            elif 'LM' or 'LV' in name:
+            elif 'LV' in name or 'LM' in name:
                 file1 = path
             if '.csv' in path:
                 _type = 'csv'
