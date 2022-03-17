@@ -216,7 +216,8 @@ def download(app_name, filename):
     if _type == 'list':
         filename = os.path.basename(zip_files(filename, zip_file_name=app_name + '_result'))
     directory = os.path.abspath(os.path.join(app.config['GENERATED_PATH'], app_name))
-    return send_from_directory(directory=directory,  filename=filename, as_attachment=True)
+    return send_from_directory(directory=directory, path=app.config['CURRENT_OUTPUT_FILE'],
+                               as_attachment=True)
 
 
 @app.route('/purge/<app_name>', methods=['GET', 'POST'])
