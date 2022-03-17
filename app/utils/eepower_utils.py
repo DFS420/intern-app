@@ -1,5 +1,8 @@
 import pandas as pd
 from math import sqrt
+import re
+
+SCEN_PATERN = r".(scen\D*)\s*(\d+)"
 
 def simple_report(rap_30, rap_1, typefile='csv', bus_excluded=None):
     """
@@ -51,14 +54,38 @@ def simple_report(rap_30, rap_1, typefile='csv', bus_excluded=None):
 
     return rap.dropna()
 
-def group_by_scenario(filepathTuple, fileNameTuple, scenario):
-    groupedFiles =[]
 
-    for t in tuple(zip(filepathTuple, fileNameTuple)):
-        if t[1].endswith('scen{0}'.format(scenario)):
-            groupedFiles.append(t)
+def group_by_scenario(filepath_list, filename_list, scenario):
+    """
+    Make a list of tuple of the path of the file and the file name if it it's the same scenario that number provided
+    :param filepath_list: list of the complete path of files to group
+    :type filepath_list: list
+    :param filename_list: list of the names of files to group
+    :type filename_list: list
+    :param scenario:
+    :type scenario: int
+    :return: list of pair (path, file name) for the scenario provided
+    :rtype: list of tuple
+    """
+    grouped_files = []
 
-    return groupedFiles
+    for file_tuple in tuple(zip(filepath_list, filename_list)):
+        if scen_num_finder(file_tuple[1]) == scenario:
+            grouped_files.append(file_tuple)
+
+    return grouped_files
+
+def scen_num_finder(file_name):
+    m = re.search(SCEN_PATERN, file_name)
+    return int(m.groups()[1])
+
+def scenario_finder(file_names):
+    scen_list = []
+    for name in file_names:
+        num = scen_num_finder(name)
+        if num not in scen_list:
+            scen_list.append(num)
+    return scen_list
 
 def pire_cas(reports, scenarios):
     pire_cas = pd.concat(reports, keys=scenarios, names=["Scénario", None])

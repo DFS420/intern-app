@@ -3,6 +3,7 @@ import os, secrets
 from flask import Flask, render_template, request, redirect, url_for, abort, Response, flash, send_from_directory
 from werkzeug.utils import secure_filename
 from .utils import eep_traitement as eep
+from .utils import eepower_utils as eeu
 from .utils.File import validate_file_epow as validate, get_uploads_files, purge_file, full_paths, \
     create_dir_if_dont_exist as create_dir, zip_files, decode_str_filename, add_to_list_file, get_items_from_file
 from .linepole.KMLHandler import KMLHandler
@@ -25,8 +26,10 @@ BUSES_FILE = os.path.join(app.config['UPLOAD_PATH_EPOW'], r'bus_exclus')
 eep_data = {}
 eep_data["BUS_EXCLUS"] = get_items_from_file(BUSES_FILE)
 eep_data["FILE_PATHS"] = []
-eep_data["FILE_NAME"] = []
+eep_data["FILE_NAMES"] = []
+eep_data["SCENARIOS"] = []
 eep_data["NB_SCEN"] = 0
+
 
 
 
@@ -66,11 +69,11 @@ def eepower():
 
 @app.route('/eepower-2', methods=['GET', 'POST'])
 def eepower_traitement():
-    uploaded_files = get_uploads_files(app.config['UPLOAD_PATH_EPOW'])
-    eep_data["FILE_NAME"] = [name.split('/')[-1].split('.')[0] for name in uploaded_files]
-    scenarios = set([int(name[(-1)]) for name in eep_data["FILE_NAME"] if 'scen' in name])
-    eep_data["FILE_PATHS"] = full_paths(app.config['UPLOAD_PATH_EPOW'])
-    eep_data["NB_SCEN"]= len(scenarios)
+    if not eep_data["FILE_NAMES"]:
+        eep_data["FILE_NAMES"] = get_uploads_files(app.config['UPLOAD_PATH_EPOW'])
+        eep_data["FILE_PATHS"] = full_paths(app.config['UPLOAD_PATH_EPOW'])
+        eep_data["SCENARIOS"] = eeu.scenario_finder(eep_data["FILE_NAMES"])
+        eep_data["NB_SCEN"] = len(eep_data["SCENARIOS"])
     file_ready = 0
 
     if request.method == 'POST':
@@ -84,7 +87,14 @@ def eepower_traitement():
 
         elif request.form['btn_id'] == 'suivant':
             try:
-                output_path, app.config['CURRENT_OUTPUT_FILE'] = eep.report(eep_data, create_dir(os.path.join(app.config['GENERATED_PATH'],'eepower')))
+                dirpath = create_dir(os.path.join(app.config['GENERATED_PATH'],'eepower'))
+            except FileNotFoundError:
+                flash("Problème lors de la création du répertoire", 'error')
+                return render_template('easy_power_traitement.html', nb_scen=eep_data["NB_SCEN"],
+                                       bus_exclus=eep_data["BUS_EXCLUS"],
+                                       file_ready=file_ready)
+            try:
+                output_path, app.config['CURRENT_OUTPUT_FILE'] = eep.report(eep_data, dirpath)
             except FileNotFoundError:
                 flash("Il faut au moins un fichiers 30s et un fichier instantané", 'error')
                 return render_template('easy_power_traitement.html', nb_scen=eep_data["NB_SCEN"],
@@ -206,8 +216,7 @@ def download(app_name, filename):
     if _type == 'list':
         filename = os.path.basename(zip_files(filename, zip_file_name=app_name + '_result'))
     directory = os.path.abspath(os.path.join(app.config['GENERATED_PATH'], app_name))
-    return send_from_directory(directory=directory, path=os.path.join(directory, app.config['CURRENT_OUTPUT_FILE']),
-                               as_attachment=True)
+    return send_from_directory(directory=directory,  filename=filename, as_attachment=True)
 
 
 @app.route('/purge/<app_name>', methods=['GET', 'POST'])

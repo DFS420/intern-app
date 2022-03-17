@@ -25,9 +25,9 @@ def report(data,target):
     reports = []
     output_path = join(target, FILE_NAME)
     writer = ExcelWriter(output_path)
-    scenarios = list(range(1, data["NB_SCEN"]+1))
+    scenarios = data["SCENARIOS"]
     for scenario in scenarios:
-        group = group_by_scenario(data["FILE_PATHS"], data["FILE_NAME"], scenario)
+        group = group_by_scenario(data["FILE_PATHS"], data["FILE_NAMES"], scenario)
         for path, name in group:
             if '30_Cycle_Report' in name or '30 Cycle'in name:
                 file30 = path
@@ -47,8 +47,9 @@ def report(data,target):
 
     try:
         pire_cas_rap.to_excel(writer, sheet_name='Pire Cas')
-        for i in scenarios:
-            reports[(i - 1)].to_excel(writer, sheet_name=('Scénario {0}'.format(i)))
+        for scenario in scenarios:
+            i = scenarios.index(scenario)
+            reports[(i - 1)].to_excel(writer, sheet_name=('Scénario {0}'.format(scenario)))
         writer.save()
         #on retourne le repertoire et le fichier séparément
         return target, FILE_NAME

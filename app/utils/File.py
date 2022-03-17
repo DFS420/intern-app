@@ -48,7 +48,7 @@ def full_paths(upload_dir):
 
 def create_dir_if_dont_exist(dir_name):
     Path(dir_name).mkdir(parents=True, exist_ok=True)
-    return dir_name
+    return Path(dir_name)
 
 
 def zip_files(list_of_files, zip_file_name=''):
