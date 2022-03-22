@@ -39,9 +39,11 @@ def simple_report(rap_30, rap_1, typefile='csv', bus_excluded=None):
     temp30 = temp30.rename(columns={'Sym Amps': 'I Sym 30'})
     rap = pd.concat([temp1, temp30['I Sym 30']], axis=1)
 
-    column_to_remove = set(['Mult Factor', 'Equip Type', 'Duty Amps'])
+    #on élimine les colonnes inutile
+    #on conserve 'Bus kV' car il est changé par la suie pour 'Bus V'
+    column_to_keep = {'Bus kV', 'Sym Amps', 'X/R Ratio', 'Asym Amps', 'I Peak', 'I Sym 30'}
     column_existing = set(rap.columns.to_list())
-    column_to_drop = list(column_to_remove - (column_to_remove - column_existing))
+    column_to_drop = list(column_existing - column_to_keep)
 
     rap = rap.drop(column_to_drop, axis=1)
     rap = rap.rename(columns={'Bus kV': 'Bus V'})
