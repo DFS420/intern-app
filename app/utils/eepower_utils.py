@@ -2,7 +2,7 @@ import pandas as pd
 from math import sqrt
 import re
 
-SCEN_PATERN = r".(scen\D*)\s*(\d+)"
+SCEN_PATERN = r".(scen\D*)(\s*_*-*)(\d+\w{0,1})"
 
 def simple_report(rap_30, rap_1, typefile='csv', bus_excluded=None):
     """
@@ -78,8 +78,8 @@ def group_by_scenario(filepath_list, filename_list, scenario):
     return grouped_files
 
 def scen_num_finder(file_name):
-    m = re.search(SCEN_PATERN, file_name)
-    return int(m.groups()[1])
+    m = re.search(SCEN_PATERN, file_name.lower())
+    return m.groups()[-1]
 
 def scenario_finder(file_names):
     scen_list = []
