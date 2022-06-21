@@ -33,15 +33,17 @@ def report(data,target):
                 file30 = path
             elif 'LV' in name or 'LM' in name:
                 file1 = path
+            elif 'HV' in name:
+                hv = path
             if '.csv' in path:
                 _type = 'csv'
             elif '.xls' in path:
                 _type = 'xlsx'
 
         if not '_type' in locals() or not 'file1' in locals() or not 'file30' in locals():
-            raise FileNotFoundError("Il faut au moins un fichiers 30s et un fichier instanné")
+            raise FileNotFoundError("Il faut au moins un fichiers 30s et un fichier instantané")
 
-        reports.append(simple_report(file30, file1, typefile=_type, bus_excluded=data["BUS_EXCLUS"]))
+        reports.append(simple_report(file30, file1, hv=hv, typefile=_type, bus_excluded=data["BUS_EXCLUS"]))
 
     pire_cas_rap = pire_cas(reports, scenarios)
 

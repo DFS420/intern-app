@@ -3,8 +3,8 @@ from math import sqrt
 import re
 
 SCEN_PATERN = r".(scen\D*)(\s*_*-*)(\d+\w{0,1})"
-
-def simple_report(rap_30, rap_1, typefile='csv', bus_excluded=None):
+#todo: add the possiblity to have csv and excel at the same time
+def simple_report(rap_30, rap_1, hv=None, typefile='csv', bus_excluded=None):
     """
     Créer une dataframe pandas en groupant les information utile depuis les rapport 30 cycles et 1 cycle
     :param rap_30:
@@ -17,7 +17,7 @@ def simple_report(rap_30, rap_1, typefile='csv', bus_excluded=None):
     :rtype:
     """
     bus_excluded = [str.upper(bus) for bus in bus_excluded]
-    #ajouté pour être sur de dropper les lignes voulues (easypower donne des noms en capitale)
+    #ajouté pour être sûr de dropper les lignes voulues (easypower donne des noms en capitale)
 
     if typefile == 'csv':
         rapport_30cycles = pd.DataFrame(pd.read_csv(rap_30, skiprows=1, index_col=0))
@@ -53,6 +53,12 @@ def simple_report(rap_30, rap_1, typefile='csv', bus_excluded=None):
 
     peak = pd.DataFrame(rap['Asym Amps'] * sqrt(2)).round(1)
     rap.insert(4, 'I Peak', peak)
+
+    if hv:
+        hv_report = simple_report(rap_30, hv, hv=None, typefile=typefile, bus_excluded=bus_excluded)
+        rap = rap.dropna()
+        rap = pd.concat([rap, hv_report])
+        rap = rap.sort_values(by='Bus V', ascending=False)
 
     return rap.dropna()
 
