@@ -56,7 +56,6 @@ def simple_report(rap_30, rap_1, hv=None, typefile='csv', bus_excluded=None):
 
     if hv:
         hv_report = simple_report(rap_30, hv, hv=None, typefile=typefile, bus_excluded=bus_excluded)
-        rap = rap.dropna()
         rap = pd.concat([rap, hv_report])
         rap = rap.sort_values(by='Bus V', ascending=False)
 

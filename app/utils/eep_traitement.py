@@ -23,9 +23,11 @@ def report(data,target):
     :rtype: tuple of path
     """
     reports = []
+    hv = None
     output_path = join(target, FILE_NAME)
     writer = ExcelWriter(output_path)
     scenarios = data["SCENARIOS"]
+
     for scenario in scenarios:
         group = group_by_scenario(data["FILE_PATHS"], data["FILE_NAMES"], scenario)
         for path, name in group:
@@ -42,6 +44,7 @@ def report(data,target):
 
         if not '_type' in locals() or not 'file1' in locals() or not 'file30' in locals():
             raise FileNotFoundError("Il faut au moins un fichiers 30s et un fichier instantané")
+
         tmp_report = simple_report(file30, file1, hv=hv, typefile=_type, bus_excluded=data["BUS_EXCLUS"])
         reports.append(tmp_report)
 
