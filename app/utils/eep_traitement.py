@@ -43,7 +43,7 @@ def report(data,target):
                 _type = 'xlsx'
 
         if not '_type' in locals() or not 'file1' in locals() or not 'file30' in locals():
-            raise FileNotFoundError("Il faut au moins un fichiers 30s et un fichier instantané")
+            raise FileNotFoundError("Il faut au moins un fichier 30s et un fichier instantané")
 
         tmp_report = simple_report(file30, file1, hv=hv, typefile=_type, bus_excluded=data["BUS_EXCLUS"])
         reports.append(tmp_report)
