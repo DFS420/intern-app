@@ -101,7 +101,7 @@ def eepower_traitement():
             try:
                 output_path, app.config['CURRENT_OUTPUT_FILE'] = eep.report(eep_data, dirpath)
             except FileNotFoundError:
-                flash("Il faut au moins un fichiers 30s et un fichier instantané", 'error')
+                flash("Il faut au moins un fichier 30s et un fichier instantané", 'error')
                 return render_template('easy_power_traitement.html', nb_scen=eep_data["NB_SCEN"],
                                        bus_exclus=eep_data["BUS_EXCLUS"],
                                        file_ready=file_ready)
