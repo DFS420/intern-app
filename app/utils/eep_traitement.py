@@ -30,6 +30,7 @@ def report(data,target):
 
     for scenario in scenarios:
         group = group_by_scenario(data["FILE_PATHS"], data["FILE_NAMES"], scenario)
+        file30, file1, _type = None, None, None
         for path, name in group:
             if '30_Cycle_Report' in name or '30 Cycle'in name:
                 file30 = path
@@ -42,7 +43,9 @@ def report(data,target):
             elif '.xls' in path:
                 _type = 'xlsx'
 
-        if not '_type' in locals() or not 'file1' in locals() or not 'file30' in locals():
+        if not _type:
+            raise FileNotFoundError("Les fichiers doivent être au format csv ou xlsx")
+        elif not file1 or not file30:
             raise FileNotFoundError("Il faut au moins un fichier 30s et un fichier instantané")
 
         tmp_report = simple_report(file30, file1, hv=hv, typefile=_type, bus_excluded=data["BUS_EXCLUS"])
