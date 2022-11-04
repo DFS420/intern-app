@@ -9,8 +9,13 @@ from .utils.File import validate_file_epow as validate, get_uploads_files, purge
 from .linepole.KMLHandler import KMLHandler
 from .linepole import settings as kml_settings
 
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.wsgi import WSGIMiddleware
+from tinydb import TinyDB, Query
+from app.model import Person, Project, Getter
 
 app = Flask(__name__)
+
 app.secret_key = secrets.token_bytes()
 app.config['MAX_CONTENT_LENGTH'] = 3072 * 3072
 app.config['UPLOAD_EXTENSIONS'] = ['.csv', '.xlsx', '.xls']
@@ -231,6 +236,74 @@ def purge(app_name):
     purge_file(os.path.join(app.config['GENERATED_PATH'], app_name))
     return redirect(url_for(app_name))
 
+
+
+db_app = FastAPI()
+
+db = TinyDB('developpement_db.json')
+
+def is_duplicate(data):
+    if db.search(Query().body == data['body']):
+        return True
+    else:
+        return False
+
+@db_app.get("/development/project/ADD")
+def add_project(request: Project):
+    project = {}
+    for k, v in request:
+        project[k] = v
+
+    if not is_duplicate(project):
+        entry_num = db.insert(project)
+        return entry_num, 'New project added'
+
+    else:
+        raise HTTPException(status_code=450, detail="Entry already exists",
+                            headers={"duplicate title": project['title']}
+                            )
+
+
+@db_app.get("/development/person/ADD")
+def add_person(request: Person):
+    person = {}
+    for k, v in request:
+        person[k] = v
+
+    if not is_duplicate(person):
+        entry_num = db.insert(person)
+        return entry_num, 'New person added'
+
+    else:
+        raise HTTPException(status_code=450, detail="Entry already exists",
+                            headers={"name": person['name']}
+                            )
+
+
+@db_app.get("/development/GET")
+def get(request: Getter):
+    ls = request.list_search
+    entry = {}
+    for k, v in request:
+        if v != '' and v != [] and k != 'list_search':
+            entry[k] = v
+
+    type_query = Query().type == entry['type']
+
+
+    print(entry)
+    if 'tags' in entry.keys():
+        if ls == 'all':
+            return db.search((Query().tags.all(entry['tags'])) & type_query)
+        elif ls == 'any':
+            return db.search(Query().tags.any(entry['tags']) & type_query)
+        elif ls == 'one_of':
+            return db.search(Query().tags.one_of(entry['tags']) & type_query)
+    else:
+        return db.search(Query().fragment(entry))
+
+
+db_app.mount("/", WSGIMiddleware(app))
 
 if __name__ == "__main__":
     app.run(debug=True)
