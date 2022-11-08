@@ -9,6 +9,9 @@ from .utils.File import validate_file_epow as validate, get_uploads_files, purge
 from .linepole.KMLHandler import KMLHandler
 from .linepole import settings as kml_settings
 
+from .utils.db_dev_api import app as db_app
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
+
 
 app = Flask(__name__)
 app.secret_key = secrets.token_bytes()
@@ -232,5 +235,7 @@ def purge(app_name):
     return redirect(url_for(app_name))
 
 
-if __name__ == "__main__":
-    app.run(debug=True)
+application = DispatcherMiddleware(app, {
+    '/dev': db_app
+})
+

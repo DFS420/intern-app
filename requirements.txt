@@ -4,7 +4,7 @@ numpy>=1.19.0
 defusedxml>=0.6.0
 pandas>=1.0.5
 gunicorn>=20.0.4
-flask
+flask~=2.0.3
 Jinja2>=2.10.3
 blinker>=1.4
 boto>=2.49.0
@@ -28,7 +28,11 @@ watchdog>=2.0.2
 wincertstore>=0.2
 zipp>=3.4.0
 openpyxl
-geopy
-shapely
-fastkml
-colour
+geopy~=2.1.0
+shapely~=1.7.1
+fastkml~=0.11
+colour~=0.1.5
+pydantic~=1.10.2
+fastapi~=0.86.0
+tinydb~=4.7.0
+Werkzeug~=2.0.3
