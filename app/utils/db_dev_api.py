@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from app.utils.model import Person, Project, Getter
 from tinydb import TinyDB, Query
 
+
 app = FastAPI()
 
 db = TinyDB('developpement_db.json')
@@ -14,12 +15,12 @@ def is_duplicate(data):
         return False
 
 
-@app.get("/")
+@app.get("/dev")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "API fonctionnelle"}
 
 
-@app.get("/project/ADD")
+@app.get("/dev/project/ADD")
 def add_project(request: Project):
     project = {}
     for k, v in request:
@@ -35,7 +36,7 @@ def add_project(request: Project):
                             )
 
 
-@app.get("/person/ADD")
+@app.get("/dev/person/ADD")
 def add_person(request: Person):
     person = {}
     for k, v in request:
@@ -51,7 +52,7 @@ def add_person(request: Person):
                             )
 
 
-@app.get("/GET")
+@app.get("/dev/GET")
 def get(request: Getter):
     ls = request.list_search
     entry = {}
