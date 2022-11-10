@@ -15,6 +15,11 @@ def is_duplicate(data):
         return False
 
 
+def get_number(search_type='project'):
+    query = Query().type == search_type
+    return db.count(query)
+
+
 @app.get("/dev")
 async def root():
     return {"message": "API fonctionnelle"}
