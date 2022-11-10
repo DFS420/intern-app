@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
-import os, secrets
+import os, secrets, re, requests
+
+import jinja2.exceptions
 from flask import Flask, render_template, request, redirect, url_for, abort, Response, flash, send_from_directory
 from werkzeug.utils import secure_filename
 from .utils import eep_traitement as eep
 from .utils import eepower_utils as eeu
 from .utils.File import validate_file_epow as validate, get_uploads_files, purge_file, full_paths, \
-    create_dir_if_dont_exist as create_dir, zip_files, decode_str_filename, add_to_list_file, get_items_from_file
+    create_dir_if_dont_exist as create_dir, zip_files, decode_str_filename, add_to_list_file, get_items_from_file, \
+    get_items_from_json
 from .linepole.KMLHandler import KMLHandler
 from .linepole import settings as kml_settings
 
-from .utils.db_dev_api import app as db_app
+from .utils.db_dev_api import get_number, get
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
 
@@ -20,19 +23,25 @@ app.config['UPLOAD_EXTENSIONS'] = ['.csv', '.xlsx', '.xls']
 app.config['UPLOAD_PATH'] = create_dir('uploads')
 app.config['UPLOAD_PATH_EPOW'] = create_dir(r'uploads/eepower')
 
-
 app.config['UPLOAD_PATH_LP'] = create_dir(r'uploads/linepole_generator')
 app.config['GENERATED_PATH'] = create_dir(r'generated')
 app.config['CURRENT_OUTPUT_FILE'] = ''
 
-BUSES_FILE = os.path.join(app.config['UPLOAD_PATH_EPOW'], r'bus_exclus')
-eep_data = {}
-eep_data["BUS_EXCLUS"] = get_items_from_file(BUSES_FILE)
-eep_data["FILE_PATHS"] = []
-eep_data["FILE_NAMES"] = []
-eep_data["SCENARIOS"] = []
-eep_data["NB_SCEN"] = 0
+app.config['UPLOAD_PATH_DEV'] = create_dir(r'uploads/developpement')
 
+BUSES_FILE = os.path.join(app.config['UPLOAD_PATH_EPOW'], r'bus_exclus')
+eep_data = {"BUS_EXCLUS": get_items_from_file(BUSES_FILE),
+            "FILE_PATHS": [],
+            "FILE_NAMES": [],
+            "SCENARIOS": [],
+            "NB_SCEN": 0}
+
+#ENTRY_FILES = os.path.join(app.config['UPLOAD_PATH_DEV'], r'entry_query')
+db_data = {"SEARCH_ENTRY": {},#get_items_from_json(ENTRY_FILES),
+            "FILE_PATHS": [],
+            "FILE_NAMES": [],
+            "NB_PROJECT": get_number('project'),
+            "NB_PERSON": get_number('person')}
 
 
 
@@ -131,7 +140,6 @@ def linepole_generator():
     app_name = 'linepole_generator'
     uploaded_files = get_uploads_files(app.config['UPLOAD_PATH_LP'])
     output_path = create_dir(os.path.join(app.config['GENERATED_PATH'], app_name))
-    print(output_path)
 
     if request.method == 'POST':
         # ajout de fichier pour analyse
@@ -218,6 +226,44 @@ def linepole_generator():
     return render_template('linepole.html', uploaded_files=uploaded_files, file_ready=0, file_submit=0, loader=0)
 
 
+@app.route('/developpement', methods=['GET', 'POST'])
+def developpement_search():
+    if request.method == 'POST':
+        if request.form['btn_id'] == 'chercher_tags':
+            if request.form['tag'] != '':
+                tags = re.split(r"\W+\s*|\s+", request.form['tag'])
+                data = {'tags': tags, "list_search": request.form['list_search'], "type":"project"}
+                try:
+                    results = requests.get("http://localhost:5000/dev/GET", json=data).json()
+                    if not results:
+                        raise FileNotFoundError
+                    return render_template('json_output.html', results=results)
+                except AttributeError as e:
+                    flash("Problème de requests : {0}".format(e.message), 'error')
+                except FileNotFoundError:
+                    flash("Aucun résultat trouvé", 'error')
+                except Exception as e:
+                    flash("Erreur : {0}".format(e.message), 'error')
+
+            else:
+                return render_template('developpement.html')
+
+    return render_template('developpement.html')
+
+
+# @app.route("/developpement/results", methods=['POST'])
+# def show_results(results):
+#     """
+#     Show the search results
+#     :param results: the data send by the db_dev_api containing the results of the search
+#     :type results: [dict]
+#     """
+#     try:
+#
+#     except:
+#         render_template('developpement.html')
+
+
 @app.route('/<app_name>/<filename>/', methods=['GET', 'POST'])
 def download(app_name, filename):
     filename, _type = decode_str_filename(filename)
@@ -235,7 +281,5 @@ def purge(app_name):
     return redirect(url_for(app_name))
 
 
-application = DispatcherMiddleware(app, {
-    '/dev': db_app
-})
+
 
