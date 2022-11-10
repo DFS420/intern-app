@@ -111,3 +111,11 @@ def get_items_from_file(filename):
     else:
         return []
 
+
+def get_items_from_json(filename):
+    if os.path.exists(filename):
+        with open('data.json') as json_file:
+            data = json.load(json_file)
+
+        return data
+
