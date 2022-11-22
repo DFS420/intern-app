@@ -67,8 +67,6 @@ def get(request: Getter):
 
     type_query = Query().type == entry['type']
 
-
-    print(entry)
     if 'tags' in entry.keys():
         if ls == 'all':
             return db.search((Query().tags.all(entry['tags'])) & type_query)
@@ -79,3 +77,15 @@ def get(request: Getter):
     else:
         return db.search(Query().fragment(entry))
 
+
+def get_data(**kwargs):
+    return db.search(Query().fragment(kwargs))
+
+
+def get_metadata():
+    return {
+        "PROJECT": get_data(type='project'),
+        "PERSON": get_data(type='person'),
+        "NB_PROJECT": len(get_data(type='project')),
+        "NB_PERSON": len(get_data(type='person'))
+    }
