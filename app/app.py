@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os, secrets, re, requests
+from requests import ReadTimeout, ConnectTimeout, HTTPError, Timeout, ConnectionError
 
 import jinja2.exceptions
 from flask import Flask, render_template, request, redirect, url_for, abort, Response, flash, send_from_directory
@@ -7,13 +8,11 @@ from werkzeug.utils import secure_filename
 from .utils import eep_traitement as eep
 from .utils import eepower_utils as eeu
 from .utils.File import validate_file_epow as validate, get_uploads_files, purge_file, full_paths, \
-    create_dir_if_dont_exist as create_dir, zip_files, decode_str_filename, add_to_list_file, get_items_from_file, \
-    get_items_from_json
+    create_dir_if_dont_exist as create_dir, zip_files, decode_str_filename, add_to_list_file, get_items_from_file
 from .linepole.KMLHandler import KMLHandler
 from .linepole import settings as kml_settings
 
-from .utils.db_dev_api import get_number, get
-from werkzeug.middleware.dispatcher import DispatcherMiddleware
+from .utils.db_dev_api import get_metadata
 
 
 app = Flask(__name__)
@@ -35,15 +34,6 @@ eep_data = {"BUS_EXCLUS": get_items_from_file(BUSES_FILE),
             "FILE_NAMES": [],
             "SCENARIOS": [],
             "NB_SCEN": 0}
-
-#ENTRY_FILES = os.path.join(app.config['UPLOAD_PATH_DEV'], r'entry_query')
-db_data = {"SEARCH_ENTRY": {},#get_items_from_json(ENTRY_FILES),
-            "FILE_PATHS": [],
-            "FILE_NAMES": [],
-            "NB_PROJECT": get_number('project'),
-            "NB_PERSON": get_number('person')}
-
-
 
 
 @app.route('/')
@@ -226,13 +216,18 @@ def linepole_generator():
     return render_template('linepole.html', uploaded_files=uploaded_files, file_ready=0, file_submit=0, loader=0)
 
 
-@app.route('/developpement', methods=['GET', 'POST'])
-def developpement_search():
+@app.route('/developpement/')
+def developpement():
+    return render_template('dev_menu.html')
+
+
+@app.route('/search/<type>/', methods=['GET', 'POST'])
+def developpement_search(type):
     if request.method == 'POST':
         if request.form['btn_id'] == 'chercher_tags':
             if request.form['tag'] != '':
                 tags = re.split(r"\W+\s*|\s+", request.form['tag'])
-                data = {'tags': tags, "list_search": request.form['list_search'], "type":"project"}
+                data = {'tags': tags, "list_search": request.form['list_search'], "type": type}
                 try:
                     results = requests.get("http://localhost:5000/dev/GET", json=data).json()
                     if not results:
@@ -246,22 +241,38 @@ def developpement_search():
                     flash("Erreur : {0}".format(e.message), 'error')
 
             else:
-                return render_template('developpement.html')
+                return render_template('search_project.html')
 
-    return render_template('developpement.html')
+    return render_template('search_project.html')
 
 
-# @app.route("/developpement/results", methods=['POST'])
-# def show_results(results):
-#     """
-#     Show the search results
-#     :param results: the data send by the db_dev_api containing the results of the search
-#     :type results: [dict]
-#     """
-#     try:
-#
-#     except:
-#         render_template('developpement.html')
+@app.route("/new_entry/", methods=['GET', 'POST'])
+def developpement_add():
+    """
+    Add entry to the dev database
+    """
+    metadata = get_metadata()
+    if request.method == 'POST':
+        if request.form.get("save_project", False):
+            data = dict(request.form)
+            data["tags"] = re.split(r"\W+\s*|\s+", request.form['project_tags'])
+            data["participants"] = request.form.getlist('participants')
+            data["associate"] = request.form.getlist('associate')
+            data["type"] = 'project'
+            data["body"] = data["project_body"]
+
+            try:
+                results = requests.get("http://localhost:5000/dev/project/ADD", json=data)
+                flash("Projet enregistré : entrée n°{0}".format(results.text[1:].split(',')[0]), category='info')
+            except (ConnectTimeout, HTTPError, ReadTimeout, Timeout, ConnectionError) as e:
+                # todo: comprendre pourquoi Connection error a lieu de http erro
+                flash("Problème lors de la création de l'entrée : {0}".format(e), category='error')
+                return redirect(url_for("developpement_add"))
+
+            return redirect(url_for("developpement_add"))
+
+    return render_template('add_entry.html', persons=metadata['PERSON'], nb_person=metadata['NB_PERSON'],
+                           projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'])
 
 
 @app.route('/<app_name>/<filename>/', methods=['GET', 'POST'])
@@ -280,6 +291,10 @@ def purge(app_name):
     purge_file(os.path.join(app.config['GENERATED_PATH'], app_name))
     return redirect(url_for(app_name))
 
+
+@app.errorhandler(Exception)
+def basic_error(e):
+    return "an error occured: " + str(e)
 
 
 

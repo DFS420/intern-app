@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../static/css/style.css/?id">
+    <title>Ajouter une entrée</title>
+</head>
+
+<body>
+{% include "header.html" %}
+
+<div id="bloc_page">
+    {% include "nav_barre.html" %}
+
+    <div id="contenu">
+
+        <section id="intro">
+            <p>
+                Bienvenue sur l'outil d'aide au développement de 3E ing !<br/>
+
+            </p>
+            <section id="numb_entry">
+                <p>
+                    La base de données comporte actuellement <em>{{nb_project}}</em> projets et
+                    <em>{{nb_person}}</em> personnes.
+                </p>
+            </section>
+
+
+            <div id="message">
+                        {% with messages = get_flashed_messages() %}
+                            {% if messages %}
+                                <ul class=flashes>
+                                    {% for message in messages %}
+                                        <em>{{ message }}</em>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        {% endwith %}
+            </div>
+
+
+        <form method="POST">
+            <fieldset>
+                <legend>Projet</legend>
+
+                <div class="form-control">
+                    <label for="language">Langue</label>
+                    <input type="radio" id="language" name="language" value="fr" checked="true"> Français
+                    <input type="radio" id="language" name="language" value="en"> Anglais
+                </div>
+
+                <div class="form-control">
+                    <label for="title">Nom*</label>
+                    <input type="text" id="title" name="title" placeholder="Entrer le nom du projet" required/>
+                </div>
+
+                <div class="form-control">
+                    <label for="country">Pays*</label>
+                    <input type="text" id="country" name="country" placeholder="Entrer le pays où s'est déroulé le projet"
+                           required/>
+                </div>
+
+                <div class="form-control">
+                    <label for="location">Localité</label>
+                    <input
+                            type="text"
+                            id="location"
+                            name="location"
+                            placeholder="Entrer la localité ou le lieu où s'est déroulé le projet"
+                    />
+                </div>
+
+                <div class="form-control">
+                    <label for="client">Client*</label>
+                    <input
+                            type="text"
+                            id="client"
+                            name="client"
+                            placeholder="Entrer le nom du client ou de la compagnie"
+                            required
+                    />
+                </div>
+
+                <div class="form-control">
+                    <label for="client_address">Adresse du client</label>
+                    <input
+                            type="text"
+                            id="client_address"
+                            name="client_address"
+                            placeholder="Entrer l'adresse du client ou de la compagnie"
+                    />
+                </div>
+
+                <div class="form-control">
+                    <label for="founder">Bailleur de fond</label>
+                    <input
+                            type="text"
+                            id="founder"
+                            name="founder"
+                            placeholder="Entrer le nom du bailleur de fond"
+                    />
+                </div>
+
+                <div class="form-control">
+                    <label for="contract_value">Valeur du contrat*</label>
+                    <input
+                            type="number"
+                            id="contract_value"
+                            name="contract_value"
+                            placeholder="Entrer le montant total du contrat"
+                            min="0"
+                            required
+                    />
+                </div>
+
+                <div class="form-control">
+                    <label for="service_value">Valeur du service*</label>
+                    <input
+                            type="number"
+                            id="service_value"
+                            name="service_value"
+                            placeholder="Entrer le montant que l'on nous a octroyé pour le service"
+                            min="0"
+                            required
+                    />
+                </div>
+
+                <div class="form-control">
+                    <label for="start_date">Date de début du projet*</label>
+                    <input
+                            type="date"
+                            id="start_date"
+                            name="start_date"
+                            required
+                    />
+                </div>
+
+                <div class="form-control">
+                    <label for="stop_date">Date de fin du projet*</label>
+                    <input
+                            type="date"
+                            id="stop_date"
+                            name="stop_date"
+                            required
+                    />
+                </div>
+
+                <div class="form-control">
+                    <label for="participants">Choisir les participants ayant travaillés sur ce projet:</label> </br>
+                    <select name="participants" id="participants" multiple>
+                        {% for person in persons %}
+                            <option value="{{ person['name'] }}"> {{ person['name'] }} </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-control">
+                    <label for="staff_month">Mois-Personne*</label>
+                    <input
+                            type="number"
+                            id="staff_month"
+                            name="staff_month"
+                            placeholder="Entrer le nombre de mois-personne"
+                            min="0"
+                            required
+                    />
+                </div>
+
+                <div class="form-control">
+                    <label for="associate">Choisir les associés ayant travaillé sur ce projet:</label> </br>
+
+                    <select name="associate" id="associate" multiple>
+                        {% for person in persons %}
+                            <option value="{{ person['name'] }}"> {{ person['name'] }} </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-control">
+                    <label for="associate_month">Mois-Personne pour associés</label>
+                    <input
+                            type="number"
+                            id="associate_month"
+                            name="associate_month"
+                            placeholder="Entrer le nombre de mois-personne pour les associés"
+                            min="0"
+                    />
+                </div>
+
+
+                <div class="form-control">
+                    <label for="project_tags">Mots-clefs (tags)*</label>
+                    <input
+                            type="text"
+                            id="project_tags"
+                            name="project_tags"
+                            placeholder="Entrer des mots clefs séparés par une virgule (ex: électrification, hydro, etc.)"
+                            required
+                    />
+                </div>
+
+                <div class="form-control">
+                    <label for="abstract">Résumé du projet*</label>
+                    <textarea
+                            id="abstract"
+                            name="abstract"
+                            cols="30"
+                            rows="5"
+                            placeholder="Entrer le résumé du projet"
+                            required
+                    ></textarea>
+                </div>
+
+                <div class="form-control">
+                    <label for="project_body">Présentation du projet*</label>
+                    <textarea
+                            id="project_body"
+                            name="project_body"
+                            cols="30"
+                            rows="10"
+                            placeholder="Entrer la description du projet"
+                            required
+                    ></textarea>
+                </div>
+
+                <div class="form-control">
+                    <label for="custom_entry_keyword">Entrée(s) libre(s)</label>
+                    <input
+                            type="text"
+                            id="custom_entry_keyword"
+                            name="custom_entry_keyword"
+                            placeholder="Entrer les noms de champs personnalisés séparés par des virgules (ex: 'Sous-région', 'employé local')"
+                    />
+                </div>
+
+                <div class="form-control">
+                    <label for="custom_entry_value">Entrée(s) libre(s)</label>
+                    <input
+                            type="text"
+                            id="custom_entry_value"
+                            name="custom_entry_value"
+                            placeholder="Entrer les noms de valeurs des champs personnalisés correspondant aux mots clefs respectivement séparés par des virgules (ex: 'Beauce', 'Marc Arcand')"
+                    />
+                </div>
+
+                <br/>
+                <br/>
+
+                    <p><input type="submit" value="Enregistrer projet", name="save_project"></p>
+
+            </fieldset>
+        </form>
+
+
+
+
+
+        <form method="post">
+            <fieldset>
+                <legend>Personne</legend>
+                <div class="form-control">
+                    <label for="name">Nom*</label>
+                    <input type="text" id="name" name="name" placeholder="Entrer le nom de la personne" required/>
+                </div>
+
+                <div class="form-control">
+                    <label for="email">Courriel*</label>
+                    <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="Entrer le courriel de la personne"
+                            required
+                    />
+                </div>
+
+                <div class="form-control">
+                    <label for="tel">Téléphone</label>
+                    <input
+                            type="tel"
+                            id="tel"
+                            name="tel"
+                            placeholder="Entrer le téléphone de la personne"
+                    />
+                </div>
+
+                <div class="form-control">
+                    <label for="company">Companie*</label>
+                    <input
+                            type="company"
+                            id="company"
+                            name="company"
+                            placeholder="Entrer le nom de la compagnie auquel appartient la personne"
+                            required
+                    />
+                </div>
+
+                <div class="form-control">
+                    <label for="person_tags">Mots-clefs (tags)*</label>
+                    <input
+                            type="tags"
+                            id="person_tags"
+                            name="person_tags"
+                            placeholder="Entrer des mots clefs séparés par une virgule (ex: électrification, hydro, etc.)"
+                            required
+                    />
+                </div>
+
+                <div class="form-control">
+                    <label for="associate_project">Choisir les projets sur lesquels la personne a travaillé:</label> </br>
+                    <select name="associate_project" id="associate_project" multiple>
+                        {% for project in projects %}
+                            <option value="{{ project['name'] }}"> {{ project['name'] }} </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+
+                <div class="form-control">
+                    <label for="person_body">Présentation de la personne</label>
+                    <textarea
+                            id="person_body"
+                            name="person_body"
+                            cols="30"
+                            rows="10"
+                            placeholder="Entrer la description de la personne, ses projets passés, ses employeurs, etc."
+                            required
+                    ></textarea>
+                </div>
+
+                <input type="submit" value="Enregister personne" class="submit-btn"/>
+            </fieldset>
+        </form>
+
+
+
+
+    </div>
+
+</div>
+</body>
+
+</html>
