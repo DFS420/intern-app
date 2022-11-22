@@ -10,13 +10,27 @@ class Project(BaseModel):
     """
     title: str
     language = 'fr'
-    client: str
-    founder = ''
     start_date: str
     stop_date: str
-    tags: List[str] = []
-    body: str
+
+    country: str
+    location: str = ''
+    client: str
+    client_address: str = ''
+    founder = ''
+
+    contract_value: int = 0
+    service_value: int = 0
+
     participants: List[str] = []
+    staff_month: int = 0
+    associate: List[str] = []
+    associate_staff_month: int = 0
+
+    tags: List[str] = []
+    abstract: str
+    body: str
+
     type = 'project'
 
 
@@ -38,6 +52,8 @@ class Person(BaseModel):
     second_name = ''
     company: str
     language = 'fr'
+    tel: str = ''
+    email: str
     body: str
     tags: List[str] = []
     project: List[str] = []
@@ -51,7 +67,6 @@ class Getter(BaseModel):
     list_search: str = 'any'
     type: str = 'project'
     body: str = ''
-    type = 'project'
 
     #section for project search
     title: str = ''
@@ -72,5 +87,5 @@ class Getter(BaseModel):
     @validator('list_search')
     def list_search_all_or_any(v):
         if v not in ['all', 'any', 'one_of']:
-            raise ValueError("Must be 'any' or 'all'")
+            raise ValueError("Must be 'any' 'all' or 'one_of'")
         return v
