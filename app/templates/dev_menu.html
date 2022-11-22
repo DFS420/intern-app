@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../static/css/style.css/?id">
+        <title>Menu outil de développement</title>
+    </head>
+
+    <body>
+        {% include "header.html" %}
+
+        <div id="bloc_page">
+            {% include "nav_barre.html" %}
+
+            <div id="contenu">
+
+                <h2>Menu des outils d'interaction avec la base de donnée</h2>
+
+                <li><a href="/search/project">Recherche de projet</a></li>
+                <li><a href="/search/person">Recherche de personne</a></li>
+                <li><a href="/new_entry">Ajout de projet et de personnes</a></li>
+
+
+            </div>
+
+        </div>
+    </body>
+
+</html>
