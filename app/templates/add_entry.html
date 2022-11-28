@@ -50,6 +50,8 @@
                     <input type="radio" id="language" name="language" value="en"> Anglais
                 </div>
 
+                <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
+
                 <div class="form-control">
                     <label for="title">Nom*</label>
                     <input type="text" id="title" name="title" placeholder="Entrer le nom du projet" required/>
@@ -71,6 +73,8 @@
                     />
                 </div>
 
+                <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
+
                 <div class="form-control">
                     <label for="client">Client*</label>
                     <input
@@ -91,6 +95,8 @@
                             placeholder="Entrer l'adresse du client ou de la compagnie"
                     />
                 </div>
+
+                <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
 
                 <div class="form-control">
                     <label for="founder">Bailleur de fond</label>
@@ -126,6 +132,8 @@
                     />
                 </div>
 
+                <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
+
                 <div class="form-control">
                     <label for="start_date">Date de début du projet*</label>
                     <input
@@ -146,9 +154,29 @@
                     />
                 </div>
 
+                <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
+
                 <div class="form-control">
-                    <label for="participants">Choisir les participants ayant travaillés sur ce projet:</label> </br>
-                    <select name="participants" id="participants" multiple>
+                    <label for="leader">Choisir les participant-es leader ayant travaillé-es sur ce projet:</label> </br>
+                    <select name="leader" id="leader" multiple>
+                        {% for person in persons %}
+                            <option value="{{ person['name'] }}"> {{ person['name'] }} </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-control">
+                    <label for="expert">Choisir les participant-es expert-es ayant travaillé-es sur ce projet:</label> </br>
+                    <select name="expert" id="expert" multiple>
+                        {% for person in persons %}
+                            <option value="{{ person['name'] }}"> {{ person['name'] }} </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-control">
+                    <label for="other">Choisir les participant-es autre-s ayant travaillé-es sur ce projet:</label> </br>
+                    <select name="other" id="other" multiple>
                         {% for person in persons %}
                             <option value="{{ person['name'] }}"> {{ person['name'] }} </option>
                         {% endfor %}
@@ -166,6 +194,8 @@
                             required
                     />
                 </div>
+
+                <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
 
                 <div class="form-control">
                     <label for="associate">Choisir les associés ayant travaillé sur ce projet:</label> </br>
@@ -188,6 +218,7 @@
                     />
                 </div>
 
+                <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
 
                 <div class="form-control">
                     <label for="project_tags">Mots-clefs (tags)*</label>
@@ -223,6 +254,8 @@
                             required
                     ></textarea>
                 </div>
+
+                <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
 
                 <div class="form-control">
                     <label for="custom_entry_keyword">Entrée(s) libre(s)</label>
