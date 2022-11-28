@@ -9,7 +9,7 @@ db = TinyDB('developpement_db.json')
 
 
 def is_duplicate(data):
-    if db.search(Query().body == data['body']):
+    if db.search(Query().body == data['body'] or Query().title == data['title']):
         return True
     else:
         return False
@@ -78,6 +78,19 @@ def get(request: Getter):
         return db.search(Query().fragment(entry))
 
 
+@app.get('/dev/edit')
+def edit(request: Getter):
+    ls = request.list_search
+    entry = {}
+    for k, v in request:
+        if v != '' and v != [] and k != 'list_search':
+            entry[k] = v
+    if entry['type'] == 'projet':
+        db.upsert(entry, Query().title == entry['title'])
+    else:
+        db.upsert(entry, Query().name == entry['name'])
+
+
 def get_data(**kwargs):
     return db.search(Query().fragment(kwargs))
 
@@ -89,3 +102,5 @@ def get_metadata():
         "NB_PROJECT": len(get_data(type='project')),
         "NB_PERSON": len(get_data(type='person'))
     }
+
+
