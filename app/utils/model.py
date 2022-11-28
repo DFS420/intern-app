@@ -1,7 +1,7 @@
 from pydantic import BaseModel, validator
 from datetime import datetime
 
-from typing import List
+from typing import List, Dict
 
 
 class Project(BaseModel):
@@ -22,7 +22,9 @@ class Project(BaseModel):
     contract_value: int = 0
     service_value: int = 0
 
-    participants: List[str] = []
+    leader: List[str] = []
+    expert: List[str] = []
+    other: List[str] = []
     staff_month: int = 0
     associate: List[str] = []
     associate_staff_month: int = 0
@@ -30,6 +32,8 @@ class Project(BaseModel):
     tags: List[str] = []
     abstract: str
     body: str
+
+    custom_entry: Dict = {}
 
     type = 'project'
 
@@ -65,23 +69,39 @@ class Getter(BaseModel):
     Define a query dict
     """
     list_search: str = 'any'
-    type: str = 'project'
+    type: str
     body: str = ''
+    tags: List[str] = []
 
     #section for project search
-    title: str = ''
-    language = ''
-    client: str = ''
+    title: str
+    start_date: str
+    stop_date: str
+
+    country: str
+    location: str = ''
+    client: str
+    client_address: str = ''
     founder = ''
-    start_date: str = ''
-    stop_date: str = ''
-    tags: List[str] = []
+
+    contract_value: int = 0
+    service_value: int = 0
+
     participants: List[str] = []
+    staff_month: int = 0
+    associate: List[str] = []
+    associate_staff_month: int = 0
+
+    abstract: str
+    body: str
 
     #section for person
-    name: str = ''
+    name: str
     second_name = ''
-    company: str = ''
+    company: str
+    tel: str = ''
+    email: str
+    body: str
     project: List[str] = []
 
     @validator('list_search')
