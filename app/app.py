@@ -251,15 +251,20 @@ def developpement_add():
     """
     Add entry to the dev database
     """
+    prefill = {}
     metadata = get_metadata()
     if request.method == 'POST':
         if request.form.get("save_project", False):
             data = dict(request.form)
             data["tags"] = re.split(r"\W+\s*|\s+", request.form['project_tags'])
-            data["participants"] = request.form.getlist('participants')
+            data["leader"] = request.form.getlist('leader')
+            data["expert"] = request.form.getlist('expert')
+            data["other"] = request.form.getlist('other')
             data["associate"] = request.form.getlist('associate')
             data["type"] = 'project'
             data["body"] = data["project_body"]
+            keys, values = re.split(r";", data['custom_entry_keyword']), re.split(r";", data['custom_entry_value'])
+            data['custom_entry'] = dict(zip(keys, values))
 
             try:
                 results = requests.get("http://localhost:5000/dev/project/ADD", json=data)
@@ -272,7 +277,7 @@ def developpement_add():
             return redirect(url_for("developpement_add"))
 
     return render_template('add_entry.html', persons=metadata['PERSON'], nb_person=metadata['NB_PERSON'],
-                           projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'])
+                           projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'], prefill=prefill)
 
 
 @app.route('/<app_name>/<filename>/', methods=['GET', 'POST'])
