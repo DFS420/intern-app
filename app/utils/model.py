@@ -74,11 +74,11 @@ class Getter(BaseModel):
     tags: List[str] = []
 
     #section for project search
-    title: str
-    start_date: str
-    stop_date: str
+    title: str = ''
+    start_date: str = ''
+    stop_date: str = ''
 
-    country: str
+    country: str = ''
     location: str = ''
     client: str
     client_address: str = ''
@@ -92,16 +92,14 @@ class Getter(BaseModel):
     associate: List[str] = []
     associate_staff_month: int = 0
 
-    abstract: str
-    body: str
+    abstract: str = ''
 
     #section for person
-    name: str
+    name: str = ''
     second_name = ''
-    company: str
+    company: str = ''
     tel: str = ''
-    email: str
-    body: str
+    email: str = ''
     project: List[str] = []
 
     @validator('list_search')
