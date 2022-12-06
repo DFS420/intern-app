@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="fr">
-    <head>
-        <meta charset="UTF-8">
-        <link rel="stylesheet" href="../static/css/style.css/?id">
-        <title>Outil de développement</title>
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../static/css/style.css">
+    <title>Chercher des projets</title>
+</head>
 
     <body>
         {% include "header.html" %}
@@ -19,6 +19,8 @@
                     Bienvenue sur l'outil d'aide au développement de 3E ing !<br/>
 
                 </p>
+
+                </section>
                 <section id="numb_entry">
                     <p>
                         La base de données comporte actuellement <em>{{nb_project}}</em> projets et
@@ -27,7 +29,7 @@
                 </section>
 
                 <section id="lecture_db">
-                    <h2>Recherche de projet</h2>
+                    <h2>Recherche d'entrées</h2>
 
                     Vous pouvez préciser ici les différents éléments recherchés (tags, noms, etc.) <br/>
                     Par exemple : <br/> <br>
@@ -40,126 +42,18 @@
                     ressortent ou l'option <cite>N'importe</cite> pour que les entrées comportant au moins un des tags
                     ressortent. <br/> <br>
 
-                    Ou tapez le nom de la compagnie, d'une personne, ou autre vous cherchez dans la barre de recherche
-                    correspondante. <br/> <br/>
+                    Ou rentrez des informations, d'un projet, d'une personne, ou autre et cliquez sur <em>Charger projet</em>
+                    pour préremplir les cases en fonction des informations stockées. Vous pourrez ensuite cliquez sur modifier
+                    si vous désirez mettre à jour en fonction de ce qui est écrit dans les cases. </br>
+
+                    Cliquez sur <em>Afficher projet en JSON </em> pour l'afficher en brut.
 
                     <br/> <br/>
 
-                    <div id="get_language">
-                        <form method="POST">
-                            <p>
-                                <label> Langue : </label>
-                                <input type="hidden" name="btn_id" value="select_language">
-                                <input type="radio" name="language" value="fr" checked="true"> Français
-                                <input type="radio" name="language" value="en"> Anglais
-                            </p>
-                        </form>
-                    </div>
-
-                    <br>
+                </section>
 
 
-                    <div id="get_tags">
-                        <form method="POST">
-                            <p>
-                                <label for="tags">Tags : </label>
-                                <input type="text" name="tag" id="tag" placeholder="Ex : électrification" size="30" maxlength="1000" />
-                                <input type="submit" value="Chercher">
-                                <input type="hidden" name="btn_id" value="chercher_tags">
-                                <input type="radio" name="list_search" value="all"> Tous
-                                <input type="radio" name="list_search" value="any" checked="true"> N'importe
-                                <input type="radio" name="list_search" value="one_of"> Un de ceux-là
-                            </p>
-                        </form>
-                    </div>
-
-                    <div>
-                        <ul id="list_tags">
-                            {% for tag in tags %}
-                                <li>{{tag}}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-
-                    <div id="get_title">
-                        <form method="POST">
-                            <p>
-                                <label for="title">Titres : </label>
-                                <input type="text" name="title" id="title" size="30" maxlength="100" />
-                                <input type="submit" value="Chercher">
-                                <input type="hidden" name="btn_id" value="chercher_titre">
-                            </p>
-                        </form>
-                    </div>
-
-                    <div>
-                        <ul id="list_title">
-                            {% for title in titles %}
-                                <li>{{title}}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-
-                    <div id="get_client">
-                        <form method="POST">
-                            <p>
-                                <label for="client"> Client : </label>
-                                <input type="text" name="client" id="client" size="30" maxlength="100" />
-                                <input type="submit" value="Chercher">
-                                <input type="hidden" name="btn_id" value="chercher_client">
-                            </p>
-                        </form>
-                    </div>
-
-                    <div>
-                        <ul id="list_client">
-                            {% for client in clients %}
-                                <li>{{client}}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-
-                    <div id="get_founder">
-                        <form method="POST">
-                            <p>
-                                <label for="founder"> Bailleur de fonds : </label>
-                                <input type="text" name="founder" id="founder" size="30" maxlength="100" />
-                                <input type="submit" value="Chercher">
-                                <input type="hidden" name="btn_id" value="chercher_founder">
-                            </p>
-                        </form>
-                    </div>
-
-                    <div>
-                        <ul id="list_founder">
-                            {% for founder in founders %}
-                                <li>{{founder}}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-
-                    <div id="get_participant">
-                        <form method="POST">
-                            <p>
-                                <label for="participant"> Participant : </label>
-                                <input type="text" name="participant" id="participant" size="30" maxlength="100" />
-                                <input type="submit" value="Chercher">
-                                <input type="hidden" name="btn_id" value="chercher_participant">
-                            </p>
-                        </form>
-                    </div>
-
-                    <div>
-                        <ul id="list_participant">
-                            {% for participant in participants %}
-                                <li>{{participant}}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-
-                    <br/> <br/>
-
-                    <div id="message">
+                <div id="message">
                         {% with messages = get_flashed_messages() %}
                             {% if messages %}
                                 <ul class=flashes>
@@ -169,27 +63,331 @@
                                 </ul>
                             {% endif %}
                         {% endwith %}
-                    </div>
-
-                    <div id="bouton chercher">
-                        <form method="POST" action="">
-                            <p><input type="submit" value="Chercher"></p>
-                            <input type="hidden" name="btn_id" value="chercher">
-                        </form>
-                     </div>
+                </div>
 
 
-                    <div id="bouton reinit">
-                        <form method="POST" action="">
-                            <p><input type="submit" value="Réinitialiser"></p>
-                            <input type="hidden" name="btn_id" value="reinit">
-                        </form>
-                     </div>
+                <form method="POST">
+                    <fieldset>
+                        <legend>Projet</legend>
 
-                </section>
+                            <div class="form-control">
+                                <label for="language">Langue</label>
+                                <input type="radio" id="language" name="language" value="fr" {{ prefill['fr'] }}> Français
+                                <input type="radio"               name="language" value="en" {{ prefill['en'] }}> Anglais
+                            </div>
+
+                            <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
+
+                            <div class="form-control">
+                                <label for="title">Nom*</label>
+                                <input type="text" id="title" name="title" placeholder="Entrer le nom du projet"
+                                        value="{{ prefill['title'] }}"/>
+                                        <p>
+                                            <input type="submit" name="btn" value="Charger">
+                                        </p>
+                            </div>
+
+                            <div class="form-control">
+                                <label for="country">Pays</label>
+                                <input type="text" id="country" name="country" placeholder="Entrer le pays où s'est déroulé le projet"
+                                       value ="{{ prefill['country'] }}"/>
+                            </div>
+
+                            <div class="form-control">
+                                <label for="location">Localité</label>
+                                <input
+                                        type="text"
+                                        id="location"
+                                        name="location"
+                                        placeholder="Entrer la localité ou le lieu où s'est déroulé le projet"
+                                        value ="{{ prefill['location'] }}"
+                                />
+                            </div>
+
+                            <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
+
+                            <div class="form-control">
+                                <label for="client">Client</label>
+                                <input
+                                        type="text"
+                                        id="client"
+                                        name="client"
+                                        placeholder="Entrer le nom du client ou de la compagnie"
+                                        value ="{{ prefill['client'] }}"
+                                />
+                            </div>
+
+                            <div class="form-control">
+                                <label for="client_address">Adresse du client</label>
+                                <input
+                                        type="text"
+                                        id="client_address"
+                                        name="client_address"
+                                        placeholder="Entrer l'adresse du client ou de la compagnie"
+                                        value ="{{ prefill['client_address'] }}"
+                                />
+                            </div>
+
+                            <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
+
+                            <div class="form-control">
+                                <label for="founder">Bailleur de fond</label>
+                                <input
+                                        type="text"
+                                        id="founder"
+                                        name="founder"
+                                        placeholder="Entrer le nom du bailleur de fond"
+                                        value ="{{ prefill['founder'] }}"
+                                />
+                            </div>
+
+                            <div class="form-control">
+                                <label for="contract_value">Valeur du contrat</label>
+                                <input
+                                        type="number"
+                                        id="contract_value"
+                                        name="contract_value"
+                                        placeholder="Entrer le montant total du contrat"
+                                        min="0"
+                                        step="100"
+                                        value="{{ prefill['contract_value'] }}"
+                                />
+                            </div>
+
+                            <div class="form-control">
+                                <label for="service_value">Valeur du service</label>
+                                <input
+                                        type="number"
+                                        id="service_value"
+                                        name="service_value"
+                                        placeholder="Entrer le montant que l'on nous a octroyé pour le service"
+                                        min="0"
+                                        step="100"
+                                        value="{{ prefill['service_value'] }}"
+                                />
+                            </div>
+
+                            <div class="form-control">
+                                <label for="currency">Monnaie</label>
+                                <input type="radio" id="currency" name="currency" value="EUR" {{ prefill['EUR'] }}> €
+                                <input type="radio"               name="currency" value="CAD" {{ prefill['CAD'] }}> $ CAD
+                                <input type="radio"               name="currency" value="USD" {{ prefill['USD'] }}> $ US
+
+                            </div>
+
+
+                            <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
+
+                            <div class="form-control">
+                                <label for="start_date">Date de début du projet</label>
+                                <input
+                                        type="month"
+                                        id="start_date"
+                                        name="start_date"
+                                        value="{{ prefill['start_date'] }}"
+                                />
+                            </div>
+
+                            <div class="form-control">
+                                <label for="stop_date">Date de fin du projet</label>
+                                <input
+                                        type="month"
+                                        id="stop_date"
+                                        name="stop_date"
+                                        value="{{ prefill['stop_date'] }}"
+                                />
+                            </div>
+
+                            <div class="form-control">
+                                <label for="duration">Durée du projet</label>
+                                <input
+                                        type="int"
+                                        id="duration"
+                                        name="duration"
+                                        value="{{ prefill['duration'] }}"
+                                />
+                            </div>
+
+
+                            <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
+
+                            <div class="form-control">
+                                <label for="leader">Choisir les participant-es leader ayant travaillé-es sur ce projet:</label> </br>
+                                <select name="leader" id="leader" multiple>
+                                    {% for person in persons %}
+                                        <option value="{{ person['name'] }}"
+                                                {% if prefill['leader'] %}
+                                                    {% if person in prefill['leader'] %}
+                                                        selected
+                                                    {% endif %}
+                                                {% endif %}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="form-control">
+                                <label for="expert">Choisir les participant-es expert-es ayant travaillé-es sur ce projet:</label> </br>
+                                <select name="expert" id="expert" multiple>
+                                    {% for person in persons %}
+                                        <option value="{{ person['name'] }}"
+                                                {% if prefill['expert'] %}
+                                                    {% if person in prefill['expert'] %}
+                                                        selected
+                                                    {% endif %}
+                                                {% endif %}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="form-control">
+                                <label for="other">Choisir les participant-es autre-s ayant travaillé-es sur ce projet:</label> </br>
+                                <select name="other" id="other" multiple>
+                                    {% for person in persons %}
+                                        <option value="{{ person['name'] }}"
+                                                {% if prefill['other'] %}
+                                                    {% if person in prefill['other'] %}
+                                                        selected
+                                                    {% endif %}
+                                                {% endif %}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="form-control">
+                                <label for="staff_month">Mois-Personne</label>
+                                <input
+                                        type="number"
+                                        id="staff_month"
+                                        name="staff_month"
+                                        placeholder="Entrer le nombre de mois-personne"
+                                        min="0"
+                                        value="{{ prefill['staff_month'] }}"
+                                />
+                            </div>
+
+                            <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
+
+                            <div class="form-control">
+                                <label for="associate">Choisir les associés ayant travaillé sur ce projet:</label> </br>
+
+                                <select name="associate" id="associate" multiple>
+                                    {% for person in persons %}
+                                        <option value="{{ person['name'] }}"
+                                                {% if prefill['associate'] %}
+                                                    {% if person in prefill['associate'] %}
+                                                        selected
+                                                    {% endif %}
+                                                {% endif %}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="form-control">
+                                <label for="associate_month">Mois-Personne pour associés</label>
+                                <input
+                                        type="number"
+                                        id="associate_month"
+                                        name="associate_month"
+                                        placeholder="Entrer le nombre de mois-personne pour les associés"
+                                        min="0"
+                                        value="{{ prefill['associate_month'] }}"
+                                />
+                            </div>
+
+                            <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
+
+                            <div class="form-control">
+                                <label for="project_tags">Mots-clefs (tags)</label>
+                                <input
+                                        type="text"
+                                        id="project_tags"
+                                        name="project_tags"
+                                        placeholder="Entrer des mots clefs séparés par une virgule (ex: électrification, hydro, etc.)"
+                                        value="{{ prefill['tags'] }}"
+                                />
+                            </div>
+
+                            <div class="form-control">
+                                <label for="abstract">Résumé du projet</label>
+                                <textarea
+                                        id="abstract"
+                                        name="abstract"
+                                        cols="30"
+                                        rows="5"
+                                        placeholder="Entrer le résumé du projet"
+                                >{{ prefill['abstract'] }}</textarea>
+                            </div>
+
+                            <div class="form-control">
+                                <label for="project_body">Présentation du projet</label>
+                                <textarea
+                                        id="project_body"
+                                        name="project_body"
+                                        cols="30"
+                                        rows="10"
+                                        placeholder="Entrer la description du projet"
+
+                                >{{ prefill['body'] }}</textarea>
+                            </div>
+
+                            <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
+
+                            <div class="form-control">
+                                <label for="custom_entry_keyword">Entrée(s) libre(s)</label>
+                                <input
+                                        type="text"
+                                        id="custom_entry_keyword"
+                                        name="custom_entry_keyword"
+                                        placeholder="Entrer les noms de champs personnalisés séparés par des virgules (ex: 'Sous-région', 'employé local')"
+                                        value="{{ prefill['custom_entry_keyword'] }}"
+                                />
+                            </div>
+
+                            <div class="form-control">
+                                <label for="custom_entry_value">Entrée(s) libre(s)</label>
+                                <input
+                                        type="text"
+                                        id="custom_entry_value"
+                                        name="custom_entry_value"
+                                        placeholder="Entrer les noms de valeurs des champs personnalisés correspondant aux mots clefs respectivement séparés par des virgules (ex: 'Beauce', 'Marc Arcand')"
+                                        value="{{ prefill['custom_entry_value'] }}"
+                                />
+                            </div>
+
+                            <br/>
+                            <br/>
+
+                            <p>
+                                <input type="submit" name="btn" value="Modifier">
+                            </p>
+
+                    </fieldset>
+                </form>
+
+                <form method="POST">
+                    <fieldset>
+                        <legend>Recherche par mots clefs</legend>
+                            <div class="form-control">
+                                <label for="project_tags_searched">Mots-clefs (tags)</label>
+                                <p>
+                                    <input type="text" name="project_tags_searched" id="project_tags_searched" placeholder="Ex : électrification" size="30" maxlength="1000" />
+                                    <input type="submit" name="btn" value="Chercher">
+                                    <input type="hidden" name="btn_id" value="search_tag">
+                                    <input type="radio" name="list_search" value="all"> Tous
+                                    <input type="radio" name="list_search" value="any" checked="true"> N'importe
+                                    <input type="radio" name="list_search" value="one_of"> Un de ceux-là
+                                </p>
+                            </div>
+                    </fieldset>
+                </form>
+
+
 
             </div>
-
         </div>
     </body>
 

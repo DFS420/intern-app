@@ -5,11 +5,11 @@ from tinydb import TinyDB, Query
 
 app = FastAPI()
 
-db = TinyDB('developpement_db.json')
+DB = TinyDB('developpement_db.json')
 
 
 def is_duplicate(data):
-    if db.search(Query().body == data['body'] or Query().title == data['title']):
+    if DB.search(Query().body == data['body'] or Query().title == data['title']):
         return True
     else:
         return False
@@ -17,7 +17,7 @@ def is_duplicate(data):
 
 def get_number(search_type='project'):
     query = Query().type == search_type
-    return db.count(query)
+    return DB.count(query)
 
 
 @app.get("/dev")
@@ -32,7 +32,7 @@ def add_project(request: Project):
         project[k] = v
 
     if not is_duplicate(project):
-        entry_num = db.insert(project)
+        entry_num = DB.insert(project)
         return entry_num, 'New project added'
 
     else:
@@ -48,7 +48,7 @@ def add_person(request: Person):
         person[k] = v
 
     if not is_duplicate(person):
-        entry_num = db.insert(person)
+        entry_num = DB.insert(person)
         return entry_num, 'New person added'
 
     else:
@@ -69,33 +69,40 @@ def get(request: Getter):
 
     if 'tags' in entry.keys():
         if ls == 'all':
-            return db.search((Query().tags.all(entry['tags'])) & type_query)
+            return DB.search((Query().tags.all(entry['tags'])) & type_query)
         elif ls == 'any':
-            return db.search(Query().tags.any(entry['tags']) & type_query)
+            return DB.search(Query().tags.any(entry['tags']) & type_query)
         elif ls == 'one_of':
-            return db.search(Query().tags.one_of(entry['tags']) & type_query)
+            return DB.search(Query().tags.one_of(entry['tags']) & type_query)
     else:
-        return db.search(Query().fragment(entry))
+        return DB.search(Query().fragment(entry))
 
 
-@app.get('/dev/edit')
-def edit(request: Getter):
-    ls = request.list_search
+@app.get('/dev/edit/project')
+def edit(request: Project):
     entry = {}
     for k, v in request:
-        if v != '' and v != [] and k != 'list_search':
+        if v != '' and v != []:
             entry[k] = v
-    if entry['type'] == 'projet':
-        db.upsert(entry, Query().title == entry['title'])
-    else:
-        db.upsert(entry, Query().name == entry['name'])
+    return DB.upsert(entry, Query().title == entry['title'])
+
+
+@app.get('/dev/edit/person')
+def edit(request: Person):
+    entry = {}
+    for k, v in request:
+        if v != '' and v != []:
+            entry[k] = v
+
+    return DB.upsert(entry, Query().name == entry['name'])
 
 
 def get_data(**kwargs):
-    return db.search(Query().fragment(kwargs))
+    return DB.search(Query().fragment(kwargs))
 
 
 def get_metadata():
+    DB = TinyDB('developpement_db.json')
     return {
         "PROJECT": get_data(type='project'),
         "PERSON": get_data(type='person'),

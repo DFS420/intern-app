@@ -13,14 +13,15 @@ class Project(BaseModel):
     start_date: str
     stop_date: str
 
-    country: str
-    location: str = ''
+    country: List[str]
+    location: List[str] = []
     client: str
     client_address: str = ''
     founder = ''
 
     contract_value: int = 0
     service_value: int = 0
+    currency: str
 
     leader: List[str] = []
     expert: List[str] = []
@@ -72,35 +73,35 @@ class Getter(BaseModel):
     type: str
     body: str = ''
     tags: List[str] = []
-
-    #section for project search
+    #
+    # #section for project search
     title: str = ''
-    start_date: str = ''
-    stop_date: str = ''
-
-    country: str = ''
-    location: str = ''
-    client: str
-    client_address: str = ''
-    founder = ''
-
-    contract_value: int = 0
-    service_value: int = 0
-
-    participants: List[str] = []
-    staff_month: int = 0
-    associate: List[str] = []
-    associate_staff_month: int = 0
-
-    abstract: str = ''
-
-    #section for person
-    name: str = ''
-    second_name = ''
-    company: str = ''
-    tel: str = ''
-    email: str = ''
-    project: List[str] = []
+    # start_date: str = ''
+    # stop_date: str = ''
+    #
+    # country: str = ''
+    # location: str = ''
+    # client: str = ''
+    # client_address: str = ''
+    # founder = ''
+    #
+    # contract_value: int = 0
+    # service_value: int = 0
+    #
+    # participants: List[str] = []
+    # staff_month: int = 0
+    # associate: List[str] = []
+    # associate_staff_month: int = 0
+    #
+    # abstract: str = ''
+    #
+    # #section for person
+    # name: str = ''
+    # second_name = ''
+    # company: str = ''
+    # tel: str = ''
+    # email: str = ''
+    # project: List[str] = []
 
     @validator('list_search')
     def list_search_all_or_any(v):
