@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="../static/css/style.css/?id">
+    <link rel="stylesheet" href="../static/css/style.css/">
     <title>Ajouter une entrée</title>
 </head>
 
@@ -116,6 +116,7 @@
                             name="contract_value"
                             placeholder="Entrer le montant total du contrat"
                             min="0"
+                            step="100"
                             required
                     />
                 </div>
@@ -128,8 +129,16 @@
                             name="service_value"
                             placeholder="Entrer le montant que l'on nous a octroyé pour le service"
                             min="0"
+                            step="100"
                             required
                     />
+                </div>
+
+                <div class="form-control">
+                    <label for="currency">Monnaie</label>
+                    <input type="radio" id="currency" name="currency" value="€"> €
+                    <input type="radio"               name="currency" value="$ CAD" checked="true"> $ CAD
+                    <input type="radio"               name="currency" value="$ US"> $ US
                 </div>
 
                 <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
