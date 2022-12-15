@@ -47,7 +47,7 @@
                 <div class="form-control">
                     <label for="language">Langue</label>
                     <input type="radio" id="language" name="language" value="fr" checked="true"> Français
-                    <input type="radio" id="language" name="language" value="en"> Anglais
+                    <input type="radio"               name="language" value="en"> Anglais
                 </div>
 
                 <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
@@ -307,6 +307,28 @@
                 </div>
 
                 <div class="form-control">
+                    <label for="language">Langue</label>
+                    <input type="radio" id="language_person" name="language" value="fr" checked="true"> Français
+                    <input type="radio"               name="language" value="en"> Anglais
+                </div>
+
+                <div class="form-control">
+                    <label for="job">Poste*</label>
+                    <input type="text" id="job" name="job" placeholder="Entrer le titre du poste" required/>
+                </div>
+
+                <div class="form-control">
+                    <label for="birthday">Date de naissance*</label>
+                    <input
+                            type="date"
+                            id="birthday"
+                            name="birthday"
+                            required
+                    />
+                </div>
+
+
+                <div class="form-control">
                     <label for="email">Courriel*</label>
                     <input
                             type="email"
@@ -339,9 +361,20 @@
                 </div>
 
                 <div class="form-control">
+                    <label for="residency">Pays de résidence*</label>
+                    <input
+                            type="text"
+                            id="residency"
+                            name="residency"
+                            placeholder="Entrer le nom de la compagnie auquel appartient la personne"
+                            required
+                    />
+                </div>
+
+                <div class="form-control">
                     <label for="person_tags">Mots-clefs (tags)*</label>
                     <input
-                            type="tags"
+                            type="text"
                             id="person_tags"
                             name="person_tags"
                             placeholder="Entrer des mots clefs séparés par une virgule (ex: électrification, hydro, etc.)"
@@ -358,6 +391,7 @@
                     </select>
                 </div>
 
+                <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
 
                 <div class="form-control">
                     <label for="person_body">Présentation de la personne</label>
@@ -371,7 +405,90 @@
                     ></textarea>
                 </div>
 
-                <input type="submit" value="Enregister personne" class="submit-btn"/>
+                <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
+
+                <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+
+                <div class="form-control">
+                    <label for="experience">Expérience de la personne</label>
+                    <table id="experience" name="experience">
+                        <tr>
+                            <th>Date de départ</th>
+                            <th>Date de fin</th>
+                            <th>Nom de l’employeur</th>
+                            <th>Titre professionnel/poste</th>
+                            <th>Référence</th>
+                            <th>Pays</th>
+                            <th>Sommaire</th>
+                        </tr>
+                        {% for num_xp in range(1, max_xp) %}
+                        <tr>
+                            <td><input
+                                type="month"
+                                id="start_date_xp_{{ num_xp }}"
+                                name="start_date_xp_{{ num_xp }}"
+<!--                                value="{{ experience['start_date_xp'] }}"-->
+                                />
+                            </td>
+                            <td><input
+                                type="month"
+                                id="stop_date_xp_{{ num_xp }}"
+                                name="stop_date_xp_{{ num_xp }}"
+<!--                                value="{{ experience['stop_date_xp'] }}"-->
+                                />
+                            </td>
+                            <td><input
+                                type="text"
+                                id="employer_{{ num_xp }}"
+                                name="employer_{{ num_xp }}"
+<!--                                value="{{ experience['employer'] }}"-->
+                                />
+                            </td>
+                            <td><input
+                                type="text"
+                                id="job_title_{{ num_xp }}"
+                                name="job_title_{{ num_xp }}"
+<!--                                value="{{ experience['job_title'] }}"-->
+                                />
+                            </td>
+                            <td><input
+                                type="text"
+                                id="reference_{{ num_xp }}"
+                                name="reference_{{ num_xp }}"
+<!--                                value="{{ experience['reference'] }}"-->
+                                />
+                            </td>
+                            <td><input
+                                type="text"
+                                id="country_xp_{{ num_xp }}"
+                                name="country_xp_{{ num_xp }}"
+<!--                                value="{{ experience['country_xp'] }}"-->
+                                />
+                            </td>
+                            <td><input
+                                type="text"
+                                id="summary_xp_{{ num_xp }}"
+                                name="summary_xp_{{ num_xp }}"
+<!--                                value="{{ experience['summary_xp'] }}"-->
+                                />
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        <button onclick="add()"  href="#experience" formnovalidate="formnovalidate" >Ajouter</button>
+                        <button onclick="remove()" formnovalidate="formnovalidate" >Retirer</button>
+                        <input type="hidden" value="1" id="total_line">
+                    </table>
+
+<!--                    <input type="submit" value="Ajouter une expérience" name="add_xp" class="submit-btn"/>-->
+                </div>
+
+
+                </br>
+                <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
+                </br>
+
+                <input type="submit" value="Enregister personne" name="save_person" class="submit-btn"/>
             </fieldset>
         </form>
 
