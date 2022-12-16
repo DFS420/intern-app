@@ -26,6 +26,8 @@ app.config['UPLOAD_PATH_LP'] = create_dir(r'uploads/linepole_generator')
 app.config['GENERATED_PATH'] = create_dir(r'generated')
 app.config['CURRENT_OUTPUT_FILE'] = ''
 
+app.config['MAX_XP'] = 3
+
 app.config['UPLOAD_PATH_DEV'] = create_dir(r'uploads/developpement')
 
 BUSES_FILE = os.path.join(app.config['UPLOAD_PATH_EPOW'], r'bus_exclus')
@@ -223,20 +225,54 @@ def developpement():
     return render_template('dev_menu.html')
 
 
-@app.route('/search', methods=['GET', 'POST'])
-def developpement_search():
+@app.route("/new_entry/", methods=['GET', 'POST'])
+def developpement_add():
+    """
+    Add entry to the dev database
+    """
     metadata = get_metadata()
+    prefill = {'fr':  'checked', 'currency': 'CAD'}
     _type = request.args['type']
-    prefill = {}
-
-    if _type == "project":
-        page = "search_project.html"
-    elif _type == "person":
-        page = "search_person.html"
+    page = 'add_entry.html'
 
     if request.method == 'POST':
-        if request.form['btn'] == 'Chercher':
-            tags_raw = '{0}_tags_searched'.format(_type)
+        if request.form.get('save', False):
+            data = prep_data_for_db(request.form, _type)
+
+            try:
+                results = requests.get("{0}dev/{1}/ADD".format(request.host_url, _type), json=data)
+                if results.status_code == 200:
+                    flash("Entrée enregistrée : entrée n°{0}".format(results.text[1:].split(',')[0]), category='info')
+                else:
+                    flash("Problème lors de la création de l'entrée : {0}".format(str(results.content)), category='error')
+            except (ConnectTimeout, HTTPError, ReadTimeout, Timeout, ConnectionError) as e:
+                # todo: comprendre pourquoi Connection error a lieu de http error
+                flash("Problème lors de la création de l'entrée : {0}".format(e), category='error')
+                return redirect(url_for("developpement_add") + '?type=' + _type)
+
+            return redirect(url_for("developpement_add") + '?type=' + _type)
+
+        elif request.form.get('load', False):
+            data = {'name': request.form['name'], 'type': _type}
+            try:
+                response = requests.get("{0}dev/GET".format(request.host_url), json=data).json()
+                if not response:
+                    raise FileNotFoundError
+                prefill = prefill_prep(response[0], _type)
+                return render_template(page, persons=metadata['PERSON'], nb_person=metadata['NB_PERSON'],
+                                       projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'],
+                                       prefill=prefill, _type=_type, max_xp=app.config['MAX_XP'])
+            except AttributeError as e:
+                flash("Problème de requests : {0}".format(e), 'error')
+            except FileNotFoundError:
+                flash("Aucun résultat trouvé", 'error')
+            except Exception as e:
+                flash("Erreur : {0}".format(e), 'error')
+
+            return redirect(url_for("developpement_add"))
+
+        if request.form.get('tag_search', False):
+            tags_raw = 'tags_searched'
             if request.form[tags_raw] != '':
                 tags = re.split(r"\W+\s*|\s+", request.form[tags_raw])
                 data = {'tags': tags, "list_search": request.form['list_search'], "type": _type}
@@ -255,23 +291,7 @@ def developpement_search():
             else:
                 flash("Aucun tags soumis", 'error')
 
-        elif request.form['btn'] == 'Charger':
-            data = {'title': request.form['title'], 'type': _type}
-            try:
-                response = requests.get("{0}dev/GET".format(request.host_url), json=data).json()
-                if not response:
-                    raise FileNotFoundError
-                prefill = prefill_prep(response[0])
-                return render_template(page, persons=metadata['PERSON'], nb_person=metadata['NB_PERSON'],
-                                       projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'], prefill=prefill)
-            except AttributeError as e:
-                flash("Problème de requests : {0}".format(e), 'error')
-            except FileNotFoundError:
-                flash("Aucun résultat trouvé", 'error')
-            except Exception as e:
-                flash("Erreur : {0}".format(e), 'error')
-
-        elif request.form['btn'] == 'Modifier':
+        elif request.form.get('edit', False):
             data = prep_data_for_db(request.form, _type)
 
             try:
@@ -281,39 +301,26 @@ def developpement_search():
             except (ConnectTimeout, HTTPError, ReadTimeout, Timeout, ConnectionError) as e:
                 flash("Problème lors de la création de l'entrée : {0}".format(e), category='error')
 
+        elif request.form.get("add_xp", False):
+            app.config['MAX_XP'] += 1
+            prefill = prefill_prep(prep_data_for_db(request.form, _type), _type)
+            return render_template(page, persons=metadata['PERSON'], nb_person=metadata['NB_PERSON'],
+                                   projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'], prefill=prefill,
+                                   max_xp=app.config['MAX_XP'], _type=_type)
+
+        elif request.form.get("del_xp", False):
+            app.config['MAX_XP'] -= 1
+            prefill = prefill_prep(prep_data_for_db(request.form, _type), _type)
+            return render_template(page, persons=metadata['PERSON'], nb_person=metadata['NB_PERSON'],
+                                   projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'], prefill=prefill,
+                                   max_xp=app.config['MAX_XP'], _type=_type)
+
         else:
             flash("Bouton inconnu")
 
     return render_template(page, persons=metadata['PERSON'], nb_person=metadata['NB_PERSON'],
-                           projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'], prefill=prefill)
-
-
-@app.route("/new_entry/", methods=['GET', 'POST'])
-def developpement_add():
-    """
-    Add entry to the dev database
-    """
-    prefill = {}
-    metadata = get_metadata()
-    if request.method == 'POST':
-        if request.form.get("save_project", False):
-            data = prep_data_for_db(request.form, 'project')
-
-            try:
-                results = requests.get("{0}dev/project/ADD".format(request.host_url), json=data)
-                if results.status_code == 200:
-                    flash("Projet enregistré : entrée n°{0}".format(results.text[1:].split(',')[0]), category='info')
-                else:
-                    flash("Problème lors de la création de l'entrée", category='error')
-            except (ConnectTimeout, HTTPError, ReadTimeout, Timeout, ConnectionError) as e:
-                # todo: comprendre pourquoi Connection error a lieu de http error
-                flash("Problème lors de la création de l'entrée : {0}".format(e), category='error')
-                return redirect(url_for("developpement_add"))
-
-            return redirect(url_for("developpement_add"))
-
-    return render_template('add_entry.html', persons=metadata['PERSON'], nb_person=metadata['NB_PERSON'],
-                           projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'], prefill=prefill)
+                           projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'], prefill=prefill,
+                           max_xp=app.config['MAX_XP'], _type=_type)
 
 
 @app.route('/<app_name>/<filename>/', methods=['GET', 'POST'])
@@ -336,3 +343,4 @@ def purge(app_name):
 @app.errorhandler(Exception)
 def basic_error(e):
     return "an error occured: " + str(e)
+

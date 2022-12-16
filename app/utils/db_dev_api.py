@@ -1,16 +1,20 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
+from fastapi.security import OAuth2PasswordBearer
 from app.utils.model import Person, Project, Getter
 from tinydb import TinyDB, Query
 
 
 app = FastAPI()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 DB = TinyDB('developpement_db.json')
 
 
 def is_duplicate(data):
-    if DB.search(Query().body == data['body'] or Query().title == data['title']):
+    if DB.search(Query().body == data['body']):
         return True
+    elif DB.search(Query().name == data['name']):
+            return True
     else:
         return False
 
@@ -18,6 +22,10 @@ def is_duplicate(data):
 def get_number(search_type='project'):
     query = Query().type == search_type
     return DB.count(query)
+
+
+async def read_items(token: str = Depends(oauth2_scheme)):
+    return {"token": token}
 
 
 @app.get("/dev")
@@ -37,7 +45,7 @@ def add_project(request: Project):
 
     else:
         raise HTTPException(status_code=450, detail="Entry already exists",
-                            headers={"duplicate title": project['title']}
+                            headers={"duplicate name": project['name']}
                             )
 
 
@@ -84,7 +92,7 @@ def edit(request: Project):
     for k, v in request:
         if v != '' and v != []:
             entry[k] = v
-    return DB.upsert(entry, Query().title == entry['title'])
+    return DB.upsert(entry, Query().name == entry['name'])
 
 
 @app.get('/dev/edit/person')

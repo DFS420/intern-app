@@ -8,10 +8,11 @@ class Project(BaseModel):
     """
     Define a project inputs
     """
-    title: str
+    name: str
     language = 'fr'
     start_date: str
     stop_date: str
+    duration: str
 
     country: List[str]
     location: List[str] = []
@@ -54,14 +55,17 @@ class Person(BaseModel):
     Define a person input
     """
     name: str
-    second_name = ''
     company: str
     language = 'fr'
+    job: str
     tel: str = ''
     email: str
+    residency: str
     body: str
     tags: List[str] = []
-    project: List[str] = []
+    associate_project: List[str] = []
+    experiences: Dict = {}
+    custom_entry: Dict = {}
     type = 'person'
 
 
@@ -73,35 +77,7 @@ class Getter(BaseModel):
     type: str
     body: str = ''
     tags: List[str] = []
-    #
-    # #section for project search
-    title: str = ''
-    # start_date: str = ''
-    # stop_date: str = ''
-    #
-    # country: str = ''
-    # location: str = ''
-    # client: str = ''
-    # client_address: str = ''
-    # founder = ''
-    #
-    # contract_value: int = 0
-    # service_value: int = 0
-    #
-    # participants: List[str] = []
-    # staff_month: int = 0
-    # associate: List[str] = []
-    # associate_staff_month: int = 0
-    #
-    # abstract: str = ''
-    #
-    # #section for person
-    # name: str = ''
-    # second_name = ''
-    # company: str = ''
-    # tel: str = ''
-    # email: str = ''
-    # project: List[str] = []
+    name: str = ''
 
     @validator('list_search')
     def list_search_all_or_any(v):
