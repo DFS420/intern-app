@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" xmlns="http://www.w3.org/1999/html">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="../static/css/style.css/">
@@ -15,17 +16,17 @@
     <div id="contenu">
 
         <section id="intro">
+
             <p>
                 Bienvenue sur l'outil d'aide au développement de 3E ing !<br/>
-
             </p>
+
             <section id="numb_entry">
                 <p>
                     La base de données comporte actuellement <em>{{nb_project}}</em> projets et
                     <em>{{nb_person}}</em> personnes.
                 </p>
             </section>
-
 
             <div id="message">
                         {% with messages = get_flashed_messages() %}
@@ -39,461 +40,53 @@
                         {% endwith %}
             </div>
 
+            <section id="lecture_db">
+                <h2>Recherche d'entrées</h2>
+
+                Vous pouvez préciser ici les différents éléments recherchés (tags, noms, etc.) <br/>
+                Par exemple : <br/> <br>
+
+                Indiquez les mots clefs recherchés dans la barre <cite>Tags</cite> tels que <cite>efficacité, rurale,
+            maritime</cite>, etc. <br/>
+                <br>
+
+                Vous pouvez choisir l'option <cite>Tous</cite> pour que seuls les entrées comportant tous les tags
+                ressortent ou l'option <cite>N'importe</cite> pour que les entrées comportant au moins un des tags
+                ressortent. <br/> <br>
+
+                Ou rentrez des informations, d'un projet, d'une personne, ou autre et cliquez sur <em>Charger projet</em>
+                pour préremplir les cases en fonction des informations stockées. Vous pourrez ensuite cliquez sur modifier
+                si vous désirez mettre à jour en fonction de ce qui est écrit dans les cases. </br>
+
+                Cliquez sur <em>Afficher projet en JSON </em> pour l'afficher en brut.
+
+                <br/> <br/>
+
+            </section>
+
+
+        {% if _type == 'project' %}
+            {% include "project_entry.html" %}
+        {% elif _type == 'person' %}
+            {% include "person_entry.html" %}
+        {% endif %}
 
         <form method="POST">
-            <fieldset>
-                <legend>Projet</legend>
-
-                <div class="form-control">
-                    <label for="language">Langue</label>
-                    <input type="radio" id="language" name="language" value="fr" checked="true"> Français
-                    <input type="radio"               name="language" value="en"> Anglais
-                </div>
-
-                <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
-
-                <div class="form-control">
-                    <label for="title">Nom*</label>
-                    <input type="text" id="title" name="title" placeholder="Entrer le nom du projet" required/>
-                </div>
-
-                <div class="form-control">
-                    <label for="country">Pays*</label>
-                    <input type="text" id="country" name="country" placeholder="Entrer le pays où s'est déroulé le projet"
-                           required/>
-                </div>
-
-                <div class="form-control">
-                    <label for="location">Localité</label>
-                    <input
-                            type="text"
-                            id="location"
-                            name="location"
-                            placeholder="Entrer la localité ou le lieu où s'est déroulé le projet"
-                    />
-                </div>
-
-                <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
-
-                <div class="form-control">
-                    <label for="client">Client*</label>
-                    <input
-                            type="text"
-                            id="client"
-                            name="client"
-                            placeholder="Entrer le nom du client ou de la compagnie"
-                            required
-                    />
-                </div>
-
-                <div class="form-control">
-                    <label for="client_address">Adresse du client</label>
-                    <input
-                            type="text"
-                            id="client_address"
-                            name="client_address"
-                            placeholder="Entrer l'adresse du client ou de la compagnie"
-                    />
-                </div>
-
-                <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
-
-                <div class="form-control">
-                    <label for="founder">Bailleur de fond</label>
-                    <input
-                            type="text"
-                            id="founder"
-                            name="founder"
-                            placeholder="Entrer le nom du bailleur de fond"
-                    />
-                </div>
-
-                <div class="form-control">
-                    <label for="contract_value">Valeur du contrat*</label>
-                    <input
-                            type="number"
-                            id="contract_value"
-                            name="contract_value"
-                            placeholder="Entrer le montant total du contrat"
-                            min="0"
-                            step="100"
-                            required
-                    />
-                </div>
-
-                <div class="form-control">
-                    <label for="service_value">Valeur du service*</label>
-                    <input
-                            type="number"
-                            id="service_value"
-                            name="service_value"
-                            placeholder="Entrer le montant que l'on nous a octroyé pour le service"
-                            min="0"
-                            step="100"
-                            required
-                    />
-                </div>
-
-                <div class="form-control">
-                    <label for="currency">Monnaie</label>
-                    <input type="radio" id="currency" name="currency" value="€"> €
-                    <input type="radio"               name="currency" value="$ CAD" checked="true"> $ CAD
-                    <input type="radio"               name="currency" value="$ US"> $ US
-                </div>
-
-                <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
-
-                <div class="form-control">
-                    <label for="start_date">Date de début du projet*</label>
-                    <input
-                            type="date"
-                            id="start_date"
-                            name="start_date"
-                            required
-                    />
-                </div>
-
-                <div class="form-control">
-                    <label for="stop_date">Date de fin du projet*</label>
-                    <input
-                            type="date"
-                            id="stop_date"
-                            name="stop_date"
-                            required
-                    />
-                </div>
-
-                <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
-
-                <div class="form-control">
-                    <label for="leader">Choisir les participant-es leader ayant travaillé-es sur ce projet:</label> </br>
-                    <select name="leader" id="leader" multiple>
-                        {% for person in persons %}
-                            <option value="{{ person['name'] }}"> {{ person['name'] }} </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="form-control">
-                    <label for="expert">Choisir les participant-es expert-es ayant travaillé-es sur ce projet:</label> </br>
-                    <select name="expert" id="expert" multiple>
-                        {% for person in persons %}
-                            <option value="{{ person['name'] }}"> {{ person['name'] }} </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="form-control">
-                    <label for="other">Choisir les participant-es autre-s ayant travaillé-es sur ce projet:</label> </br>
-                    <select name="other" id="other" multiple>
-                        {% for person in persons %}
-                            <option value="{{ person['name'] }}"> {{ person['name'] }} </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="form-control">
-                    <label for="staff_month">Mois-Personne*</label>
-                    <input
-                            type="number"
-                            id="staff_month"
-                            name="staff_month"
-                            placeholder="Entrer le nombre de mois-personne"
-                            min="0"
-                            required
-                    />
-                </div>
-
-                <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
-
-                <div class="form-control">
-                    <label for="associate">Choisir les associés ayant travaillé sur ce projet:</label> </br>
-
-                    <select name="associate" id="associate" multiple>
-                        {% for person in persons %}
-                            <option value="{{ person['name'] }}"> {{ person['name'] }} </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="form-control">
-                    <label for="associate_month">Mois-Personne pour associés</label>
-                    <input
-                            type="number"
-                            id="associate_month"
-                            name="associate_month"
-                            placeholder="Entrer le nombre de mois-personne pour les associés"
-                            min="0"
-                    />
-                </div>
-
-                <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
-
-                <div class="form-control">
-                    <label for="project_tags">Mots-clefs (tags)*</label>
-                    <input
-                            type="text"
-                            id="project_tags"
-                            name="project_tags"
-                            placeholder="Entrer des mots clefs séparés par une virgule (ex: électrification, hydro, etc.)"
-                            required
-                    />
-                </div>
-
-                <div class="form-control">
-                    <label for="abstract">Résumé du projet*</label>
-                    <textarea
-                            id="abstract"
-                            name="abstract"
-                            cols="30"
-                            rows="5"
-                            placeholder="Entrer le résumé du projet"
-                            required
-                    ></textarea>
-                </div>
-
-                <div class="form-control">
-                    <label for="project_body">Présentation du projet*</label>
-                    <textarea
-                            id="project_body"
-                            name="project_body"
-                            cols="30"
-                            rows="10"
-                            placeholder="Entrer la description du projet"
-                            required
-                    ></textarea>
-                </div>
-
-                <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
-
-                <div class="form-control">
-                    <label for="custom_entry_keyword">Entrée(s) libre(s)</label>
-                    <input
-                            type="text"
-                            id="custom_entry_keyword"
-                            name="custom_entry_keyword"
-                            placeholder="Entrer les noms de champs personnalisés séparés par des virgules (ex: 'Sous-région', 'employé local')"
-                    />
-                </div>
-
-                <div class="form-control">
-                    <label for="custom_entry_value">Entrée(s) libre(s)</label>
-                    <input
-                            type="text"
-                            id="custom_entry_value"
-                            name="custom_entry_value"
-                            placeholder="Entrer les noms de valeurs des champs personnalisés correspondant aux mots clefs respectivement séparés par des virgules (ex: 'Beauce', 'Marc Arcand')"
-                    />
-                </div>
-
-                <br/>
-                <br/>
-
-                    <p><input type="submit" value="Enregistrer projet", name="save_project"></p>
-
-            </fieldset>
-        </form>
-
-
-
-
-
-        <form method="post">
-            <fieldset>
-                <legend>Personne</legend>
-                <div class="form-control">
-                    <label for="name">Nom*</label>
-                    <input type="text" id="name" name="name" placeholder="Entrer le nom de la personne" required/>
-                </div>
-
-                <div class="form-control">
-                    <label for="language">Langue</label>
-                    <input type="radio" id="language_person" name="language" value="fr" checked="true"> Français
-                    <input type="radio"               name="language" value="en"> Anglais
-                </div>
-
-                <div class="form-control">
-                    <label for="job">Poste*</label>
-                    <input type="text" id="job" name="job" placeholder="Entrer le titre du poste" required/>
-                </div>
-
-                <div class="form-control">
-                    <label for="birthday">Date de naissance*</label>
-                    <input
-                            type="date"
-                            id="birthday"
-                            name="birthday"
-                            required
-                    />
-                </div>
-
-
-                <div class="form-control">
-                    <label for="email">Courriel*</label>
-                    <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            placeholder="Entrer le courriel de la personne"
-                            required
-                    />
-                </div>
-
-                <div class="form-control">
-                    <label for="tel">Téléphone</label>
-                    <input
-                            type="tel"
-                            id="tel"
-                            name="tel"
-                            placeholder="Entrer le téléphone de la personne"
-                    />
-                </div>
-
-                <div class="form-control">
-                    <label for="company">Companie*</label>
-                    <input
-                            type="company"
-                            id="company"
-                            name="company"
-                            placeholder="Entrer le nom de la compagnie auquel appartient la personne"
-                            required
-                    />
-                </div>
-
-                <div class="form-control">
-                    <label for="residency">Pays de résidence*</label>
-                    <input
-                            type="text"
-                            id="residency"
-                            name="residency"
-                            placeholder="Entrer le nom de la compagnie auquel appartient la personne"
-                            required
-                    />
-                </div>
-
-                <div class="form-control">
-                    <label for="person_tags">Mots-clefs (tags)*</label>
-                    <input
-                            type="text"
-                            id="person_tags"
-                            name="person_tags"
-                            placeholder="Entrer des mots clefs séparés par une virgule (ex: électrification, hydro, etc.)"
-                            required
-                    />
-                </div>
-
-                <div class="form-control">
-                    <label for="associate_project">Choisir les projets sur lesquels la personne a travaillé:</label> </br>
-                    <select name="associate_project" id="associate_project" multiple>
-                        {% for project in projects %}
-                            <option value="{{ project['name'] }}"> {{ project['name'] }} </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
-
-                <div class="form-control">
-                    <label for="person_body">Présentation de la personne</label>
-                    <textarea
-                            id="person_body"
-                            name="person_body"
-                            cols="30"
-                            rows="10"
-                            placeholder="Entrer la description de la personne, ses projets passés, ses employeurs, etc."
-                            required
-                    ></textarea>
-                </div>
-
-                <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
-
-                <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-
-
-                <div class="form-control">
-                    <label for="experience">Expérience de la personne</label>
-                    <table id="experience" name="experience">
-                        <tr>
-                            <th>Date de départ</th>
-                            <th>Date de fin</th>
-                            <th>Nom de l’employeur</th>
-                            <th>Titre professionnel/poste</th>
-                            <th>Référence</th>
-                            <th>Pays</th>
-                            <th>Sommaire</th>
-                        </tr>
-                        {% for num_xp in range(1, max_xp) %}
-                        <tr>
-                            <td><input
-                                type="month"
-                                id="start_date_xp_{{ num_xp }}"
-                                name="start_date_xp_{{ num_xp }}"
-<!--                                value="{{ experience['start_date_xp'] }}"-->
-                                />
-                            </td>
-                            <td><input
-                                type="month"
-                                id="stop_date_xp_{{ num_xp }}"
-                                name="stop_date_xp_{{ num_xp }}"
-<!--                                value="{{ experience['stop_date_xp'] }}"-->
-                                />
-                            </td>
-                            <td><input
-                                type="text"
-                                id="employer_{{ num_xp }}"
-                                name="employer_{{ num_xp }}"
-<!--                                value="{{ experience['employer'] }}"-->
-                                />
-                            </td>
-                            <td><input
-                                type="text"
-                                id="job_title_{{ num_xp }}"
-                                name="job_title_{{ num_xp }}"
-<!--                                value="{{ experience['job_title'] }}"-->
-                                />
-                            </td>
-                            <td><input
-                                type="text"
-                                id="reference_{{ num_xp }}"
-                                name="reference_{{ num_xp }}"
-<!--                                value="{{ experience['reference'] }}"-->
-                                />
-                            </td>
-                            <td><input
-                                type="text"
-                                id="country_xp_{{ num_xp }}"
-                                name="country_xp_{{ num_xp }}"
-<!--                                value="{{ experience['country_xp'] }}"-->
-                                />
-                            </td>
-                            <td><input
-                                type="text"
-                                id="summary_xp_{{ num_xp }}"
-                                name="summary_xp_{{ num_xp }}"
-<!--                                value="{{ experience['summary_xp'] }}"-->
-                                />
-                            </td>
-                        </tr>
-                        {% endfor %}
-                        <button onclick="add()"  href="#experience" formnovalidate="formnovalidate" >Ajouter</button>
-                        <button onclick="remove()" formnovalidate="formnovalidate" >Retirer</button>
-                        <input type="hidden" value="1" id="total_line">
-                    </table>
-
-<!--                    <input type="submit" value="Ajouter une expérience" name="add_xp" class="submit-btn"/>-->
-                </div>
-
-
-                </br>
-                <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
-                </br>
-
-                <input type="submit" value="Enregister personne" name="save_person" class="submit-btn"/>
-            </fieldset>
-        </form>
-
-
-
+                <fieldset>
+                    <legend>Recherche par mots clefs</legend>
+                        <div class="form-control">
+                            <label for="tags_searched">Mots-clefs (tags)</label>
+                            <p>
+                                <input type="text" name="tags_searched" id="tags_searched" placeholder="Ex : électrification" size="30" maxlength="1000" />
+                                <input type="submit" name="tag_search" value="Chercher" formnovalidate="formnovalidate">
+                                <input type="hidden" name="btn_id" value="search_tag">
+                                <input type="radio" name="list_search" value="all"> Tous
+                                <input type="radio" name="list_search" value="any" checked="true"> N'importe
+                                <input type="radio" name="list_search" value="one_of"> Un de ceux-là
+                            </p>
+                        </div>
+                </fieldset>
+            </form>
 
     </div>
 
