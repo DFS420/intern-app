@@ -325,11 +325,12 @@ def developpement_add():
 
 @app.route('/download_dev_db', methods=['GET', 'POST'])
 def download_dev_db():
-    response = requests.get("{0}dev/download_db".format(request.host_url))
+    _type = request.args['type']
+    response = requests.get("{0}dev/download_db?_type={1}".format(request.host_url, _type))
     content = response.content
     return Response(content,
-                    mimetype='application/json',
-                    headers={'Content-Disposition': 'attachment;filename=dev_db.json'})
+                    mimetype='application/{0}'.format(_type),
+                    headers={'Content-Disposition': 'attachment;filename=dev_db.{0}'.format(_type)})
 
 
 

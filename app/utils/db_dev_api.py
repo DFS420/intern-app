@@ -3,6 +3,8 @@ from fastapi.responses import FileResponse
 from fastapi.security import OAuth2PasswordBearer
 from app.utils.model import Person, Project, Getter
 from tinydb import TinyDB, Query
+import pandas as pd
+import json
 
 db_path = 'developpement_db.json'
 app = FastAPI()
@@ -107,8 +109,15 @@ def edit(request: Person):
 
 
 @app.get('/dev/download_db')
-def download_db():
-    return FileResponse(path=db_path, filename=db_path, media_type='json')
+def download_db(_type: str):
+    if _type == 'csv':
+        with open(db_path) as f:
+            data = json.loads(f.read())['_default']
+            df = pd.DataFrame(data).T
+            df.to_csv('dev_db.csv', encoding='UTF-8', sep=';')
+            return FileResponse(path='dev_db.csv', filename='dev_db.csv', media_type='csv')
+    else:
+        return FileResponse(path=db_path, filename=db_path, media_type='json')
 
 
 def get_data(**kwargs):
