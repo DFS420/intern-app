@@ -1,13 +1,14 @@
 from fastapi import FastAPI, HTTPException, Depends
+from fastapi.responses import FileResponse
 from fastapi.security import OAuth2PasswordBearer
 from app.utils.model import Person, Project, Getter
 from tinydb import TinyDB, Query
 
-
+db_path = 'developpement_db.json'
 app = FastAPI()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-DB = TinyDB('developpement_db.json')
+DB = TinyDB(db_path)
 
 
 def is_duplicate(data):
@@ -105,6 +106,11 @@ def edit(request: Person):
     return DB.upsert(entry, Query().name == entry['name'])
 
 
+@app.get('/dev/download_db')
+def download_db():
+    return FileResponse(path=db_path, filename=db_path, media_type='json')
+
+
 def get_data(**kwargs):
     return DB.search(Query().fragment(kwargs))
 
@@ -117,5 +123,4 @@ def get_metadata():
         "NB_PROJECT": len(get_data(type='project')),
         "NB_PERSON": len(get_data(type='person'))
     }
-
 

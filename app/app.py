@@ -323,6 +323,16 @@ def developpement_add():
                            max_xp=app.config['MAX_XP'], _type=_type)
 
 
+@app.route('/download_dev_db', methods=['GET', 'POST'])
+def download_dev_db():
+    response = requests.get("{0}dev/download_db".format(request.host_url))
+    content = response.content
+    return Response(content,
+                    mimetype='application/json',
+                    headers={'Content-Disposition': 'attachment;filename=dev_db.json'})
+
+
+
 @app.route('/<app_name>/<filename>/', methods=['GET', 'POST'])
 def download(app_name, filename):
     filename, _type = decode_str_filename(filename)
