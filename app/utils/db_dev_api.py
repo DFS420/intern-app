@@ -10,7 +10,7 @@ db_path = 'developpement_db.json'
 app = FastAPI()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-DB = TinyDB(db_path)
+DB = TinyDB(db_path, ensure_ascii=False)
 
 
 def is_duplicate(data):
