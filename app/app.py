@@ -261,7 +261,7 @@ def developpement_add():
                 prefill = prefill_prep(response[0], _type)
                 return render_template(page, persons=metadata['PERSON'], nb_person=metadata['NB_PERSON'],
                                        projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'],
-                                       prefill=prefill, _type=_type, max_xp=app.config['MAX_XP'])
+                                       prefill=prefill, _type=_type, max_xp=prefill['xp_len'])
             except AttributeError as e:
                 flash("Problème de requests : {0}".format(e), 'error')
             except FileNotFoundError:

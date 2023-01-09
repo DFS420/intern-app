@@ -48,6 +48,8 @@ def prefill_prep(data, _type):
                 for k2, v2 in v.items():
                     prefill[k2] = v2
 
+        prefill['xp_len'] = len([k for k in prefill['experiences'].keys() if k.isdigit()])
+
         return prefill
 
     except KeyError as e:
@@ -77,10 +79,10 @@ def prep_data_for_db(web_input, _type):
     elif _type == 'person':
         data['associate_project'] = web_input.getlist('associate_project')
         data['experiences'] = {}
-        xp = {key : value for key, value in web_input.items() if key.startswith('xp')}
+        xp = {key: value for key, value in web_input.items() if key.startswith('xp')}
         klen = set([str(key.split('_')[-1]) for key in xp.keys()]) #récupération nombre de lignes d'Expérience
         for id in klen:
-            data['experiences'][id] = {key : value for key, value in xp.items() if key.endswith(id)}
+            data['experiences'][id] = {key: value for key, value in xp.items() if key.endswith(id)}
 
 
 
