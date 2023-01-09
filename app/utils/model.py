@@ -57,6 +57,7 @@ class Person(BaseModel):
     name: str
     company: str
     language = 'fr'
+    birthday: str
     job: str
     tel: str = ''
     email: str
