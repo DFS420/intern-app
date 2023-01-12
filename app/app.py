@@ -8,7 +8,8 @@ from werkzeug.utils import secure_filename
 from .utils import eep_traitement as eep
 from .utils import eepower_utils as eeu
 from .utils.File import validate_file_epow as validate, get_uploads_files, purge_file, full_paths, \
-    create_dir_if_dont_exist as create_dir, zip_files, decode_str_filename, add_to_list_file, get_items_from_file
+    create_dir_if_dont_exist as create_dir, zip_files, decode_str_filename, add_to_list_file, get_items_from_file, \
+    save_items_as_json
 from .utils.dev_db_utils import prefill_prep, prep_data_for_db
 from .linepole.KMLHandler import KMLHandler
 from .linepole import settings as kml_settings
@@ -230,6 +231,7 @@ def developpement_add():
     """
     Add entry to the dev database
     """
+    app_name = 'developpement'
     metadata = get_metadata()
     prefill = {'fr':  'checked', 'currency': 'CAD'}
     _type = request.args['type']
@@ -271,7 +273,7 @@ def developpement_add():
 
             return redirect(url_for("developpement_add"))
 
-        if request.form.get('tag_search', False):
+        if request.form.get('tag_search', False) or request.form.get('save_json', False):
             tags_raw = 'tags_searched'
             if request.form[tags_raw] != '':
                 tags = re.split(r"\W+\s*|\s+", request.form[tags_raw])
@@ -280,7 +282,12 @@ def developpement_add():
                     results = requests.get("{0}dev/GET".format(request.host_url), json=data).json()
                     if not results:
                         raise FileNotFoundError
-                    return render_template('json_output.html', results=results)
+                    if request.form.get('save_json', False):
+                        dirpath = create_dir(os.path.join(app.config['GENERATED_PATH'], 'developpement'))
+                        filename, _ = save_items_as_json(results, dirpath)
+                        return redirect(url_for('download', app_name=app_name, filename=filename))
+                    else:
+                        return render_template('json_output.html', results=results)
                 except AttributeError as e:
                     flash("Problème de requests : {0}".format(e.message), 'error')
                 except FileNotFoundError:
@@ -340,7 +347,7 @@ def download(app_name, filename):
     if _type == 'list':
         filename = os.path.basename(zip_files(filename, zip_file_name=app_name + '_result'))
     directory = os.path.abspath(os.path.join(app.config['GENERATED_PATH'], app_name))
-    return send_from_directory(directory=directory, path=app.config['CURRENT_OUTPUT_FILE'],
+    return send_from_directory(directory=directory, path=filename,
                                as_attachment=True)
 
 

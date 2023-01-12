@@ -19,13 +19,13 @@ class Project(BaseModel):
     client: str
     client_address: str = ''
     founder = ''
-    reference: str = ''
+    reference: List[str] = []
 
     contract_value: int = 0
     service_value: int = 0
     currency: str
 
-    leader: List[str] = []
+    leader: str = ''
     expert: List[str] = []
     other: List[str] = []
     staff_month: int = 0
