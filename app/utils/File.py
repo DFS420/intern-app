@@ -1,6 +1,7 @@
 import shutil
 
 import pandas as pd
+import openpyxl
 import os
 import json
 import zipfile
@@ -121,4 +122,13 @@ def get_items_from_json(filename):
             data = json.load(json_file)
 
         return data
+
+
+def save_items_as_json(data, path, filename="data.json"):
+    json_object = json.dumps(data, indent=4)
+    filepath = os.path.join(path, filename)
+    with open(filepath, "w") as outfile:
+        outfile.write(json_object)
+
+    return filename, filepath
 
