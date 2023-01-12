@@ -31,7 +31,12 @@ def prefill_prep(data, _type):
             for other in data['other']:
                 prefill['other'][other] = 'selected'
 
+            prefill['xp_len'] = 0
+
         if _type == 'person':
+
+            prefill['xp_len'] = len([k for k in prefill['experiences'].keys() if k.isdigit()])
+
             prefill['associate_project'] = {}
             for associate_project in data['associate_project']:
                 prefill['associate_project'][associate_project] = 'selected'
@@ -47,8 +52,6 @@ def prefill_prep(data, _type):
             elif isinstance(v, dict):
                 for k2, v2 in v.items():
                     prefill[k2] = v2
-
-        prefill['xp_len'] = len([k for k in prefill['experiences'].keys() if k.isdigit()])
 
         return prefill
 
@@ -71,6 +74,7 @@ def prep_data_for_db(web_input, _type):
     if _type == 'project':
         data["country"] = re.split(r"\W+\s*|\s+", web_input['country'])
         data["location"] = re.split(r"\W+\s*|\s+", web_input['location'])
+        data["reference"] = re.split(r"; *", web_input['reference'])
         data["leader"] = web_input.getlist('leader')
         data["expert"] = web_input.getlist('expert')
         data["other"] = web_input.getlist('other')

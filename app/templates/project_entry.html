@@ -83,6 +83,21 @@
                                 />
                             </div>
 
+                            <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
+
+                            <div class="form-control">
+                                <label for="reference">Référence</label>
+                                <input
+                                        type="text"
+                                        id="reference"
+                                        name="reference"
+                                        placeholder="Entrer le nom nom du contact référent (ajoutez des infos en les séparant par des ';')"
+                                        value ="{{ prefill['reference'] }}"
+                                />
+                            </div>
+
+                            <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
+
                             <div class="form-control">
                                 <label for="contract_value">Valeur du contrat*</label>
                                 <input
@@ -159,7 +174,7 @@
 
                             <div class="form-control">
                                 <label for="leader">Choisir les participant-es leader ayant travaillé-es sur ce projet:</label> </br>
-                                <select name="leader" id="leader" multiple>
+                                <select name="leader" id="leader">
                                     {% for person in persons %}
                                         <option value="{{ person['name'] }}"
                                                 {% if prefill['leader'] %}

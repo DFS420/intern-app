@@ -19,6 +19,7 @@ class Project(BaseModel):
     client: str
     client_address: str = ''
     founder = ''
+    reference: str = ''
 
     contract_value: int = 0
     service_value: int = 0
