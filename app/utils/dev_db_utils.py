@@ -91,7 +91,7 @@ def prep_data_for_db(web_input, _type):
 
 
     data["type"] = _type
-    data["tags"] = re.split(r"\W+\s*|\s+", web_input['{0}_tags'.format(_type)])
+    data["tags"] = list(map(str.lower, re.split(r"\W+\s*|\s+", web_input['{0}_tags'.format(_type)])))
     data["body"] = data["{0}_body".format(_type)]
     keys, values = re.split(r";", data['custom_entry_keyword']), re.split(r";", data['custom_entry_value'])
     data['custom_entry'] = dict(zip(keys, values))
