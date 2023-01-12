@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../static/css/style.css/?id">
+        <title>Menu outil de développement</title>
+    </head>
+
+    <body>
+        {% include "header.html" %}
+
+        <div id="bloc_page">
+            {% include "nav_barre.html" %}
+
+            <div id="contenu">
+
+                        <section id="intro">
+
+                <p>
+                    Bienvenue sur l'outil de génération de documents<br/>
+                </p>
+
+                <section id="numb_entry">
+                    <p>
+                        La base de données comporte actuellement <em>{{nb_project}}</em> projets et
+                        <em>{{nb_person}}</em> personnes.
+                    </p>
+                </section>
+
+                <div id="message">
+                            {% with messages = get_flashed_messages() %}
+                                {% if messages %}
+                                    <ul class=flashes>
+                                        {% for message in messages %}
+                                            <em>{{ message }}</em>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            {% endwith %}
+                </div>
+
+                <fieldset>
+                        <legend>Générer un document</legend>
+
+                            <div class="form-control">
+                                <label for="language">Langue</label>
+                                <input type="radio" id="language" name="language" value="fr" checked> Français
+                                <input type="radio"               name="language" value="en" > Anglais
+                            </div>
+
+                            <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
+
+                            <div class="form-control">
+                                    <label for="tags_searched">Mots-clefs (tags)</label>
+                                    <p>
+                                        <input type="text" name="tags_searched" id="tags_searched" placeholder="Ex : électrification" size="30" maxlength="1000" />
+                                        <input type="radio" name="list_search" value="all"> Tous
+                                        <input type="radio" name="list_search" value="any" checked="true"> N'importe
+                                        <input type="radio" name="list_search" value="one_of"> Un de ceux-là
+                                    </p>
+                            </div>
+
+                            <div class="form-control">
+                                <label for="country">Pays*</label>
+                                <input type="text" id="country" name="country" placeholder="Entrer les pays où se sont déroulé les projets"
+                                <input type="radio" name="list_search" value="all"> Tous
+                                <input type="radio" name="list_search" value="any" checked="true"> N'importe
+                                <input type="radio" name="list_search" value="one_of"> Un de ceux-là
+                                />
+                            </div>
+
+                            <div class="form-control">
+                                <label for="persons">Choisir les participant-es ayant travaillé-es sur ce projet:</label> </br>
+                                <select name="persons" id="persons" multiple>
+                                    {% for person in persons %}
+                                        <option value="{{ person['name'] }}"
+                                    >
+                                            {{ person['name'] }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+
+                            <div class="form-control">
+                                <label for="year">Année</label>
+                                <input type="number"
+                                       id="year"
+                                       min="1900"
+                                       max="2099"
+                                       step="1"
+                                       value="2050" />
+                            </div>
+
+                    <input type="submit" name="search" value="Chercher" formnovalidate="formnovalidate">
+                </fieldset>
+            </div>
+
+        </div>
+    </body>
