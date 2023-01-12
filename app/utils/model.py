@@ -25,7 +25,7 @@ class Project(BaseModel):
     service_value: int = 0
     currency: str
 
-    leader: str = ''
+    leader: str = ' '
     expert: List[str] = []
     other: List[str] = []
     staff_month: int = 0
@@ -75,13 +75,20 @@ class Getter(BaseModel):
     """
     Define a query dict
     """
-    list_search: str = 'any'
     type: str
-    body: str = ''
+    #body: str = ''
     tags: List[str] = []
+    tags_ls: str = 'any'
     name: str = ''
+    name_ls: str = 'any'
+    country: List[str] = []
+    country_ls: str = 'any'
+    person: List[str] = []
+    person_ls: str = 'any'
+    year: str = ''
+    language: str = ''
 
-    @validator('list_search')
+    @validator('tags_ls', 'name_ls', 'country_ls', 'person_ls')
     def list_search_all_or_any(v):
         if v not in ['all', 'any', 'one_of']:
             raise ValueError("Must be 'any' 'all' or 'one_of'")

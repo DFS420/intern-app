@@ -277,7 +277,7 @@ def developpement_add():
             tags_raw = 'tags_searched'
             if request.form[tags_raw] != '':
                 tags = list(map(str.lower, re.split(r"\W+\s*|\s+", request.form[tags_raw])))
-                data = {'tags': tags, "list_search": request.form['list_search'], "type": _type}
+                data = {'tags': tags, "tags_ls": request.form['list_search'], "type": _type}
                 try:
                     results = requests.get("{0}dev/GET".format(request.host_url), json=data).json()
                     if not results:

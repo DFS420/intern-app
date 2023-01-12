@@ -70,23 +70,24 @@ def add_person(request: Person):
 
 @app.get("/dev/GET")
 def get(request: Getter):
-    ls = request.list_search
     entry = {}
+    list_entry = {}
+    ls = {}
     for k, v in request:
-        if v != '' and v != [] and k != 'list_search':
+        if v != '' and v != [] and 'ls' not in k and isinstance(v, str):
             entry[k] = v
+        elif v != '' and v != [] and 'ls' not in k and isinstance(v, list):
+            list_entry[k] = v
+        elif v != '' and v != [] and 'ls' in k:
+            ls[k] = v
 
-    type_query = Query().type == entry['type']
+    queries = ["(Query().type == entry['type'])", "(Query().fragment(entry))"]
 
-    if 'tags' in entry.keys():
-        if ls == 'all':
-            return DB.search((Query().tags.all(entry['tags'])) & type_query)
-        elif ls == 'any':
-            return DB.search(Query().tags.any(entry['tags']) & type_query)
-        elif ls == 'one_of':
-            return DB.search(Query().tags.one_of(entry['tags']) & type_query)
-    else:
-        return DB.search(Query().fragment(entry))
+    if list_entry:
+        for k in list_entry.keys():
+            queries.append("(Query().{0}.{1}(list_entry['{0}']))".format(k, ls['{0}_ls'.format(k)]))
+
+    return eval("DB.search({0})".format(' & '.join(queries)))
 
 
 @app.get('/dev/edit/project')
