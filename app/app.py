@@ -9,7 +9,7 @@ from .utils import eep_traitement as eep
 from .utils import eepower_utils as eeu
 from .utils.File import validate_file_epow as validate, get_uploads_files, purge_file, full_paths, \
     create_dir_if_dont_exist as create_dir, zip_files, decode_str_filename, add_to_list_file, get_items_from_file, \
-    save_items_as_json
+    save_items_as_json, render_document
 from .utils.dev_db_utils import prefill_prep, prep_data_for_db
 from .linepole.KMLHandler import KMLHandler
 from .linepole import settings as kml_settings
@@ -30,6 +30,8 @@ app.config['CURRENT_OUTPUT_FILE'] = ''
 app.config['MAX_XP'] = 3
 
 app.config['UPLOAD_PATH_DEV'] = create_dir(r'uploads/developpement')
+app.config['DEV_TEMPLATE_DOC'] = os.path.join(app.config['UPLOAD_PATH_DEV'], 'templates')
+app.config['GENERATED_DEV_DOC_PATH'] = os.path.join(app.config['GENERATED_PATH'], 'developpement')
 
 BUSES_FILE = os.path.join(app.config['UPLOAD_PATH_EPOW'], r'bus_exclus')
 eep_data = {"BUS_EXCLUS": get_items_from_file(BUSES_FILE),
@@ -233,7 +235,7 @@ def developpement_add():
     """
     app_name = 'developpement'
     metadata = get_metadata()
-    prefill = {'fr':  'checked', 'currency': 'CAD'}
+    prefill = {'fr': 'checked', 'currency': 'CAD'}
     _type = request.args['type']
     page = 'add_entry.html'
 
@@ -246,7 +248,8 @@ def developpement_add():
                 if results.status_code == 200:
                     flash("Entrée enregistrée : entrée n°{0}".format(results.text[1:].split(',')[0]), category='info')
                 else:
-                    flash("Problème lors de la création de l'entrée : {0}".format(str(results.content)), category='error')
+                    flash("Problème lors de la création de l'entrée : {0}".format(str(results.content)),
+                          category='error')
             except (ConnectTimeout, HTTPError, ReadTimeout, Timeout, ConnectionError) as e:
                 # todo: comprendre pourquoi Connection error a lieu de http error
                 flash("Problème lors de la création de l'entrée : {0}".format(e), category='error')
@@ -270,8 +273,6 @@ def developpement_add():
                 flash("Aucun résultat trouvé", 'error')
             except Exception as e:
                 flash("Erreur : {0}".format(e), 'error')
-
-            return redirect(url_for("developpement_add"))
 
         if request.form.get('tag_search', False) or request.form.get('save_json', False):
             tags_raw = 'tags_searched'
@@ -303,7 +304,10 @@ def developpement_add():
 
             try:
                 results = requests.get("{0}dev/edit/{1}".format(request.host_url, _type), json=data)
-                flash("{0} modifié(e) : entrée n°{1}".format(_type, results.text[1:].split(',')[0]), category='info')
+                if results.status_code == 200:
+                    flash("{0} modifié(e) : entrée n°{1}".format(_type, results.text[1:].split(',')[0]), category='info')
+                else:
+                    raise HTTPError
 
             except (ConnectTimeout, HTTPError, ReadTimeout, Timeout, ConnectionError) as e:
                 flash("Problème lors de la création de l'entrée : {0}".format(e), category='error')
@@ -330,6 +334,77 @@ def developpement_add():
                            max_xp=app.config['MAX_XP'], _type=_type)
 
 
+@app.route("/doc_assembler", methods=['GET', 'POST'])
+def doc_assembler():
+    """
+    Search entry and generate documents
+    """
+    app_name = 'developpement'
+    metadata = get_metadata()
+    templates = get_uploads_files(dir_name='./uploads/developpement/templates')
+    page = 'doc_assembler.html'
+
+    if request.method == 'POST':
+        if request.form.get('search', False):
+            language = request.form['language']
+            tags = list(map(str.lower, re.split(r"\W+\s*", request.form['tags_searched'])))
+            countries = list(map(str.lower, re.split(r"\W+\s*", request.form['countries'])))
+            #todo to implement year = request.form['year']
+            persons = request.form.getlist('persons')
+
+            proj_data = {'tags': tags, "tags_ls": request.form['tags_ls'],
+                         'countries': countries, "countries_ls": request.form['countries_ls'],
+                         'persons': persons, "persons_ls": request.form['persons_ls'],
+                         'language': language, "type": 'project'}
+            per_data = {'names': persons, 'language': language, "type": 'person'}
+
+            try:
+                results = (requests.get("{0}dev/GET".format(request.host_url), json=proj_data).json(),
+                           requests.get("{0}dev/GET".format(request.host_url), json=per_data).json())
+
+                if not results[0] and not results[1]:
+                    raise FileNotFoundError
+
+                return render_template(page, persons=metadata['PERSON'], nb_person=metadata['NB_PERSON'],
+                                       projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'],
+                                       templates=templates, selected_projects=results[0],
+                                       selected_persons=results[1], selected=True)
+
+            except AttributeError as e:
+                flash("Problème de requests : {0}".format(e.message), 'error')
+            except FileNotFoundError:
+                flash("Aucun résultat trouvé", 'error')
+            except Exception as e:
+                flash("Erreur : {0}".format(e.message), 'error')
+
+        if request.form.get('generate', False):
+            template_path = os.path.join(app.config['DEV_TEMPLATE_DOC'], request.form['template'])
+            docpath = os.path.join(app.config['GENERATED_DEV_DOC_PATH'], 'generated_doc.docx')
+            proj_data = {'names': request.form.getlist('selected_projects'), "type": 'project'}
+            per_data = {'names': request.form.getlist('selected_persons'), "type": 'person'}
+
+            try:
+                projects, persons = (requests.get("{0}dev/GET".format(request.host_url), json=proj_data).json(),
+                           requests.get("{0}dev/GET".format(request.host_url), json=per_data).json())
+
+                if not projects and not persons:
+                    raise FileNotFoundError
+
+                doc_file = render_document(template_path, docpath, projects, persons)
+
+                return redirect(url_for('download', app_name=app_name, filename=doc_file))
+
+            except AttributeError as e:
+                flash("Problème de requests : {0}".format(e.message), 'error')
+            except FileNotFoundError:
+                flash("Aucun résultat trouvé", 'error')
+            except Exception as e:
+                flash("Erreur : {0}".format(e.message), 'error')
+
+    return render_template(page, persons=metadata['PERSON'], nb_person=metadata['NB_PERSON'],
+                           projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'])
+
+
 @app.route('/download_dev_db', methods=['GET', 'POST'])
 def download_dev_db():
     _type = request.args['type']
@@ -338,7 +413,6 @@ def download_dev_db():
     return Response(content,
                     mimetype='application/{0}'.format(_type),
                     headers={'Content-Disposition': 'attachment;filename=dev_db.{0}'.format(_type)})
-
 
 
 @app.route('/<app_name>/<filename>/', methods=['GET', 'POST'])
@@ -361,4 +435,3 @@ def purge(app_name):
 @app.errorhandler(Exception)
 def basic_error(e):
     return "an error occured: " + str(e)
-

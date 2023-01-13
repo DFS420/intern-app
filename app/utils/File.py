@@ -1,5 +1,4 @@
 import shutil
-
 import pandas as pd
 import openpyxl
 import os
@@ -7,6 +6,7 @@ import json
 import zipfile
 from glob import glob
 from pathlib import Path
+from docxtpl import DocxTemplate
 
 def get_uploads_files(dir_name=r'.\uploads'):
     if os.path.exists(dir_name) and os.path.isdir(dir_name):
@@ -131,4 +131,26 @@ def save_items_as_json(data, path, filename="data.json"):
         outfile.write(json_object)
 
     return filename, filepath
+
+
+def render_document(template_path, doc_path, projects, persons=None):
+    """
+    Generate a docx file from a template
+    :param template_path: path to the template file
+    :type template_path: str
+    :param doc_path: filepath where to save the document
+    :type doc_path: str
+    :param projects: all the projects to include in the document
+    :type projects: list[dict]
+    :return: filename of the document
+    :rtype: str
+    """
+
+    doc = DocxTemplate(template_path)
+    context = {'projects': projects, 'persons': persons}
+    doc.render(context)
+    doc.save(doc_path)
+
+    return doc_path.split('\\')[-1]
+
 
