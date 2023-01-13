@@ -38,3 +38,4 @@ tinydb~=4.7.0
 Werkzeug~=2.0.3
 uvicorn
 requests
+docxtpl
