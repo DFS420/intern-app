@@ -72,13 +72,15 @@ def prep_data_for_db(web_input, _type):
 
     data = dict(web_input)
     if _type == 'project':
-        data["country"] = re.split(r"\W+\s*|\s+", web_input['country'])
-        data["location"] = re.split(r"\W+\s*|\s+", web_input['location'])
+        data["countries"] = re.split(r"\W+\s*", web_input['countries'])
+        data["locations"] = re.split(r"\W+\s*", web_input['locations'])
         data["reference"] = re.split(r"; *", web_input['reference'])
-        data["leader"] = web_input.getlist('leader')
+
         data["expert"] = web_input.getlist('expert')
         data["other"] = web_input.getlist('other')
         data["associate"] = web_input.getlist('associate')
+        data["persons"] = list(set([data["leader"]] + data["expert"] + data["other"] + data["associate"]))
+
 
     elif _type == 'person':
         data['associate_project'] = web_input.getlist('associate_project')

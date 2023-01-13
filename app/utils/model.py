@@ -14,8 +14,8 @@ class Project(BaseModel):
     stop_date: str
     duration: str
 
-    country: List[str]
-    location: List[str] = []
+    countries: List[str]
+    locations: List[str] = []
     client: str
     client_address: str = ''
     founder = ''
@@ -31,6 +31,7 @@ class Project(BaseModel):
     staff_month: int = 0
     associate: List[str] = []
     associate_staff_month: int = 0
+    persons: List[str] = []
 
     tags: List[str] = []
     abstract: str
@@ -76,19 +77,19 @@ class Getter(BaseModel):
     Define a query dict
     """
     type: str
-    #body: str = ''
     tags: List[str] = []
     tags_ls: str = 'any'
     name: str = ''
     name_ls: str = 'any'
-    country: List[str] = []
-    country_ls: str = 'any'
-    person: List[str] = []
-    person_ls: str = 'any'
+    names: List[str] = []
+    countries: List[str] = []
+    countries_ls: str = 'any'
+    persons: List[str] = []
+    persons_ls: str = 'any'
     year: str = ''
     language: str = ''
 
-    @validator('tags_ls', 'name_ls', 'country_ls', 'person_ls')
+    @validator('tags_ls', 'name_ls', 'countries_ls', 'persons_ls')
     def list_search_all_or_any(v):
         if v not in ['all', 'any', 'one_of']:
             raise ValueError("Must be 'any' 'all' or 'one_of'")
