@@ -29,6 +29,19 @@
 
             </section>
 
+            <section>
+                <div class="form-control">
+                    <label>Téléverser des templates :</label> </br>
+                    <form method="POST" action="" enctype="multipart/form-data">
+                        <p><input type="file" value="Choisir" name="upload_template" multiple accept=".docx">
+                            <input type="submit" value="Soumettre">
+                        </p>
+                        <input type="hidden" name="btn_id" value="soumettre_fichier">
+                    </form>
+                </div>
+            </section>
+
+
             <div id="message">
                         {% with messages = get_flashed_messages() %}
                             {% if messages %}
@@ -164,6 +177,7 @@
                         </select>
                     </p>
                     </div>
+
 
                 <p>
                     <input type="submit" name="generate" value="Générer documents">

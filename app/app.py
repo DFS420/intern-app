@@ -401,6 +401,19 @@ def doc_assembler():
             except Exception as e:
                 flash("Erreur : {0}".format(e.message), 'error')
 
+        if request.form['btn_id'] == 'soumettre_fichier':
+            for uploaded_file in request.files.getlist('upload_template'):
+                filename = secure_filename(uploaded_file.filename)
+                if filename != '':
+                    file_ext = os.path.splitext(filename)[1]
+                    # valide si l'extension des fichier est bonne
+                    if file_ext not in ['.docx']:
+                        flash("Les fichiers reçus ne sont des pas des fichiers .docx", 'error')
+                        return redirect(url_for('doc_assembler'))
+                    uploaded_file.save(os.path.join(app.config['DEV_TEMPLATE_DOC'], filename))
+                    flash("Template(s) téléversé(s)", 'message')
+
+
     return render_template(page, persons=metadata['PERSON'], nb_person=metadata['NB_PERSON'],
                            projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'])
 
