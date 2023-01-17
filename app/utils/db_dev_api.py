@@ -16,8 +16,8 @@ DB = TinyDB(db_path, ensure_ascii=False)
 def is_duplicate(data):
     if DB.search(Query().body == data['body']):
         return True
-    elif DB.search(Query().name == data['name']):
-            return True
+    elif DB.search((Query().name == data['name']) & (Query().language == data['language'])):
+        return True
     else:
         return False
 
