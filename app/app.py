@@ -258,7 +258,7 @@ def developpement_add():
             return redirect(url_for("developpement_add") + '?type=' + _type)
 
         elif request.form.get('load', False):
-            data = {'name': request.form['name'], 'type': _type}
+            data = {'name': request.form['name'], 'type': _type, 'language': request.form['language']}
             try:
                 response = requests.get("{0}dev/GET".format(request.host_url), json=data).json()
                 if not response:
