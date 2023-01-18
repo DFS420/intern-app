@@ -18,16 +18,19 @@
                             value = "{{ prefill['name'] }}"
                             required
                     />
-                    <p>
-                        <input type="submit" name="load" value="Charger" formnovalidate="formnovalidate">
-                    </p>
-                </div>
 
                 <div class="form-control">
                     <label for="language_person">Langue</label>
                     <input type="radio" id="language_person" name="language" value="fr" {{ prefill['fr'] }}> Français
                     <input type="radio"               name="language" value="en" {{ prefill['en'] }}> Anglais
                 </div>
+
+                    <p>
+                        <input type="submit" name="load" value="Charger" formnovalidate="formnovalidate">
+                    </p>
+                </div>
+
+
 
                 <div class="form-control">
                     <label for="job">Poste*</label>
