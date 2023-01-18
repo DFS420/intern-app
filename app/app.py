@@ -10,7 +10,7 @@ from .utils import eepower_utils as eeu
 from .utils.File import validate_file_epow as validate, get_uploads_files, purge_file, full_paths, \
     create_dir_if_dont_exist as create_dir, zip_files, decode_str_filename, add_to_list_file, get_items_from_file, \
     save_items_as_json, render_document
-from .utils.dev_db_utils import prefill_prep, prep_data_for_db
+from .utils.dev_db_utils import prefill_prep, prep_data_for_db, get_max_len
 from .linepole.KMLHandler import KMLHandler
 from .linepole import settings as kml_settings
 
@@ -28,6 +28,8 @@ app.config['GENERATED_PATH'] = create_dir(r'generated')
 app.config['CURRENT_OUTPUT_FILE'] = ''
 
 app.config['MAX_XP'] = 3
+app.config['MAX_SLAN'] = 2
+app.config['MAX_DEGREES'] = 2
 
 app.config['UPLOAD_PATH_DEV'] = create_dir(r'uploads/developpement')
 app.config['DEV_TEMPLATE_DOC'] = os.path.join(app.config['UPLOAD_PATH_DEV'], 'templates')
@@ -261,18 +263,30 @@ def developpement_add():
             data = {'name': request.form['name'], 'type': _type, 'language': request.form['language']}
             try:
                 response = requests.get("{0}dev/GET".format(request.host_url), json=data).json()
+
                 if not response:
                     raise FileNotFoundError
                 prefill = prefill_prep(response[0], _type)
+
+                app.config['MAX_XP'] = prefill['xp_len']
+                app.config['MAX_DEGREES'] = prefill['degrees_len']
+                app.config['MAX_SLAN'] = prefill['slan_len']
+
                 return render_template(page, persons=metadata['PERSON'], nb_person=metadata['NB_PERSON'],
                                        projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'],
-                                       prefill=prefill, _type=_type, max_xp=prefill['xp_len'])
+                                       prefill=prefill, _type=_type, max_xp=prefill['xp_len'],
+                                       max_slan=prefill['slan_len'],
+                                       max_degrees=prefill['degrees_len'])
+
             except AttributeError as e:
                 flash("Problème de requests : {0}".format(e), 'error')
+                return redirect(url_for("developpement_add") + '?type=' + _type)
             except FileNotFoundError:
                 flash("Aucun résultat trouvé", 'error')
+                return redirect(url_for("developpement_add") + '?type=' + _type)
             except Exception as e:
                 flash("Erreur : {0}".format(e), 'error')
+                return redirect(url_for("developpement_add") + '?type=' + _type)
 
         if request.form.get('tag_search', False) or request.form.get('save_json', False):
             tags_raw = 'tags_searched'
@@ -291,13 +305,17 @@ def developpement_add():
                         return render_template('json_output.html', results=results)
                 except AttributeError as e:
                     flash("Problème de requests : {0}".format(e.message), 'error')
+                    return redirect(url_for("developpement_add") + '?type=' + _type)
                 except FileNotFoundError:
                     flash("Aucun résultat trouvé", 'error')
+                    return redirect(url_for("developpement_add") + '?type=' + _type)
                 except Exception as e:
                     flash("Erreur : {0}".format(e.message), 'error')
+                    return redirect(url_for("developpement_add") + '?type=' + _type)
 
             else:
                 flash("Aucun tags soumis", 'error')
+                return redirect(url_for("developpement_add") + '?type=' + _type)
 
         elif request.form.get('edit', False):
             data = prep_data_for_db(request.form, _type)
@@ -305,33 +323,83 @@ def developpement_add():
             try:
                 results = requests.get("{0}dev/edit/{1}".format(request.host_url, _type), json=data)
                 if results.status_code == 200:
-                    flash("{0} modifié(e) : entrée n°{1}".format(_type, results.text[1:].split(',')[0]), category='info')
+                    flash("{0} modifié(e) : entrée n°{1}".format(_type, results.text[1:].split(',')[0]),
+                          category='info')
                 else:
                     raise HTTPError
 
             except (ConnectTimeout, HTTPError, ReadTimeout, Timeout, ConnectionError) as e:
                 flash("Problème lors de la création de l'entrée : {0}".format(e), category='error')
+                return redirect(url_for("developpement_add") + '?type=' + _type)
 
         elif request.form.get("add_xp", False):
-            app.config['MAX_XP'] += 1
+            current_xp_len = get_max_len(request.form, 'xp')
+            app.config['MAX_XP'] = current_xp_len + 1
             prefill = prefill_prep(prep_data_for_db(request.form, _type), _type)
             return render_template(page, persons=metadata['PERSON'], nb_person=metadata['NB_PERSON'],
-                                   projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'], prefill=prefill,
-                                   max_xp=app.config['MAX_XP'], _type=_type)
+                                   projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'],
+                                   prefill=prefill, _type=_type, max_xp=app.config['MAX_XP'],
+                                   max_slan=app.config['MAX_SLAN'],
+                                   max_degrees=app.config['MAX_DEGREES'])
 
         elif request.form.get("del_xp", False):
-            app.config['MAX_XP'] -= 1
+            current_xp_len = get_max_len(request.form, 'xp')
+            app.config['MAX_XP'] = current_xp_len - 1
             prefill = prefill_prep(prep_data_for_db(request.form, _type), _type)
             return render_template(page, persons=metadata['PERSON'], nb_person=metadata['NB_PERSON'],
-                                   projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'], prefill=prefill,
-                                   max_xp=app.config['MAX_XP'], _type=_type)
+                                   projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'],
+                                   prefill=prefill, _type=_type, max_xp=app.config['MAX_XP'],
+                                   max_slan=app.config['MAX_SLAN'],
+                                   max_degrees=app.config['MAX_DEGREES'])
+
+        elif request.form.get("add_degree", False):
+            current_deg_len = get_max_len(request.form, 'degree')
+            app.config['MAX_DEGREES'] = current_deg_len + 1
+            prefill = prefill_prep(prep_data_for_db(request.form, _type), _type)
+            return render_template(page, persons=metadata['PERSON'], nb_person=metadata['NB_PERSON'],
+                                   projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'],
+                                   prefill=prefill, _type=_type, max_xp=app.config['MAX_XP'],
+                                   max_slan=app.config['MAX_SLAN'],
+                                   max_degrees=app.config['MAX_DEGREES'])
+
+        elif request.form.get("del_degree", False):
+            current_deg_len = get_max_len(request.form, 'degree')
+            app.config['MAX_DEGREES'] = current_deg_len - 1
+            prefill = prefill_prep(prep_data_for_db(request.form, _type), _type)
+            return render_template(page, persons=metadata['PERSON'], nb_person=metadata['NB_PERSON'],
+                                   projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'],
+                                   prefill=prefill, _type=_type, max_xp=app.config['MAX_XP'],
+                                   max_slan=app.config['MAX_SLAN'],
+                                   max_degrees=app.config['MAX_DEGREES'])
+
+        elif request.form.get("add_lan", False):
+            current_slan_len = get_max_len(request.form, 'slan')
+            app.config['MAX_DEGREES'] = current_slan_len + 1
+            prefill = prefill_prep(prep_data_for_db(request.form, _type), _type)
+            return render_template(page, persons=metadata['PERSON'], nb_person=metadata['NB_PERSON'],
+                                   projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'],
+                                   prefill=prefill, _type=_type, max_xp=app.config['MAX_XP'],
+                                   max_slan=app.config['MAX_SLAN'],
+                                   max_degrees=app.config['MAX_DEGREES'])
+
+        elif request.form.get("del_lan", False):
+            current_slan_len = get_max_len(request.form, 'slan')
+            app.config['MAX_DEGREES'] = current_slan_len - 1
+            prefill = prefill_prep(prep_data_for_db(request.form, _type), _type)
+            return render_template(page, persons=metadata['PERSON'], nb_person=metadata['NB_PERSON'],
+                                   projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'],
+                                   prefill=prefill, _type=_type, max_xp=app.config['MAX_XP'],
+                                   max_slan=app.config['MAX_SLAN'],
+                                   max_degrees=app.config['MAX_DEGREES'])
 
         else:
             flash("Bouton inconnu")
 
     return render_template(page, persons=metadata['PERSON'], nb_person=metadata['NB_PERSON'],
-                           projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'], prefill=prefill,
-                           max_xp=app.config['MAX_XP'], _type=_type)
+                           projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'],
+                           prefill=prefill, _type=_type, max_xp=app.config['MAX_XP'],
+                           max_slan=app.config['MAX_SLAN'],
+                           max_degrees=app.config['MAX_DEGREES'])
 
 
 @app.route("/doc_assembler", methods=['GET', 'POST'])
@@ -348,15 +416,16 @@ def doc_assembler():
         if request.form.get('search', False):
             language = request.form['language']
             tags = list(map(str.lower, re.split(r"\W+\s*", request.form['tags_searched'])))
-            countries = list(map(str.lower, re.split(r"\W+\s*", request.form['countries'])))
-            #todo to implement year = request.form['year']
+            countries = list(map(str.capitalize, re.split(r"\W+\s*", request.form['countries'])))
+            # todo to implement year = request.form['year']
             persons = request.form.getlist('persons')
 
             proj_data = {'tags': tags, "tags_ls": request.form['tags_ls'],
                          'countries': countries, "countries_ls": request.form['countries_ls'],
                          'persons': persons, "persons_ls": request.form['persons_ls'],
                          'language': language, "type": 'project'}
-            per_data = {'names': persons, 'language': language, "type": 'person'}
+            per_data = {'names': persons, 'language': language, "type": 'person', 'tags': tags,
+                        'countries': countries, "countries_ls": request.form['countries_ls'],}
 
             try:
                 results = (requests.get("{0}dev/GET".format(request.host_url), json=proj_data).json(),
@@ -372,10 +441,13 @@ def doc_assembler():
 
             except AttributeError as e:
                 flash("Problème de requests : {0}".format(e.message), 'error')
+                return redirect(url_for('doc_assembler'))
             except FileNotFoundError:
                 flash("Aucun résultat trouvé", 'error')
+                return redirect(url_for('doc_assembler'))
             except Exception as e:
                 flash("Erreur : {0}".format(e.message), 'error')
+                return redirect(url_for('doc_assembler'))
 
         if request.form.get('generate', False):
             template_path = os.path.join(app.config['DEV_TEMPLATE_DOC'], request.form['template'])
@@ -385,7 +457,7 @@ def doc_assembler():
 
             try:
                 projects, persons = (requests.get("{0}dev/GET".format(request.host_url), json=proj_data).json(),
-                           requests.get("{0}dev/GET".format(request.host_url), json=per_data).json())
+                                     requests.get("{0}dev/GET".format(request.host_url), json=per_data).json())
 
                 if not projects and not persons:
                     raise FileNotFoundError
@@ -412,7 +484,6 @@ def doc_assembler():
                         return redirect(url_for('doc_assembler'))
                     uploaded_file.save(os.path.join(app.config['DEV_TEMPLATE_DOC'], filename))
                     flash("Template(s) téléversé(s)", 'message')
-
 
     return render_template(page, persons=metadata['PERSON'], nb_person=metadata['NB_PERSON'],
                            projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'])

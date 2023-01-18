@@ -32,10 +32,15 @@ def prefill_prep(data, _type):
                 prefill['other'][other] = 'selected'
 
             prefill['xp_len'] = 0
+            prefill['slan_len'] = 0
+            prefill['degrees_len'] = 0
 
         if _type == 'person':
 
-            prefill['xp_len'] = len([k for k in prefill['experiences'].keys() if k.isdigit()])
+            prefill['xp_len'] = len([k for k in prefill['experiences'].keys()])
+            prefill['slan_len'] = len([k for k in prefill['spoken_languages'].keys()])
+            prefill['degrees_len'] = len([k for k in prefill['education'].keys()])
+
 
             prefill['associate_project'] = {}
             for associate_project in data['associate_project']:
@@ -72,10 +77,9 @@ def prep_data_for_db(web_input, _type):
 
     data = dict(web_input)
     if _type == 'project':
-        data["countries"] = re.split(r"\W+\s*", web_input['countries'])
+
         data["locations"] = re.split(r"\W+\s*", web_input['locations'])
         data["reference"] = re.split(r"; *", web_input['reference'])
-
         data["expert"] = web_input.getlist('expert')
         data["other"] = web_input.getlist('other')
         data["associate"] = web_input.getlist('associate')
@@ -85,13 +89,28 @@ def prep_data_for_db(web_input, _type):
     elif _type == 'person':
         data['associate_project'] = web_input.getlist('associate_project')
         data['experiences'] = {}
+        data['spoken_languages'] = {}
+        data['education'] = {}
+
         xp = {key: value for key, value in web_input.items() if key.startswith('xp')}
         klen = set([str(key.split('_')[-1]) for key in xp.keys()]) #récupération nombre de lignes d'Expérience
         for id in klen:
-            data['experiences'][id] = {key: value for key, value in xp.items() if key.endswith(id)}
+            kid = 'xp_{0}'.format(id)
+            data['experiences'][kid] = {key: value for key, value in xp.items() if key.endswith(id)}
 
+        slan = {key: value for key, value in web_input.items() if key.startswith('slan')}
+        klen = set([str(key.split('_')[-1]) for key in slan.keys()]) #récupération nombre de lignes de langues
+        for id in klen:
+            kid = 'slan_{0}'.format(id)
+            data['spoken_languages'][kid] = {key: value for key, value in slan.items() if key.endswith(id)}
 
+        degree = {key: value for key, value in web_input.items() if key.startswith('degree')}
+        klen = set([str(key.split('_')[-1]) for key in degree.keys()]) #récupération nombre de lignes de formation
+        for id in klen:
+            kid = 'degree_{0}'.format(id)
+            data['education'][kid] = {key: value for key, value in degree.items() if key.endswith(id)}
 
+    data["countries"] = re.split(r"\W+\s*", web_input['countries'])
     data["type"] = _type
     data["tags"] = list(map(str.lower, re.split(r"\W+\s*|\s+", web_input['{0}_tags'.format(_type)])))
     data["body"] = data["{0}_body".format(_type)]
@@ -99,4 +118,18 @@ def prep_data_for_db(web_input, _type):
     data['custom_entry'] = dict(zip(keys, values))
 
     return data
+
+
+def get_max_len(web_input, entry):
+    """
+    Give the length of new entry table such as 'xp', 'slan', 'degree'
+    :param web_input: typically the request.from from the webpage
+    :type web_input: dict
+    :param entry: name of the entry table (ex: 'slan')
+    :type entry: str
+    :return: the current number of table lines
+    :rtype: int
+    """
+
+    return max([int(k.split('_')[-1]) for k in web_input.keys() if k.startswith(entry)])
 

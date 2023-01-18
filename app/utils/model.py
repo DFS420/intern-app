@@ -58,7 +58,7 @@ class Person(BaseModel):
     """
     name: str
     company: str
-    language = 'fr'
+    language: str = 'fr'
     birthday: str
     job: str
     tel: str = ''
@@ -67,7 +67,10 @@ class Person(BaseModel):
     body: str
     tags: List[str] = []
     associate_project: List[str] = []
+    education: Dict = {}
     experiences: Dict = {}
+    spoken_languages: Dict = {}
+    countries: List[str] = []
     custom_entry: Dict = {}
     type = 'person'
 
