@@ -380,7 +380,7 @@ def developpement_add():
 
         elif request.form.get("add_lan", False):
             current_slan_len = get_max_len(request.form, 'slan')
-            app.config['MAX_DEGREES'] = current_slan_len + 1
+            app.config['MAX_SLAN'] = current_slan_len + 1
             prefill = prefill_prep(prep_data_for_db(request.form, _type), _type)
             return render_template(page, persons=metadata['PERSON'], nb_person=metadata['NB_PERSON'],
                                    projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'],
@@ -390,7 +390,7 @@ def developpement_add():
 
         elif request.form.get("del_lan", False):
             current_slan_len = get_max_len(request.form, 'slan')
-            app.config['MAX_DEGREES'] = current_slan_len - 1
+            app.config['MAX_SLAN'] = current_slan_len - 1
             prefill = prefill_prep(prep_data_for_db(request.form, _type), _type)
             return render_template(page, persons=metadata['PERSON'], nb_person=metadata['NB_PERSON'],
                                    projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'],
