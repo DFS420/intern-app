@@ -297,7 +297,7 @@ def developpement_add():
         if request.form.get('tag_search', False) or request.form.get('save_json', False):
             tags_raw = 'tags_searched'
             if request.form[tags_raw] != '':
-                tags = list(map(str.lower, re.split(r"\W+\s*|\s+", request.form[tags_raw])))
+                tags = list(map(str.lower, re.split(r";\s*", request.form[tags_raw])))
                 data = {'tags': tags, "tags_ls": request.form['list_search'], "type": _type}
                 try:
                     results = requests.get("{0}dev/GET".format(request.host_url), json=data).json()
@@ -421,8 +421,8 @@ def doc_assembler():
     if request.method == 'POST':
         if request.form.get('search', False):
             language = request.form['language']
-            tags = list(map(str.lower, re.split(r"\W+\s*", request.form['tags_searched'])))
-            countries = list(map(str.capitalize, re.split(r"\W+\s*", request.form['countries'])))
+            tags = list(map(str.lower, re.split(r";\s*", request.form['tags_searched'])))
+            countries = list(map(str.capitalize, re.split(r";", request.form['countries'])))
             # todo to implement year = request.form['year']
             persons = request.form.getlist('persons')
 

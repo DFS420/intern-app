@@ -78,8 +78,8 @@ def prep_data_for_db(web_input, _type):
     data = dict(web_input)
     if _type == 'project':
 
-        data["locations"] = re.split(r"\W+\s*", web_input['locations'])
-        data["reference"] = re.split(r"; *", web_input['reference'])
+        data["locations"] = re.split(r";\s*", web_input['locations'])
+        data["reference"] = re.split(r";\s*", web_input['reference'])
         data["expert"] = web_input.getlist('expert')
         data["other"] = web_input.getlist('other')
         data["associate"] = web_input.getlist('associate')
@@ -110,11 +110,11 @@ def prep_data_for_db(web_input, _type):
             kid = 'degree_{0}'.format(id)
             data['education'][kid] = {key: value for key, value in degree.items() if key.endswith(id)}
 
-    data["countries"] = re.split(r"\W+\s*", web_input['countries'])
+    data["countries"] = re.split(r";\s*", web_input['countries'])
     data["type"] = _type
-    data["tags"] = list(map(str.lower, re.split(r"\W+\s*|\s+", web_input['{0}_tags'.format(_type)])))
+    data["tags"] = list(map(str.lower, re.split(r";\s*", web_input['{0}_tags'.format(_type)])))
     data["body"] = data["{0}_body".format(_type)]
-    keys, values = re.split(r";", data['custom_entry_keyword']), re.split(r";", data['custom_entry_value'])
+    keys, values = re.split(r";\s*", data['custom_entry_keyword']), re.split(r";\s*", data['custom_entry_value'])
     data['custom_entry'] = dict(zip(keys, values))
 
     return data
