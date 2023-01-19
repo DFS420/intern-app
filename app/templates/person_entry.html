@@ -211,7 +211,7 @@
                                 />
                             </td>
                             <td><input
-                                type="month"
+                                type="date"
                                 id="xp_stop_date_{{ num_xp }}"
                                 name="xp_stop_date_{{ num_xp }}"
                                 value="{{ prefill['xp_{0}'.format(num_xp)]['xp_stop_date_{0}'.format(num_xp)] if prefill['xp_{0}'.format(num_xp)] }}"
@@ -321,6 +321,7 @@
                             name="countries"
                             placeholder="Entrer les pays dans lequels la personnes a travaillé, séparés par un ';'"
                             value="{{ prefill['countries'] }}"
+                            required
                     />
                     </div>
 
