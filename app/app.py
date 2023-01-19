@@ -250,12 +250,18 @@ def developpement_add():
                 if results.status_code == 200:
                     flash("Entrée enregistrée : entrée n°{0}".format(results.text[1:].split(',')[0]), category='info')
                 else:
-                    flash("Problème lors de la création de l'entrée : {0}".format(str(results.content)),
-                          category='error')
-            except (ConnectTimeout, HTTPError, ReadTimeout, Timeout, ConnectionError) as e:
-                # todo: comprendre pourquoi Connection error a lieu de http error
+                    raise ValueError
+            except (ConnectTimeout, HTTPError, ReadTimeout, Timeout, ConnectionError, ValueError) as e:
+                prefill = prefill_prep(prep_data_for_db(request.form, _type), _type)
+                app.config['MAX_XP'] = prefill['xp_len']
+                app.config['MAX_DEGREES'] = prefill['degrees_len']
+                app.config['MAX_SLAN'] = prefill['slan_len']
                 flash("Problème lors de la création de l'entrée : {0}".format(e), category='error')
-                return redirect(url_for("developpement_add") + '?type=' + _type)
+                return render_template(page, persons=metadata['PERSON'], nb_person=metadata['NB_PERSON'],
+                                       projects=metadata['PROJECT'], nb_project=metadata['NB_PROJECT'],
+                                       prefill=prefill, _type=_type, max_xp=app.config['MAX_XP'],
+                                       max_slan=app.config['MAX_SLAN'],
+                                       max_degrees=app.config['MAX_DEGREES'])
 
             return redirect(url_for("developpement_add") + '?type=' + _type)
 
