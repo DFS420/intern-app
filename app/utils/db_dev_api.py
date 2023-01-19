@@ -109,7 +109,7 @@ def edit(request: Project):
     for k, v in request:
         if v != '' and v != []:
             entry[k] = v
-    return DB.upsert(entry, Query().name == entry['name'])
+    return DB.upsert(entry, (Query().name == entry['name']) & (Query().language == entry['language']))
 
 
 @app.get('/dev/edit/person')
@@ -119,7 +119,7 @@ def edit(request: Person):
         if v != '' and v != []:
             entry[k] = v
 
-    return DB.upsert(entry, Query().name == entry['name'])
+    return DB.upsert(entry, (Query().name == entry['name']) & (Query().language == entry['language']))
 
 
 @app.get('/dev/download_db')
