@@ -59,9 +59,9 @@
 
                 <div class="form-control">
                     <label for="language">Langue</label>
-                    <input type="radio" id="language" name="language" value="fr"> Français
+                    <input type="radio" id="language" name="language" value="fr" checked> Français
                     <input type="radio"               name="language" value="en"> Anglais
-                    <input type="radio"               name="language" value="" checked> Tous
+<!--                    <input type="radio"               name="language" value=""> Tous-->
                 </div>
 
                 <hr style="color: #f6f7f7; margin-left: auto; margin-right: auto;">
@@ -142,7 +142,7 @@
                         <select name="selected_persons" id="selected_persons" multiple>
                             {% for person in selected_persons %}
                                 <option value="{{ person['name'] }}" selected>
-                                    {{ person['name'] }}
+                                    {{ person['name'] }} - {{ person['language'] }}
                                 </option>
                             {% endfor %}
                         </select>
@@ -156,7 +156,7 @@
                         <select name="selected_projects" id="selected_projects" multiple>
                             {% for project in selected_projects %}
                                 <option value="{{ project['name'] }}" selected>
-                                    {{ project['name'] }}
+                                    {{ project['name'] }} - {{ project['language'] }}
                                 </option>
                             {% endfor %}
                         </select>
