@@ -80,6 +80,7 @@ def eepower():
 
 @app.route('/eepower-2', methods=['GET', 'POST'])
 def eepower_traitement():
+    app_name = 'eepower'
     if not eep_data["FILE_NAMES"]:
         try:
             eep_data["FILE_NAMES"] = get_uploads_files(app.config['UPLOAD_PATH_EPOW'])
@@ -110,7 +111,9 @@ def eepower_traitement():
                                        bus_exclus=eep_data["BUS_EXCLUS"],
                                        file_ready=file_ready)
             try:
-                output_path, app.config['CURRENT_OUTPUT_FILE'] = eep.report(eep_data, dirpath)
+                file_list = eep.report(eep_data, dirpath)
+                app.config['CURRENT_OUTPUT_FILE'] = zip_files(file_list, zip_file_name=app_name + '_result')
+
             except FileNotFoundError as e:
                 flash(e, 'error')
                 return render_template('easy_power_traitement.html', nb_scen=eep_data["NB_SCEN"],
