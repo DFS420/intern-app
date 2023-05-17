@@ -44,11 +44,14 @@ def validate_file_epow(file):
     else:
         return -1
 
+
 def dirname(full_path):
     return os.path.dirname(full_path)
 
+
 def full_paths(upload_dir):
     return glob(os.path.join(upload_dir, "*"))
+
 
 def create_dir_if_dont_exist(dir_name):
     Path(dir_name).mkdir(parents=True, exist_ok=True)
@@ -67,22 +70,24 @@ def zip_files(list_of_files, zip_file_name=''):
     """
 
     if zip_file_name == '':
-        file_name = os.path.dirname(list_of_files[0])
+        file_name = Path(list_of_files[0]).parent
 
     #the current working directory is changed to the directory of the first file in the list
     # return to the previous directory after saving
-    previous_dir = os.getcwd()
-    os.chdir(os.path.dirname(os.path.abspath(list_of_files[0])))
-
-    with zipfile.ZipFile(zip_file_name + '.zip',
+    previous_dir = Path.cwd()
+    wd = Path(list_of_files[0]).parent
+    os.chdir(wd)
+    zip_file_name += '.zip'
+    with zipfile.ZipFile(zip_file_name,
                          "w",
                          zipfile.ZIP_DEFLATED,
                          allowZip64=True) as zf:
-        for name in list_of_files:
-            zf.write(os.path.split(name)[-1])
+        for file in list_of_files:
+            zf.write(Path(file).name)
 
+    zippath = wd.joinpath(zip_file_name)
     os.chdir(previous_dir)
-    return os.path.abspath(zf.filename)
+    return zippath.name
 
 
 def decode_str_filename(str_filename):
