@@ -528,3 +528,4 @@ def purge(app_name):
 @app.errorhandler(Exception)
 def basic_error(e):
     return "an error occured: " + str(e)
+
