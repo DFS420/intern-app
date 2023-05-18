@@ -2,11 +2,16 @@ from .eepower_utils import simple_report, group_by_scenario, pire_cas
 from pandas import ExcelWriter
 from pathlib import Path
 from re import search
+import json
 
 XL_FILE_NAME = 'eep-output.xlsx'
 TEX_FILE_NAME = "tab_cc.tex"
+tex_ref_file = Path(r"app/static/config/tex_ref.json")
+with open(tex_ref_file, encoding='utf-8') as file:
+    TEX_REF = json.loads(file.read())
 
-def report(data, target_repert):
+
+def report(data, target_rep):
     """
     Generate a xlsx report for easy power
     :param data: a dictionary that contains all information for the processs
@@ -19,15 +24,15 @@ def report(data, target_repert):
     :type data["FILE_NAME"]: list of str
     :param data["NB_SCEN"]: number of scenario
     :type data["NB_SCEN"]: list of str
-    :param target_repert: the path to the target path
-    :type target_repert: str
+    :param target_rep: the path to the target path
+    :type target_rep: str
     :return: a path to the directory and the name of generated file
     :rtype: tuple of path
     """
     reports = []
     hv = None
-    xl_output_path = Path(target_repert).joinpath(XL_FILE_NAME)
-    tex_output_path = Path(target_repert).joinpath(TEX_FILE_NAME)
+    xl_output_path = Path(target_rep).joinpath(XL_FILE_NAME)
+    tex_output_path = Path(target_rep).joinpath(TEX_FILE_NAME)
 
     writer = ExcelWriter(xl_output_path)
     scenarios = data["SCENARIOS"]
@@ -65,7 +70,7 @@ def report(data, target_repert):
             i = scenarios.index(scenario)
             reports[i].to_excel(writer, sheet_name=('Scénario {0}'.format(scenario)))
         writer.save()
-        #on retourne le repertoire et le fichier séparément
+        # on retourne le repertoire et le fichier séparément
         return xl_output_path, latex_table_filepath
 
     except PermissionError:
@@ -74,41 +79,29 @@ def report(data, target_repert):
         raise ValueError
 
 
-def df_to_tabularay(df, filepath):
+def df_to_tabularay(df, filepath, type='cc'):
     """
     Gives a tabularray table instead of the normal to_latex()
     :param df: DataFrame
     :return:
     """
+    styled_df = df.style \
+        .format_index("\\textbf{{{}}}", escape="latex") \
+        .format(precision=1) \
+        .format(precision=0, subset=["Bus V"])
 
-    match = search(r"(?<=\\midrule\n)(.+\n)+(?=\\bottomrule)", df.to_latex())
+    if type == "af":
+        styled_df.format("\\\colorcell{{{}}}", escape="latex", subset=df.iloc[-1])
+    latex_df = styled_df.to_latex()
+    match = search(r"(?<=\\)(\n.+)+(?=\\\\\n\\end)", latex_df)
     isolated_table = match.group()
-    header = r"""
-    \begin{longtblr}[caption = {Analyse de court-circuit}]%
-                    {colspec={*{7}{ X X X X X X X}},
-                     rowhead = {1},
-                     rows = {font=\small},
-                     row{odd} = {white}, row{even} = {blue9},
-                     column{1} = {3.5cm}
-                     }
-    \toprule \SetRow{bg=abszero,fg=white}
-     %\SetCol{width=5cm}
-    \textbf{Équipement}
-		&\textbf{Scénario} 
-		    & \textbf{Bus (V)} 
-		        & \textbf{Sym Amps (A)} 
-                        & \textbf{X/R Ratio}
-                            & \textbf{Asym Amps(A)}
-                                    & \textbf{I Crête(A)}
-                                        & \textbf{I Sym 30 (A)}\\
-    """
-    foot = r"\end{longtblr}"
 
-    table = header + isolated_table + foot
+    header = TEX_REF[type]['header']
+    footer = TEX_REF[type]['footer']
 
-    with open(filepath, 'w') as file:
+    table = header + isolated_table + footer
+
+    with open(filepath, 'w', encoding='utf-8') as file:
         file.write(table)
 
     return filepath
-
-
