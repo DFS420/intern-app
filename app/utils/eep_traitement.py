@@ -34,7 +34,7 @@ def report(data, target_rep):
     xl_output_path = Path(target_rep).joinpath(XL_FILE_NAME)
     tex_output_path = Path(target_rep).joinpath(TEX_FILE_NAME)
 
-    writer = ExcelWriter(xl_output_path)
+    writer = ExcelWriter(xl_output_path, engine='openpyxl')
     scenarios = data["SCENARIOS"]
 
     for scenario in scenarios:
