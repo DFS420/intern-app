@@ -36,7 +36,7 @@ app.config['DEV_TEMPLATE_DOC'] = os.path.join(app.config['UPLOAD_PATH_DEV'], 'te
 app.config['GENERATED_DEV_DOC_PATH'] = os.path.join(app.config['GENERATED_PATH'], 'developpement')
 
 BUSES_FILE = os.path.join(app.config['UPLOAD_PATH_EPOW'], r'bus_exclus')
-eep_data = {"BUS_EXCLUS": get_items_from_file(BUSES_FILE),
+EEP_DATA = {"BUS_EXCLUS": get_items_from_file(BUSES_FILE),
             "FILE_PATHS": [],
             "FILE_NAMES": [],
             "SCENARIOS": [],
@@ -63,7 +63,7 @@ def eepower():
                         flash("Les fichiers reçus ne sont des fichiers .csv ou .xlsx", 'error')
                     uploaded_file.save(os.path.join(app.config['UPLOAD_PATH_EPOW'], filename))
                     # valide en ouvrant les fichier si le contenue est bon
-                    if validate(os.path.join(app.config['UPLOAD_PATH_EPOW'], filename)) != 0:
+                    if not validate(os.path.join(app.config['UPLOAD_PATH_EPOW'], filename)):
                         os.remove(os.path.join(app.config['UPLOAD_PATH_EPOW'], filename))
                         flash("Les fichiers reçus ne contiennent pas les informations nécessaires ou n'ont "
                               "pas le bon format", 'error')
@@ -81,15 +81,15 @@ def eepower():
 @app.route('/eepower-2', methods=['GET', 'POST'])
 def eepower_traitement():
     app_name = 'eepower'
-    if not eep_data["FILE_NAMES"]:
+    if not EEP_DATA["FILE_NAMES"]:
         try:
-            eep_data["FILE_NAMES"] = get_uploads_files(app.config['UPLOAD_PATH_EPOW'])
-            eep_data["FILE_PATHS"] = full_paths(app.config['UPLOAD_PATH_EPOW'])
-            eep_data["SCENARIOS"] = eeu.scenario_finder(eep_data["FILE_NAMES"])
-            eep_data["NB_SCEN"] = len(eep_data["SCENARIOS"])
+            EEP_DATA["FILE_NAMES"] = get_uploads_files(app.config['UPLOAD_PATH_EPOW'])
+            EEP_DATA["FILE_PATHS"] = full_paths(app.config['UPLOAD_PATH_EPOW'])
+            EEP_DATA["SCENARIOS"] = eeu.scenario_finder(EEP_DATA["FILE_NAMES"])
+            EEP_DATA["NB_SCEN"] = len(EEP_DATA["SCENARIOS"])
         except(AttributeError):
             flash("Problème avec les regex", 'error')
-            eep_data["FILE_NAMES"] = []
+            EEP_DATA["FILE_NAMES"] = []
             return redirect(url_for('eepower_traitement'))
     file_ready = 0
 
@@ -97,9 +97,9 @@ def eepower_traitement():
         if request.form['btn_id'] == 'ajouter_bus':
             if request.form['bus'] != '':
                 add_to_list_file(BUSES_FILE, str.upper(request.form['bus']))
-                eep_data["BUS_EXCLUS"] = get_items_from_file(BUSES_FILE)
-                render_template('easy_power_traitement.html', nb_scen=eep_data["NB_SCEN"],
-                                bus_exclus=eep_data["BUS_EXCLUS"],
+                EEP_DATA["BUS_EXCLUS"] = get_items_from_file(BUSES_FILE)
+                render_template('easy_power_traitement.html', nb_scen=EEP_DATA["NB_SCEN"],
+                                bus_exclus=EEP_DATA["BUS_EXCLUS"],
                                 file_ready=1)
 
         elif request.form['btn_id'] == 'suivant':
@@ -107,21 +107,23 @@ def eepower_traitement():
                 dirpath = create_dir(os.path.join(app.config['GENERATED_PATH'], 'eepower'))
             except FileNotFoundError:
                 flash("Problème lors de la création du répertoire", 'error')
-                return render_template('easy_power_traitement.html', nb_scen=eep_data["NB_SCEN"],
-                                       bus_exclus=eep_data["BUS_EXCLUS"],
+                return render_template('easy_power_traitement.html', nb_scen=EEP_DATA["NB_SCEN"],
+                                       bus_exclus=EEP_DATA["BUS_EXCLUS"],
                                        file_ready=file_ready)
             try:
-                file_list = eep.report(eep_data, dirpath)
+                file_list = []
+                file_list += eep.report_cc(EEP_DATA, dirpath)
+                file_list += eep.report_af(EEP_DATA, dirpath)
                 app.config['CURRENT_OUTPUT_FILE'] = zip_files(file_list, zip_file_name=app_name + '_result')
 
             except FileNotFoundError as e:
                 flash(e, 'error')
-                return render_template('easy_power_traitement.html', nb_scen=eep_data["NB_SCEN"],
-                                       bus_exclus=eep_data["BUS_EXCLUS"],
+                return render_template('easy_power_traitement.html', nb_scen=EEP_DATA["NB_SCEN"],
+                                       bus_exclus=EEP_DATA["BUS_EXCLUS"],
                                        file_ready=file_ready)
 
-            return render_template('easy_power_traitement.html', nb_scen=eep_data["NB_SCEN"],
-                                   bus_exclus=eep_data["BUS_EXCLUS"],
+            return render_template('easy_power_traitement.html', nb_scen=EEP_DATA["NB_SCEN"],
+                                   bus_exclus=EEP_DATA["BUS_EXCLUS"],
                                    file_ready=1)
 
         elif request.form['btn_id'] == 'retour':
@@ -133,7 +135,7 @@ def eepower_traitement():
         elif request.form['btn_id'] == 'terminer':
             return redirect(url_for('purge', app_name='eepower'))
 
-    return render_template('easy_power_traitement.html', nb_scen=eep_data["NB_SCEN"], bus_exclus=eep_data["BUS_EXCLUS"],
+    return render_template('easy_power_traitement.html', nb_scen=EEP_DATA["NB_SCEN"], bus_exclus=EEP_DATA["BUS_EXCLUS"],
                            file_ready=file_ready)
 
 
@@ -522,6 +524,11 @@ def download(app_name, filename):
 def purge(app_name):
     purge_file(os.path.join(app.config['UPLOAD_PATH'], app_name))
     purge_file(os.path.join(app.config['GENERATED_PATH'], app_name))
+    EEP_DATA = {"BUS_EXCLUS": [],
+                "FILE_PATHS": [],
+                "FILE_NAMES": [],
+                "SCENARIOS": [],
+                "NB_SCEN": 0}
     return redirect(url_for(app_name))
 
 

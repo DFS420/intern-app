@@ -8,6 +8,7 @@ from glob import glob
 from pathlib import Path
 from docxtpl import DocxTemplate
 
+
 def get_uploads_files(dir_name=r'.\uploads'):
     if os.path.exists(dir_name) and os.path.isdir(dir_name):
         if not os.listdir(dir_name):
@@ -31,18 +32,40 @@ def purge_file(dir_name=r'.\uploads'):
 def validate_file_epow(file):
     col30 = {'Bus kV', 'Sym Amps'}
     col1 = {"Bus kV", "Sym Amps", "X/R Ratio", "Mult Factor", "Asym Amps", "Equip Type", "Duty Amps"}
+    af_col = {"Arc Fault Bus Name",
+              "Worst Case Scenario",
+              "Arc Fault Bus kV",
+              "Fault Type",
+              "Upstream Trip Device Name",
+              "Bus Bolted Fault (kA)",
+              "Bus Arc Fault (kA)",
+              "Trip Time (sec)",
+              "Arc Time (sec)",
+              "Limited Approach Boundary (m)",
+              "Restricted Approach Boundary (m)",
+              "Working Distance (m)",
+              "Incident Energy\n(cal/cm2)"}
     try:
-        df = pd.DataFrame(pd.read_csv(file, skiprows=1, index_col=0))
+        df = pd.DataFrame(pd.read_csv(file, skiprows=1))
     except:
         try:
-            df = pd.DataFrame(pd.read_excel(file, skiprows=7, index_col=0, engine='openpyxl'))
+            df = pd.DataFrame(pd.read_excel(file, skiprows=7, engine='openpyxl'))
         except openpyxl.utils.exceptions.InvalidFileException as notXL:
             return -1
 
     if col1.issubset(df.columns.to_list()) or col30.issubset(df.columns.to_list()):
-        return 0
-    else:
-        return -1
+        return True
+
+    try:
+        df = pd.DataFrame(pd.read_csv(file, index_col=0))
+    except:
+        try:
+            df = pd.DataFrame(pd.read_excel(file, engine='openpyxl'))
+        except openpyxl.utils.exceptions.InvalidFileException as notXL:
+            return False
+
+    if af_col.issubset(df.columns.to_list()):
+        return True
 
 
 def dirname(full_path):
@@ -72,7 +95,7 @@ def zip_files(list_of_files, zip_file_name=''):
     if zip_file_name == '':
         file_name = Path(list_of_files[0]).parent
 
-    #the current working directory is changed to the directory of the first file in the list
+    # the current working directory is changed to the directory of the first file in the list
     # return to the previous directory after saving
     previous_dir = Path.cwd()
     wd = Path(list_of_files[0]).parent
@@ -157,5 +180,3 @@ def render_document(template_path, doc_path, projects, persons=None):
     doc.save(doc_path)
 
     return doc_path.split('\\')[-1]
-
-
