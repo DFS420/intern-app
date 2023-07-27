@@ -48,7 +48,7 @@ def simple_af_report(rap_af, bus_excluded=None):
     rapport.dropna()
 
     rapport = rapport.rename(columns=columns)
-    rapport.index = rapport.index.rename("Équipement")
+    #rapport.index = rapport.index.rename("Équipement")
 
     #on élimine les colonnes inutile
     column_to_keep = {v for k, v in columns.items()}

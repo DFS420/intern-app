@@ -124,8 +124,11 @@ def df_to_tabularay(df, filepath, type='cc'):
     :param df: DataFrame
     :return:
     """
+    # todo: changer ce comportement une fois solution trouvé
+    #  (voir SO: https://stackoverflow.com/questions/76781323/dataframe-to-latex-create-a-multilevel-header-in-latex-when-the-index-have-a-nam)
+    df.index.name, df.index.names = None, [None]
     styled_df = df.style \
-        .format_index("\\textbf{{{}}}") \
+        .format_index("\\textbf{{{}}}", escape="latex") \
         .format(precision=1, escape="latex") \
         .format(precision=0, subset=["Bus (V)"])
 
