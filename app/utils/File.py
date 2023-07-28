@@ -80,6 +80,9 @@ def validate_file_epow(file):
     if af_col.issubset(df.columns.to_list()) or ed_col.issubset(df.columns.to_list()):
         return True
 
+    missing_col = min([col_set - set(df.columns.to_list()) for col_set in (af_col, ed_col, col30, col1)], key=len)
+    raise ValueError("Les colonnes {0} semblent être manquantes ou mal écrite dans les fichiers fournis".format(missing_col))
+
 
 def dirname(full_path):
     return os.path.dirname(full_path)

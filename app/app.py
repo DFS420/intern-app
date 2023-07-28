@@ -62,12 +62,14 @@ def eepower():
                     if file_ext not in app.config['UPLOAD_EXTENSIONS']:
                         flash("Les fichiers reçus ne sont des fichiers .csv ou .xlsx", 'error')
                     uploaded_file.save(os.path.join(app.config['UPLOAD_PATH_EPOW'], filename))
-                    # valide en ouvrant les fichier si le contenue est bon
-                    if not validate(os.path.join(app.config['UPLOAD_PATH_EPOW'], filename)):
+                    # valide en ouvrant les fichier si le contenu est bon
+                    try:
+                        validate(os.path.join(app.config['UPLOAD_PATH_EPOW'], filename))
+                        return redirect(url_for('eepower'))
+                    except ValueError as e:
                         os.remove(os.path.join(app.config['UPLOAD_PATH_EPOW'], filename))
-                        flash("Les fichiers reçus ne contiennent pas les informations nécessaires ou n'ont "
-                              "pas le bon format", 'error')
-            return redirect(url_for('eepower'))
+                        flash(e.args[0], 'error')
+                        return redirect(url_for('eepower'))
 
         elif request.form['btn_id'] == 'purger':
             return redirect(url_for('purge', app_name='eepower'))
