@@ -1,4 +1,4 @@
-from .eepower_utils import simple_cc_report, simple_af_report, group_by_scenario, pire_cas
+from .eepower_utils import simple_cc_report, simple_af_report, simple_ed_report, group_by_scenario, pire_cas
 from pandas import ExcelWriter
 from pathlib import Path
 from re import search
@@ -8,9 +8,49 @@ CC_XL_FILE_NAME = 'eep-cc-output.xlsx'
 CC_TEX_FILE_NAME = "tab_cc.tex"
 AF_XL_FILE_NAME = 'eep-af-output.xlsx'
 AF_TEX_FILE_NAME = "tab_af.tex"
+ED_XL_FILE_NAME = 'eep-ed-output.xlsx'
+ED_TEX_FILE_NAME = "tab_ed.tex"
 tex_ref_file = Path(r"app/static/config/tex_ref.json")
 with open(tex_ref_file, encoding='utf-8') as file:
     TEX_REF = json.loads(file.read())
+
+
+def report_ed(data, target_rep):
+    """
+    Generate a xlsx and latex report for Equipment Duty
+    :param data: a dictionary that contains all information for the processs
+    :type data: dict
+    :param data["BUS_EXCLUS"]: list of string patern to exclude form the analysis
+    :type data["BUS_EXCLUS"]: list of str
+    :param data["FILE_PATHS"]: list of path to the files
+    :type data["FILE_PATHS"]: list of str
+    :param data["FILE_NAME"]: list of name of the files
+    :type data["FILE_NAME"]: list of str
+    :param target_rep: the path to the target path
+    :type target_rep: str
+    :return: a path to the directory and the name of generated file
+    :rtype: tuple of path
+    """
+
+    xl_output_path = Path(target_rep).joinpath(ED_XL_FILE_NAME)
+    tex_output_path = Path(target_rep).joinpath(ED_TEX_FILE_NAME)
+    try:
+        f = [f for f in data["FILE_PATHS"] if "equipment_duty" in Path(f).name.lower()][0]
+        report = simple_ed_report(f, bus_excluded=data["BUS_EXCLUS"])
+    except IndexError:
+        raise FileNotFoundError("Aucun fichier de capacité d'équipement")
+
+    try:
+        with ExcelWriter(xl_output_path, engine="openpyxl") as writer:
+            report.to_excel(writer)
+            latex_table_filepath = df_to_tabularay(report, tex_output_path, type='ed')
+            # on retourne le repertoire et le fichier séparément
+        return xl_output_path, latex_table_filepath
+
+    except PermissionError:
+        raise PermissionError("Le fichier choisis est déjà ouvert ou vous n'avez pas la permission de l'écrire")
+    except ValueError:
+        raise ValueError
 
 
 def report_af(data, target_rep):
@@ -127,7 +167,7 @@ def df_to_tabularay(df, filepath, type='cc'):
     # todo: changer ce comportement une fois solution trouvé
     #  (voir SO: https://stackoverflow.com/questions/76781323/dataframe-to-latex-create-a-multilevel-header-in-latex-when-the-index-have-a-nam)
     df.index.name, df.index.names = None, [None]
-    styled_df = df.style \
+    styled_df = df.fillna(' ').style \
         .format_index("\\textbf{{{}}}", escape="latex") \
         .format(precision=1, escape="latex") \
         .format(precision=0, subset=["Bus (V)"])

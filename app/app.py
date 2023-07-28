@@ -114,6 +114,7 @@ def eepower_traitement():
                 file_list = []
                 file_list += eep.report_cc(EEP_DATA, dirpath)
                 file_list += eep.report_af(EEP_DATA, dirpath)
+                file_list += eep.report_ed(EEP_DATA, dirpath)
                 app.config['CURRENT_OUTPUT_FILE'] = zip_files(file_list, zip_file_name=app_name + '_result')
 
             except FileNotFoundError as e:

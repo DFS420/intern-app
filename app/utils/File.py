@@ -45,6 +45,19 @@ def validate_file_epow(file):
               "Restricted Approach Boundary (m)",
               "Working Distance (m)",
               "Incident Energy\n(cal/cm2)"}
+    ed_col = {
+        "Equipment\nName",
+        "Worst Case Scenario",
+        "Fault\nType",
+        "Bus Base\nkV",
+        "Manufacturer",
+        "Style",
+        "Test\nStandard",
+        "1/2 Cycle\nRating\n(kA)",
+        "1/2 Cycle\nDuty\n(kA)",
+        "1/2 Cycle\nDuty\n(%)",
+        "Comments"
+    }
     try:
         df = pd.DataFrame(pd.read_csv(file, skiprows=1))
     except:
@@ -64,7 +77,7 @@ def validate_file_epow(file):
         except openpyxl.utils.exceptions.InvalidFileException as notXL:
             return False
 
-    if af_col.issubset(df.columns.to_list()):
+    if af_col.issubset(df.columns.to_list()) or ed_col.issubset(df.columns.to_list()):
         return True
 
 

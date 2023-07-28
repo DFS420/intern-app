@@ -6,6 +6,54 @@ from pathlib import Path
 SCEN_PATERN = r".(lm|hv|30_cycle_report).(scen\D*)(\s*_*-*)(\d+\w{0,1})"
 
 
+def simple_ed_report(rap_ed, bus_excluded=None):
+    """
+    Créer un dataframe pandas avec les données nécessaires issues d'EasyPower:
+
+        Équipement | Scénario | Bus (V) | Type de défault | Disjoncteur en amont | Courant de court circuit (kA) |
+     Courant d'arc (kA) | Temps de déclenchement (s) | Temps de l'arc (s) | Périmètre de sécurité (m) |
+     Distance d'accès limité (m) | Distance de travail (m) | Niveau d'énergie (Cal/cm²)
+    :param rap_af: rapport excel ou csv
+    :type rap_af: str
+    :param bus_excluded: liste des bus à ne pas inclure dans le tableau
+    :type bus_excluded: list of str
+    :return: un Dataframe Pandas contenant les informations nécessaire dans le tableau
+    :rtype: pd.DataFrame
+    """
+    columns = {
+        "Equipment\nName": "Équipement",
+        "Worst Case Scenario": "Scénario",
+        "Fault\nType": "Type de défault",
+        "Bus Base\nkV": "Bus (V)",
+        "Manufacturer": "Manufacturier",
+        "Style": "Style",
+        "Test\nStandard": "Standard de test",
+        "1/2 Cycle\nRating\n(kA)": "Capacité pour 1/2 cycle (kA)",
+        "1/2 Cycle\nDuty\n(kA)": "Utilisation pour 1/2 cycle (kA)",
+        "1/2 Cycle\nDuty\n(%)": "Utilisation pour 1/2 cycle (%)",
+        "Comments": "Commentaires"
+    }
+
+    rapport = pd.DataFrame(pd.read_excel(rap_ed, index_col=0))
+
+    if bus_excluded is not None and bus_excluded != []:
+        rapport = rapport[~rapport.index.str.contains('|'.join(bus_excluded))]
+
+    rapport = rapport.rename(columns=columns)
+
+    #on élimine les colonnes inutile
+    column_to_keep = {v for k, v in columns.items()}
+    column_existing = set(rapport.columns.to_list())
+    column_to_drop = list(column_existing - column_to_keep)
+
+    rapport = rapport.drop(column_to_drop, axis=1)
+    rapport['Bus (V)'] = rapport['Bus (V)'] * 1000
+
+    rapport = rapport.sort_index(ascending=True)
+
+    return rapport
+
+
 def simple_af_report(rap_af, bus_excluded=None):
     """
     Créer un dataframe pandas avec les données nécessaires issues d'EasyPower:
@@ -48,7 +96,6 @@ def simple_af_report(rap_af, bus_excluded=None):
     rapport.dropna()
 
     rapport = rapport.rename(columns=columns)
-    #rapport.index = rapport.index.rename("Équipement")
 
     #on élimine les colonnes inutile
     column_to_keep = {v for k, v in columns.items()}
@@ -62,7 +109,7 @@ def simple_af_report(rap_af, bus_excluded=None):
 
     return rapport.dropna()
 
-#todo: add the possiblity to have csv and excel at the same time
+
 def simple_cc_report(rap_30, rap_1, hv=None, typefile='csv', bus_excluded=None):
     """
     Créer une dataframe pandas en groupant les information utile depuis les rapport 30 cycles et 1 cycle
