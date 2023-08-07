@@ -54,6 +54,7 @@ def eepower():
     if request.method == 'POST':
         # ajout de fichier pour analyse
         if request.form['btn_id'] == 'soumettre_fichier':
+            error_messages = []
             for uploaded_file in request.files.getlist('file'):
                 filename = secure_filename(uploaded_file.filename)
                 if filename != '':
@@ -65,11 +66,12 @@ def eepower():
                     # valide en ouvrant les fichier si le contenu est bon
                     try:
                         validate(os.path.join(app.config['UPLOAD_PATH_EPOW'], filename))
-                        return redirect(url_for('eepower'))
                     except ValueError as e:
                         os.remove(os.path.join(app.config['UPLOAD_PATH_EPOW'], filename))
-                        flash(e.args[0], 'error')
-                        return redirect(url_for('eepower'))
+                        error_messages.append("Fichier {0} : {1}".format(filename, e))
+
+            flash("\n".join(error_messages), 'warning')
+            return redirect(url_for('eepower'))
 
         elif request.form['btn_id'] == 'purger':
             return redirect(url_for('purge', app_name='eepower'))
