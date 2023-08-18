@@ -50,6 +50,7 @@ def parse_excel_sheet(file, sheet_name=0, threshold=5, header=0):
             else:
                 md = pd.DataFrame()
             df_mds.append(md)
+    xl.close()
     return dfs, df_mds
 
 def simple_ed_report(rap_ed, bus_excluded=None):
