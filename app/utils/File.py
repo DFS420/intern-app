@@ -89,12 +89,13 @@ def validate_file_epow(file):
         return True
 
     try:
-        tcc_dfs, tcc_df_mds = parse_excel_sheet(file, header=[0, 1])
-    except openpyxl.utils.exceptions.InvalidFileException as notXL:
+        df_tcc, _ = parse_excel_sheet(file, header=[0, 1])
+        df = df_tcc[0]
+        if set.intersection(tcc_col, df.columns.to_list()[0]) != set():
+            return True
+    except openpyxl.utils.exceptions.InvalidFileException or IndexError:
         return False
 
-    if set.intersection(tcc_col,tcc_dfs[0].columns.to_list()[0]) != set():
-        return True
 
     missing_col = min([col_set - set(df.columns.to_list()) for col_set in (af_col, ed_col, col30, col1)], key=len)
     raise ValueError("Les colonnes {0} semblent être manquantes ou mal écrite dans les fichiers fournis".format(missing_col))
