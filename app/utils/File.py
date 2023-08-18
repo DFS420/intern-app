@@ -60,14 +60,19 @@ def validate_file_epow(file):
         "1/2 Cycle\nDuty\n(%)",
         "Comments"
     }
-    dfs, df_mds = parse_excel_sheet(file, header=[0,1])
+    tcc_col = {
+        "Fuse",
+        "SST",
+        "Thermal Magnetic Breaker"
+    }
+
     try:
         df = pd.DataFrame(pd.read_csv(file, skiprows=1))
     except:
         try:
             df = pd.DataFrame(pd.read_excel(file, skiprows=7, engine='openpyxl'))
         except openpyxl.utils.exceptions.InvalidFileException as notXL:
-            return -1
+            return False
 
     if col1.issubset(df.columns.to_list()) or col30.issubset(df.columns.to_list()):
         return True
@@ -81,6 +86,14 @@ def validate_file_epow(file):
             return False
 
     if af_col.issubset(df.columns.to_list()) or ed_col.issubset(df.columns.to_list()):
+        return True
+
+    try:
+        tcc_dfs, tcc_df_mds = parse_excel_sheet(file, header=[0, 1])
+    except openpyxl.utils.exceptions.InvalidFileException as notXL:
+        return False
+
+    if set.intersection(tcc_col,tcc_dfs[0].columns.to_list()[0]) != set():
         return True
 
     missing_col = min([col_set - set(df.columns.to_list()) for col_set in (af_col, ed_col, col30, col1)], key=len)

@@ -37,18 +37,19 @@ def parse_excel_sheet(file, sheet_name=0, threshold=5, header=0):
     dfs = []
     df_mds = []
     for ind in range(len(table_beginnings)):
-        start = int(table_beginnings[ind])+1
-        if ind < len(table_endings):
-            stop = int(table_endings[ind] + 1)
-        else:
-            stop = int(entire_sheet.shape[0])
-        df = xl.parse(sheet_name=sheet_name, skiprows=start, nrows=stop-start, header=header)
-        dfs.append(df)
-        if start-md_beginnings[ind]-1 > 0:
-            md = xl.parse(sheet_name=sheet_name, skiprows=md_beginnings[ind], nrows=start-md_beginnings[ind]-1).dropna(axis=1)
-        else:
-            md = pd.DataFrame()
-        df_mds.append(md)
+        start = int(table_beginnings[ind])
+        if md_start != start:
+            if ind < len(table_endings):
+                stop = int(table_endings[ind] + 1)
+            else:
+                stop = int(entire_sheet.shape[0])
+            df = xl.parse(sheet_name=sheet_name, skiprows=start, nrows=stop-start, header=header)
+            dfs.append(df)
+            if start-md_beginnings[ind] > 0:
+                md = xl.parse(sheet_name=sheet_name, skiprows=md_beginnings[ind], nrows=start-md_beginnings[ind]).dropna(axis=1)
+            else:
+                md = pd.DataFrame()
+            df_mds.append(md)
     return dfs, df_mds
 
 def simple_ed_report(rap_ed, bus_excluded=None):

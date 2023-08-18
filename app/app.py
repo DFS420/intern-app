@@ -59,11 +59,11 @@ def eepower():
                 filename = secure_filename(uploaded_file.filename)
                 if filename != '':
                     file_ext = os.path.splitext(filename)[1]
-                    # valide si l'extension des fichier est bonne
+                    # valide si l'extension des fichiers est bonne
                     if file_ext not in app.config['UPLOAD_EXTENSIONS']:
                         flash("Les fichiers reçus ne sont des fichiers .csv ou .xlsx", 'error')
                     uploaded_file.save(os.path.join(app.config['UPLOAD_PATH_EPOW'], filename))
-                    # valide en ouvrant les fichier si le contenu est bon
+                    # valide en ouvrant les fichiers si le contenu est bon
                     try:
                         validate(os.path.join(app.config['UPLOAD_PATH_EPOW'], filename))
                     except ValueError as e:
