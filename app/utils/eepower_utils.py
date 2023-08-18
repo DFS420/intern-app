@@ -1,10 +1,55 @@
 import pandas as pd
 from math import sqrt
 import re
+import numpy as np
 from pathlib import Path
 
 SCEN_PATERN = r".(lm|hv|30_cycle_report).(scen\D*)(\s*_*-*)(\d+\w{0,1})"
 
+def parse_excel_sheet(file, sheet_name=0, threshold=5, header=0):
+    """
+    parses multiple tables from an excel sheet into multiple data frame objects. Returns [dfs, df_mds],
+    where dfs is a list of data frames and df_mds their potential associated metadata
+    from https://stackoverflow.com/questions/43367805/pandas-read-excel-multiple-tables-on-the-same-sheet
+    """
+    xl = pd.ExcelFile(file)
+    entire_sheet = xl.parse(sheet_name=sheet_name)
+
+    # count the number of non-Nan cells in each row and then the change in that number between adjacent rows
+    n_values = np.logical_not(entire_sheet.isnull()).sum(axis=1)
+    n_values_deltas = n_values[1:] - n_values[:-1].values
+
+    # define the beginnings and ends of tables using delta in n_values
+    table_beginnings = n_values_deltas > threshold
+    table_beginnings = table_beginnings[table_beginnings].index
+    table_endings = n_values_deltas < -threshold
+    table_endings = table_endings[table_endings].index
+    if len(table_beginnings) < len(table_endings) or len(table_beginnings) > len(table_endings)+1:
+        raise BaseException('Could not detect equal number of beginnings and ends')
+
+    # look for metadata before the beginnings of tables
+    md_beginnings = []
+    for start in table_beginnings:
+        md_start = n_values.iloc[:start][n_values==0].index[-1] + 1
+        md_beginnings.append(md_start)
+
+    # make data frames
+    dfs = []
+    df_mds = []
+    for ind in range(len(table_beginnings)):
+        start = int(table_beginnings[ind])+1
+        if ind < len(table_endings):
+            stop = int(table_endings[ind] + 1)
+        else:
+            stop = int(entire_sheet.shape[0])
+        df = xl.parse(sheet_name=sheet_name, skiprows=start, nrows=stop-start, header=header)
+        dfs.append(df)
+        if start-md_beginnings[ind]-1 > 0:
+            md = xl.parse(sheet_name=sheet_name, skiprows=md_beginnings[ind], nrows=start-md_beginnings[ind]-1).dropna(axis=1)
+        else:
+            md = pd.DataFrame()
+        df_mds.append(md)
+    return dfs, df_mds
 
 def simple_ed_report(rap_ed, bus_excluded=None):
     """
@@ -124,7 +169,6 @@ def simple_cc_report(rap_30, rap_1, hv=None, typefile='csv', bus_excluded=None):
     """
     bus_excluded = [str.upper(bus) for bus in bus_excluded]
     #ajouté pour être sûr de dropper les lignes voulues (easypower donne des noms en capitale)
-
     if typefile == 'csv':
         rapport_30cycles = pd.DataFrame(pd.read_csv(rap_30, skiprows=1, index_col=0))
         rapport_1cycle = pd.DataFrame(pd.read_csv(rap_1, skiprows=1, index_col=0))
@@ -188,12 +232,14 @@ def group_by_scenario(filepath_list, filename_list, scenario):
 
     return grouped_files
 
+
 def scen_num_finder(file_name):
     m = re.search(SCEN_PATERN, file_name.lower())
     if m:
         return m.groups()[-1]
     else:
         return None
+
 
 def scenario_finder(file_names):
     scen_list = []
@@ -205,9 +251,11 @@ def scenario_finder(file_names):
 
     return scen_list
 
+
 def pire_cas(reports, scenarios):
     pire_cas = pd.concat(reports, keys=scenarios, names=["Scénario", None])
     pire_cas = pire_cas.loc[pire_cas.groupby(level=1)['I Peak'].idxmax()]
     pire_cas = pire_cas.sort_values(by='Bus (V)', ascending=False)
     pire_cas = pire_cas.reset_index("Scénario")
     return pire_cas
+

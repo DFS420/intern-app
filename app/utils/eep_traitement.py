@@ -187,3 +187,4 @@ def df_to_tabularay(df, filepath, type='cc'):
         file.write(table)
 
     return filepath
+

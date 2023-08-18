@@ -8,6 +8,8 @@ from glob import glob
 from pathlib import Path
 from docxtpl import DocxTemplate
 
+from app.utils.eepower_utils import parse_excel_sheet
+
 
 def get_uploads_files(dir_name=r'.\uploads'):
     if os.path.exists(dir_name) and os.path.isdir(dir_name):
@@ -58,6 +60,7 @@ def validate_file_epow(file):
         "1/2 Cycle\nDuty\n(%)",
         "Comments"
     }
+    dfs, df_mds = parse_excel_sheet(file, header=[0,1])
     try:
         df = pd.DataFrame(pd.read_csv(file, skiprows=1))
     except:
