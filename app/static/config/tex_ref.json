@@ -14,6 +14,20 @@
   {
     "header": "\\begin{longtblr}[ \ncaption = {Capacité des protections en court-circuits}, \nlabel = {tab:duty} \n] \n{%width=23cm, \n\trowhead=1, \n\tcolspec={*{11}{X X X X X X X X X X X}}, \n\trow{odd} = {white}, row{even} = {blue9}, \n\tcolumn{11} = {3.5cm}, \n} \n \n\\toprule \n\\SetCell{bg=abszero,fg=white} \\textbf{Équipment} & \n\\SetCell{bg=abszero,fg=white} \\textbf{Scénario} & \n\\SetCell{bg=abszero,fg=white} \\textbf{Type de faute} & \n\\SetCell{bg=abszero,fg=white} \\textbf{Tension} & \n\\SetCell{bg=abszero,fg=white} \\textbf{Manufacturier} & \n\\SetCell{bg=abszero,fg=white} \\textbf{Style} & \n\\SetCell{bg=abszero,fg=white} \\textbf{Standard de test} & \n\\SetCell{bg=abszero,fg=white} \\textbf{Calibre 1/2 cycle [kA]} & \n\\SetCell{bg=abszero,fg=white} \\textbf{Travail 1/2 cycle [kA]} & \n\\SetCell{bg=abszero,fg=white} \\textbf{Travail 1/2 cycle [\\%]} & \n\\SetCell{bg=abszero,fg=white} \\textbf{Commentaires} \\\\",
     "footer" : "\n\\end{longtblr}"
+  },
+  "electronique":
+  {
+    "header": "\\begin{longtblr}[\n\tcaption = {Ajustement des disjoncteurs avec unité électronique},\n\tlabel = {tab:disj-elec}\n\t]%\n\t{width=23cm,\n\t\tcolspec={*{14}{X X X X X X| X X X| X X X| X X}},\n\t\trowhead = {2},\n\t\trows = {font=\\small},\n\t\trow{odd} = {white}, row{even} = {blue9},\n\t\t%column{1} = {3.5cm},\n\t\t%column{2} = {1cm},\n\t\t%column{3} = {1.5cm},\n\t\t%column{5} = {1.5cm}\n\t}\n\t\n\t\\toprule\n\t\\SetCell[c=6]{c} \\SetCell{bg=abszero,fg=white}\\textbf{Description} & & \n\t& & & &  \\SetCell[c=3]{c} \\SetCell{bg=abszero,fg=white} \\textbf{Seuil long} & & & \\SetCell[c=3]{c} \\SetCell{bg=abszero,fg=white} \n\t\\textbf{Seuil court} & & &   \\SetCell[c=2]{c}\\SetCell \n\t{bg=abszero,fg=white} \\textbf{Instantané}  \\\\\n\t%\t\t\\SetCell[c=3]{c}\\SetCell {bg=abszero,fg=white}\n\t%\t\t\\textbf{Fuite à terre}  \n\t\\textbf{ID} &\n\t\\textbf{Manuf.} &\n\t\\textbf{Type} &\n\t\\textbf{Style} &\n\t\\textbf{Frame}&\n\t\\textbf{Plug}&\n\t\\textbf{Setting} &\n\t\\textbf{Trip (A)} & \n\t\\textbf{Delai (s)} &\n\t\\textbf{Setting} &\n\t\\textbf{Trip (A)} &\n\t\\textbf{Delai (s)} & \n\t\\textbf{Setting} &\n\t\\textbf{Trip (A)}\\\\",
+    "footer" : "\n\\end{longtblr}"
+  },
+    "magnetothermique":
+  {
+    "header": "\\begin{longtblr}[\n\tcaption = {Ajustement des disjoncteurs magnéto-thermique},\n\tlabel = {tab:disj-magn}\n\t]%\n\t{width=23cm,\n\t\tcolspec={*{8}{X X X X X X|X X}},\n\t\trowhead = {2},\n\t\trows = {font=\\small},\n\t\trow{odd} = {white}, row{even} = {blue9},\n\t\tcolumn{1} = {3.8cm},\n\t\tcolumn{4} = {1cm},\n\t\tcolumn{6} = {1cm},\n\t\tcolumn{7} = {1cm},\n\t\tcolumn{8} = {1cm}\n\t}\n\t\\toprule\n\t\\SetCell[c=6]{c} \\SetCell{bg=abszero,fg=white}\\textbf{Description} & & & &\n\t& & \\SetCell[c=2]{c}\\SetCell {bg=abszero,fg=white} \\textbf{Instantané} &  \\\\\n\t\\textbf{Circuit} &\n\t\\textbf{Manufact} &\n\t\\textbf{Type} &\n\t\\textbf{Style} &\n\t\\textbf{Frame}&\n\t\\textbf{Trip (A)} & \n\t\\textbf{Setting} &\n\t\\textbf{Trip (A)}\\\\",
+    "footer" : "\n\\end{longtblr}"
+  },
+    "fuse":
+  {
+    "header": "\\begin{longtblr}[\n\tcaption = {Calibre des fusibles},\n\tlabel = {tab:fuse}\n\t]%\n\t{width=23cm,\n\t\tcolspec={*{7}{X X X X X X X X}},\n\t\trowhead = {1},\n\t\trows = {font=\\small},\n\t\trow{odd} = {white}, row{even} = {blue9},\n\t}\n\t\\toprule\n\t\\SetRow{bg=abszero,fg=white}\n\t\\textbf{Circuit} &\n\t\\textbf{Manufact} &\n\t\\textbf{Type} &\n\t\\textbf{Style} &\n\t\\textbf{Modèle}&\n\t\\textbf{V} & \n\t\\textbf{Calibre} \\\\",
+    "footer" : "\n\\end{longtblr}"
   }
-
 }
