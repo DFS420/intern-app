@@ -13,53 +13,148 @@ def parse_excel_sheet(file, sheet_name=0, threshold=5, header=0):
     from https://stackoverflow.com/questions/43367805/pandas-read-excel-multiple-tables-on-the-same-sheet
     """
     xl = pd.ExcelFile(file)
-    entire_sheet = xl.parse(sheet_name=sheet_name)
+    try:
+        entire_sheet = xl.parse(sheet_name=sheet_name)
 
-    # count the number of non-Nan cells in each row and then the change in that number between adjacent rows
-    n_values = np.logical_not(entire_sheet.isnull()).sum(axis=1)
-    n_values_deltas = n_values[1:] - n_values[:-1].values
+        # count the number of non-Nan cells in each row and then the change in that number between adjacent rows
+        n_values = np.logical_not(entire_sheet.isnull()).sum(axis=1)
+        n_values_deltas = n_values[1:] - n_values[:-1].values
 
-    # define the beginnings and ends of tables using delta in n_values
-    table_beginnings = n_values_deltas > threshold
-    table_beginnings = table_beginnings[table_beginnings].index
-    table_endings = n_values_deltas < -threshold
-    table_endings = table_endings[table_endings].index
-    if len(table_beginnings) < len(table_endings) or len(table_beginnings) > len(table_endings)+1:
-        raise BaseException('Could not detect equal number of beginnings and ends')
+        # define the beginnings and ends of tables using delta in n_values
+        table_beginnings = n_values_deltas > threshold
+        table_beginnings = table_beginnings[table_beginnings].index
+        table_endings = n_values_deltas < -threshold
+        table_endings = table_endings[table_endings].index
+        if len(table_beginnings) < len(table_endings) or len(table_beginnings) > len(table_endings)+1:
+            raise BaseException('Could not detect equal number of beginnings and ends')
 
-    # look for metadata before the beginnings of tables
-    md_beginnings = []
-    for start in table_beginnings:
-        md_start = n_values.iloc[:start][n_values==0].index[-1] + 1
-        md_beginnings.append(md_start)
+        # look for metadata before the beginnings of tables
+        md_beginnings = []
+        for start in table_beginnings:
+            md_start = n_values.iloc[:start][n_values==0].index[-1] + 1
+            md_beginnings.append(md_start)
 
-    # make data frames
-    dfs = []
-    df_mds = []
-    for ind in range(len(table_beginnings)):
-        start = int(table_beginnings[ind])
-        if md_start != start:
-            if ind < len(table_endings):
-                stop = int(table_endings[ind] + 1)
-            else:
-                stop = int(entire_sheet.shape[0])
-            df = xl.parse(sheet_name=sheet_name, skiprows=start, nrows=stop-start, header=header)
-            dfs.append(df)
-            if start-md_beginnings[ind] > 0:
-                md = xl.parse(sheet_name=sheet_name, skiprows=md_beginnings[ind], nrows=start-md_beginnings[ind]).dropna(axis=1)
-            else:
-                md = pd.DataFrame()
-            df_mds.append(md)
-    xl.close()
-    return dfs, df_mds
+        # make data frames
+        dfs = []
+        df_mds = []
+        for ind in range(len(table_beginnings)):
+            start = int(table_beginnings[ind])
+            if md_start != start:
+                if ind < len(table_endings):
+                    stop = int(table_endings[ind] + 1)
+                else:
+                    stop = int(entire_sheet.shape[0])
+                df = xl.parse(sheet_name=sheet_name, skiprows=start, nrows=stop-start, header=header)
+                dfs.append(df)
+                if start-md_beginnings[ind] > 0:
+                    md = xl.parse(sheet_name=sheet_name, skiprows=md_beginnings[ind],
+                                  nrows=start-md_beginnings[ind]).dropna(axis=1)
+                else:
+                    md = pd.DataFrame()
+                df_mds.append(md)
+        xl.close()
+        return dfs, df_mds
+    except Exception as e:
+        xl.close()
+        raise e
 
-def simple_ed_report(rap_ed, bus_excluded=None):
+
+
+def simple_tcc_reports(rap_tcc, bus_excluded=None):
     """
     Créer un dataframe pandas avec les données nécessaires issues d'EasyPower:
 
-        Équipement | Scénario | Bus (V) | Type de défault | Disjoncteur en amont | Courant de court circuit (kA) |
-     Courant d'arc (kA) | Temps de déclenchement (s) | Temps de l'arc (s) | Périmètre de sécurité (m) |
-     Distance d'accès limité (m) | Distance de travail (m) | Niveau d'énergie (Cal/cm²)
+    :param rap_af: rapport excel ou csv
+    :type rap_af: str
+    :param bus_excluded: liste des bus à ne pas inclure dans le tableau
+    :type bus_excluded: list of str
+    :return: un Dataframe Pandas contenant les informations nécessaire dans le tableau
+    :rtype: pd.DataFrame
+    """
+    tables = {
+        "fuse": pd.DataFrame(),
+        "magnetothermique": pd.DataFrame(),
+        "electronique": pd.DataFrame()
+    }
+
+    columns = {
+        "fuse":{
+            "Fuse": "Description",
+            "ID": "Équip.",
+            "Manufacturer": "Manufacturier",
+            "Type": "Type",
+            "Style": "Style",
+            "Model": "Modèle",
+            "kV": "V",
+            "Size": "Calibre"
+        },
+        "electronique": {
+            "SST": "Description",
+            "LTPU": "Seuil long",
+            "STPU": "Seuil court",
+            "Inst": "Instantané",
+            "ID": "Équip.",
+            "Manufacturer": "Manuf.",
+            "Type": "Type",
+            "Style": "Style",
+            "Frame/Sensor": "Format",
+            "tap/plug": "entrée",
+            "Setting": "Réglage",
+            "Trip (A)": "Décl.(A)",
+            "Band": "Délais (s)"
+        },
+        "magnetothermique": {
+            "Thermal Magnetic Breaker": "Description",
+            "Instantaneous": "Instantané",
+            "ID": "Équip.",
+            "Manufacturer": "Manuf.",
+            "Type": "Type",
+            "Style": "Style",
+            "Frame": "Format",
+            "Trip": "décl.",
+            "Setting": "Réglage",
+            "Trip (A)": "Décl.(A)",
+        }
+    }
+
+    rapports, _ = parse_excel_sheet(rap_tcc, header=[0, 1])
+    for df in rapports:
+        prim_cols = set([prim for prim, sec in df.columns.to_list()])
+        if "Fuse" in prim_cols:
+            tables["fuse"] = df.set_index(("Fuse", "ID"))
+        elif "SST" in prim_cols:
+            tables["electronique"] = df.set_index(("SST", "ID"))
+        elif "Thermal Magnetic Breaker" in prim_cols:
+            tables["magnetothermique"] = df.set_index(("Thermal Magnetic Breaker", "ID"))
+
+    for rapport_name, rapport_df in tables.items():
+        if bus_excluded is not None and bus_excluded != []:
+            rapport_df = rapport_df[~rapport_df.index.str.contains('|'.join(bus_excluded))]
+
+        # rapport_df = rapport_df.reset_index()
+        rapport_df = rapport_df.rename(columns=columns[rapport_name])
+
+        #on élimine les colonnes inutile
+        column_to_keep = {v for k, v in columns[rapport_name].items()}
+        column_existing = set(rapport_df.columns.get_level_values(1))
+        column_to_drop = list(column_existing - column_to_keep)
+
+        rapport_df = rapport_df.drop(column_to_drop, axis=1, level=1)
+        if "ZSI" in rapport_df.columns.get_level_values(0):
+            rapport_df = rapport_df.drop(["ZSI", "Ground Trip"], axis=1, level=0)
+
+        if "V" in rapport_df.columns.get_level_values(1):
+            rapport_df.loc[:,('Description','V')] = rapport_df['Description']['V'] * 1000
+
+        tables[rapport_name] = rapport_df
+
+    return tables
+
+
+def simple_ed_report(rap_ed, bus_excluded=None):
+    """
+    Créer un dataframe pandas avec les données nécessaires issues d'EasyPower
+
     :param rap_af: rapport excel ou csv
     :type rap_af: str
     :param bus_excluded: liste des bus à ne pas inclure dans le tableau

@@ -72,10 +72,10 @@ def validate_file_epow(file):
         try:
             df = pd.DataFrame(pd.read_excel(file, skiprows=7, engine='openpyxl'))
         except openpyxl.utils.exceptions.InvalidFileException as notXL:
-            return False
+            return None
 
     if col1.issubset(df.columns.to_list()) or col30.issubset(df.columns.to_list()):
-        return True
+        return "CC"
 
     try:
         df = pd.DataFrame(pd.read_csv(file, index_col=0))
@@ -83,22 +83,28 @@ def validate_file_epow(file):
         try:
             df = pd.DataFrame(pd.read_excel(file, engine='openpyxl'))
         except openpyxl.utils.exceptions.InvalidFileException as notXL:
-            return False
+            return None
 
-    if af_col.issubset(df.columns.to_list()) or ed_col.issubset(df.columns.to_list()):
-        return True
+    if af_col.issubset(df.columns.to_list()):
+        return "AF"
+    if ed_col.issubset(df.columns.to_list()):
+        return "ED"
 
     try:
         df_tcc, _ = parse_excel_sheet(file, header=[0, 1])
         df = df_tcc[0]
         if set.intersection(tcc_col, df.columns.to_list()[0]) != set():
-            return True
-    except openpyxl.utils.exceptions.InvalidFileException or IndexError:
-        return False
+            return "TCC"
+    except openpyxl.utils.exceptions.InvalidFileException:
+        return None
+
+    except IndexError:
+        missing_col = min([col_set - set(df.columns.to_list()) for col_set in (af_col, ed_col, col30, col1)], key=len)
+        raise ValueError(
+            "Les colonnes {0} semblent être manquantes ou mal écrite dans les fichiers fournis".format(missing_col))
 
 
-    missing_col = min([col_set - set(df.columns.to_list()) for col_set in (af_col, ed_col, col30, col1)], key=len)
-    raise ValueError("Les colonnes {0} semblent être manquantes ou mal écrite dans les fichiers fournis".format(missing_col))
+
 
 
 def dirname(full_path):

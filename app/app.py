@@ -3,7 +3,7 @@ import os, secrets, re, requests
 
 from requests import ReadTimeout, ConnectTimeout, HTTPError, Timeout, ConnectionError
 
-from flask import Flask, render_template, request, redirect, url_for, abort, Response, flash, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, Response, flash, send_from_directory
 from werkzeug.utils import secure_filename
 from .utils import eep_traitement as eep
 from .utils import eepower_utils as eeu
@@ -40,7 +40,8 @@ EEP_DATA = {"BUS_EXCLUS": get_items_from_file(BUSES_FILE),
             "FILE_PATHS": [],
             "FILE_NAMES": [],
             "SCENARIOS": [],
-            "NB_SCEN": 0}
+            "NB_SCEN": 0,
+            "REPORT_TYPE": []}
 
 
 @app.route('/')
@@ -55,7 +56,8 @@ def eepower():
         # ajout de fichier pour analyse
         if request.form['btn_id'] == 'soumettre_fichier':
             error_messages = []
-            for uploaded_file in request.files.getlist('file'):
+            submittted_files = request.files.getlist('file')
+            for uploaded_file in submittted_files:
                 filename = secure_filename(uploaded_file.filename)
                 if filename != '':
                     file_ext = os.path.splitext(filename)[1]
@@ -65,7 +67,7 @@ def eepower():
                     uploaded_file.save(os.path.join(app.config['UPLOAD_PATH_EPOW'], filename))
                     # valide en ouvrant les fichiers si le contenu est bon
                     try:
-                        validate(os.path.join(app.config['UPLOAD_PATH_EPOW'], filename))
+                        EEP_DATA["REPORT_TYPE"].append(validate(os.path.join(app.config['UPLOAD_PATH_EPOW'], filename)))
                     except ValueError as e:
                         os.remove(os.path.join(app.config['UPLOAD_PATH_EPOW'], filename))
                         error_messages.append("Fichier {0} : {1}".format(filename, e))
@@ -116,9 +118,19 @@ def eepower_traitement():
                                        file_ready=file_ready)
             try:
                 file_list = []
-                file_list += eep.report_cc(EEP_DATA, dirpath)
-                file_list += eep.report_af(EEP_DATA, dirpath)
-                file_list += eep.report_ed(EEP_DATA, dirpath)
+                if "CC" in EEP_DATA["REPORT_TYPE"]:
+                    file_list += eep.report_cc(EEP_DATA, dirpath)
+                if "AF" in EEP_DATA["REPORT_TYPE"]:
+                    file_list += eep.report_af(EEP_DATA, dirpath)
+                if "ED" in EEP_DATA["REPORT_TYPE"]:
+                    file_list += eep.report_ed(EEP_DATA, dirpath)
+                if "TCC" in EEP_DATA["REPORT_TYPE"]:
+                    file_list += eep.report_tcc(EEP_DATA, dirpath)
+                if file_list == []:
+                    flash("Pas de fichiers fournis", 'error')
+                    return render_template('easy_power_traitement.html', nb_scen=EEP_DATA["NB_SCEN"],
+                                           bus_exclus=EEP_DATA["BUS_EXCLUS"],
+                                           file_ready=file_ready)
                 app.config['CURRENT_OUTPUT_FILE'] = zip_files(file_list, zip_file_name=app_name + '_result')
 
             except FileNotFoundError as e:
