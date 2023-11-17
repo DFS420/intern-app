@@ -87,16 +87,15 @@ def eepower():
 @app.route('/eepower-2', methods=['GET', 'POST'])
 def eepower_traitement():
     app_name = 'eepower'
-    if not EEP_DATA["FILE_NAMES"]:
-        try:
-            EEP_DATA["FILE_NAMES"] = get_uploads_files(app.config['UPLOAD_PATH_EPOW'])
-            EEP_DATA["FILE_PATHS"] = full_paths(app.config['UPLOAD_PATH_EPOW'])
-            EEP_DATA["SCENARIOS"] = eeu.scenario_finder(EEP_DATA["FILE_NAMES"])
-            EEP_DATA["NB_SCEN"] = len(EEP_DATA["SCENARIOS"])
-        except(AttributeError):
-            flash("Problème avec les regex", 'error')
-            EEP_DATA["FILE_NAMES"] = []
-            return redirect(url_for('eepower_traitement'))
+    try:
+        EEP_DATA["FILE_NAMES"] = get_uploads_files(app.config['UPLOAD_PATH_EPOW'])
+        EEP_DATA["FILE_PATHS"] = full_paths(app.config['UPLOAD_PATH_EPOW'])
+        EEP_DATA["SCENARIOS"] = eeu.scenario_finder(EEP_DATA["FILE_NAMES"])
+        EEP_DATA["NB_SCEN"] = len(EEP_DATA["SCENARIOS"])
+    except(AttributeError):
+        flash("Problème avec les regex", 'error')
+        EEP_DATA["FILE_NAMES"] = []
+        return redirect(url_for('eepower_traitement'))
     file_ready = 0
 
     if request.method == 'POST':
