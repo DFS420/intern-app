@@ -4,7 +4,7 @@ import re
 import numpy as np
 from pathlib import Path
 
-SCEN_PATERN = r".(lm|hv|30_cycle_report).(scen\D*)(\s*_*-*)(\d+\w{0,1})"
+SCEN_PATERN = r"(?i)(lv|lm|hv|30_cycle_report).+(scen\D*)(\s*_*-*)(\d+\w{0,1})"
 
 def parse_excel_sheet(file, sheet_name=0, threshold=5, header=0):
     """
@@ -176,9 +176,11 @@ def simple_ed_report(rap_ed, bus_excluded=None):
         "Comments": "Commentaires"
     }
 
-    rapport = pd.DataFrame(pd.read_excel(rap_ed, index_col=0))
+    rapport = pd.DataFrame(pd.read_excel(rap_ed))
 
     if bus_excluded is not None and bus_excluded != []:
+        rapport.fillna(method='ffill', inplace=True)
+        rapport = rapport.set_index('Bus Name')
         rapport = rapport[~rapport.index.str.contains('|'.join(bus_excluded))]
 
     rapport = rapport.rename(columns=columns)
