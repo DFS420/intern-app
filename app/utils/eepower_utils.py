@@ -112,6 +112,7 @@ def simple_tcc_reports(rap_tcc, bus_excluded=None):
             "Style": "Style",
             "Frame": "Format",
             "Trip": "décl.",
+            "Trip Adjust": "Ajust.",
             "Setting": "Réglage",
             "Trip (A)": "Décl.(A)",
         }
