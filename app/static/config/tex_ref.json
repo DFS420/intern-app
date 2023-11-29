@@ -22,7 +22,7 @@
   },
     "magnetothermique":
   {
-    "header": "\\begin{longtblr}[\n\tcaption = {Ajustement des disjoncteurs magnéto-thermique},\n\tlabel = {tab:disj-magn}\n\t]%\n\t{width=23cm,\n\t\tcolspec={*{8}{X X X X X X|X X}},\n\t\trowhead = {2},\n\t\trows = {font=\\small},\n\t\trow{odd} = {white}, row{even} = {blue9},\n\t\tcolumn{1} = {3.8cm},\n\t\tcolumn{4} = {1cm},\n\t\tcolumn{6} = {1cm},\n\t\tcolumn{7} = {1cm},\n\t\tcolumn{8} = {1cm}\n\t}\n\t\\toprule\n\t\\SetCell[c=6]{c} \\SetCell{bg=abszero,fg=white}\\textbf{Description} & & & &\n\t& & \\SetCell[c=2]{c}\\SetCell {bg=abszero,fg=white} \\textbf{Instantané} &  \\\\\n\t\\textbf{Circuit} &\n\t\\textbf{Manufact} &\n\t\\textbf{Type} &\n\t\\textbf{Style} &\n\t\\textbf{Frame}&\n\t\\textbf{Trip (A)} & \n\t\\textbf{Setting} &\n\t\\textbf{Trip (A)}\\\\",
+    "header": "\\begin{longtblr}[\n\tcaption = {Ajustement des disjoncteurs magnéto-thermique},\n\tlabel = {tab:disj-magn}\n\t]%\n\t{width=23cm,\n\t\tcolspec={*{9}{X X X X X X X|X X}},\n\t\trowhead = {2},\n\t\trows = {font=\\small},\n\t\trow{odd} = {white}, row{even} = {blue9},\n\t\tcolumn{1} = {3.8cm},\n\t\tcolumn{4} = {1cm},\n\t\tcolumn{6} = {1cm},\n\t\tcolumn{7} = {1cm},\n\t\tcolumn{8} = {1cm}\n\t}\n\t\\toprule\n\t\\SetCell[c=7]{c} \\SetCell{bg=abszero,fg=white}\\textbf{Description} & & & & &\n\t& & \\SetCell[c=2]{c}\\SetCell {bg=abszero,fg=white} \\textbf{Instantané} &  \\\\\n\t\\textbf{Circuit} &\n\t\\textbf{Manufact} &\n\t\\textbf{Type} &\n\t\\textbf{Style} &\n\t\\textbf{Frame}&\n\t\\textbf{Trip (A)} &\n\t\\textbf{Ajust.} & \n\t\\textbf{Setting} &\n\t\\textbf{Trip (A)}\\\\",
     "footer" : "\n\\end{longtblr}"
   },
     "fuse":
