@@ -177,7 +177,7 @@ def simple_ed_report(rap_ed, bus_excluded=None):
         "Comments": "Commentaires"
     }
 
-    rapport = pd.DataFrame(pd.read_excel(rap_ed))
+    rapport = pd.DataFrame(pd.read_excel(rap_ed, index_col=1))
 
     if bus_excluded is not None and bus_excluded != []:
         rapport.fillna(method='ffill', inplace=True)
