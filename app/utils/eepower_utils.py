@@ -181,7 +181,6 @@ def simple_ed_report(rap_ed, bus_excluded=None):
 
     if bus_excluded is not None and bus_excluded != []:
         rapport.fillna(method='ffill', inplace=True)
-        rapport = rapport.set_index('Bus Name')
         rapport = rapport[~rapport.index.str.contains('|'.join(bus_excluded))]
 
     rapport = rapport.rename(columns=columns)
