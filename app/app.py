@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os, secrets, re, requests
+import pathlib
 
 from requests import ReadTimeout, ConnectTimeout, HTTPError, Timeout, ConnectionError
 
@@ -58,19 +59,20 @@ def eepower():
             error_messages = []
             submittted_files = request.files.getlist('file')
             for uploaded_file in submittted_files:
-                filename = secure_filename(uploaded_file.filename)
-                if filename != '':
-                    file_ext = os.path.splitext(filename)[1]
+                file = pathlib.Path(secure_filename(uploaded_file.filename))
+                if file.name != '':
                     # valide si l'extension des fichiers est bonne
-                    if file_ext not in app.config['UPLOAD_EXTENSIONS']:
+                    if file.suffix not in app.config['UPLOAD_EXTENSIONS']:
                         flash("Les fichiers reçus ne sont des fichiers .csv ou .xlsx", 'error')
-                    uploaded_file.save(os.path.join(app.config['UPLOAD_PATH_EPOW'], filename))
+                    path_to_file = pathlib.Path(app.config['UPLOAD_PATH_EPOW']) / file
+                    uploaded_file.save(path_to_file)
                     # valide en ouvrant les fichiers si le contenu est bon
                     try:
-                        EEP_DATA["REPORT_TYPE"].append(validate(os.path.join(app.config['UPLOAD_PATH_EPOW'], filename)))
+
+                        EEP_DATA["REPORT_TYPE"].append(validate(path_to_file))
                     except ValueError as e:
-                        os.remove(os.path.join(app.config['UPLOAD_PATH_EPOW'], filename))
-                        error_messages.append("Fichier {0} : {1}".format(filename, e))
+                        os.remove(path_to_file)
+                        error_messages.append("{0}".format(e))
 
             flash("\n".join(error_messages), 'warning')
             return redirect(url_for('eepower'))
