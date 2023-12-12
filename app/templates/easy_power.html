@@ -80,7 +80,7 @@
                         Les fichiers téléversés sont les suivants :
                         <ul>
                             {% for file in uploaded_files %}
-                                <li>{{ file }} </li>
+                                <li>{{ file.name }} </li>
                             {% endfor %}
                         </ul>
                         <div id="purge">

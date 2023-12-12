@@ -5,31 +5,25 @@ from pathlib import Path
 import os
 import json
 import zipfile
-from glob import glob
 from pathlib import Path
 from docxtpl import DocxTemplate
 
 from app.utils.eepower_utils import parse_excel_sheet
 
 
-def get_uploads_files(dir_name=r'.\uploads'):
-    if os.path.exists(dir_name) and os.path.isdir(dir_name):
-        if not os.listdir(dir_name):
-            print("Directory ", dir_name, " is empty")
-            return []
-        else:
-            print("Directory ", dir_name, " is not empty")
-            return os.listdir(dir_name)
-
+def get_uploads_files(upload_dir=r'.\uploads'):
+    upload_dir = Path(upload_dir)
+    if upload_dir.exists() and upload_dir.is_dir():
+        return [child for child in upload_dir.iterdir()]
     else:
-        print("Directory ", dir_name, " doesn't exist")
+        print("Directory ", upload_dir.name, " doesn't exist")
         return []
 
 
-def purge_file(dir_name=r'.\uploads'):
+def purge_file(dir_name=Path(r'.\uploads')):
     if get_uploads_files(dir_name) != []:
         for file in get_uploads_files(dir_name):
-            os.remove(os.path.join(dir_name, file))
+            file.unlink()
 
 
 def validate_file_epow(file):
@@ -118,7 +112,7 @@ def validate_file_epow(file):
         if ed_col.issubset(df.columns.to_list()):
             return "ED"
         else:
-            missing_col = ed_col- set(df.columns.to_list())
+            missing_col = ed_col - set(df.columns.to_list())
             raise ValueError(
                 "Les colonnes {0} du fichier '{1}' semblent être manquantes ou mal écrite dans les fichiers "
                 "fournis".format(missing_col, file.name)
@@ -140,12 +134,8 @@ def validate_file_epow(file):
             return None
 
 
-def dirname(full_path):
-    return os.path.dirname(full_path)
-
-
 def full_paths(upload_dir):
-    return glob(os.path.join(upload_dir, "*"))
+    return upload_dir / "*"
 
 
 def create_dir_if_dont_exist(dir_name):
