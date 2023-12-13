@@ -11,6 +11,10 @@ from docxtpl import DocxTemplate
 from app.utils.eepower_utils import parse_excel_sheet
 
 
+class FileError(Exception):
+    pass
+
+
 def get_uploads_files(upload_dir=r'.\uploads'):
     upload_dir = Path(upload_dir)
     if upload_dir.exists() and upload_dir.is_dir():
@@ -33,7 +37,7 @@ def validate_file_epow(file):
     :return: The type of file it is for the study, None is not valitated
     """
     file_names_patern = {
-        "cc": "(?i)(LV|LM.Momentary)|(30.Cycle)",
+        "cc": "(?i)(.*LM|.*LV.Momentary)|(.*30.Cycle)",
         "af": "(?i)Arc.Flash",
         "ed": "(?i)Equipment.Duty",
         "tcc": "(?i)TCC.coordination"
@@ -79,46 +83,46 @@ def validate_file_epow(file):
             try:
                 df = pd.DataFrame(pd.read_excel(file, skiprows=7, engine='openpyxl'))
             except openpyxl.utils.exceptions.InvalidFileException as notXL:
-                return None
+                raise FileError("Le type de fichiers n'est pas .xlsx")
 
         if col1.issubset(df.columns.to_list()) or col30.issubset(df.columns.to_list()):
             return "CC"
         else:
             missing_col = col30 + col1 - set(df.columns.to_list())
-            raise ValueError(
+            raise FileError(
                 "Les colonnes {0} du fichier '{1}' semblent être manquantes ou mal écrite dans les fichiers "
                 "fournis".format(missing_col, file)
             )
 
-    if re.match(file_names_patern['af'], file.name):
+    elif re.match(file_names_patern['af'], file.name):
         try:
             df = pd.DataFrame(pd.read_excel(file, engine='openpyxl'))
         except openpyxl.utils.exceptions.InvalidFileException as notXL:
-            return None   
+            raise FileError("Le type de fichiers n'est pas .xlsx")
         if af_col.issubset(df.columns.to_list()):
             return "AF"
         else:
             missing_col = af_col - set(df.columns.to_list())
-            raise ValueError(
+            raise FileError(
                 "Les colonnes {0} du fichier '{1}' semblent être manquantes ou mal écrite dans les fichiers "
                 "fournis".format(missing_col, file)
             )
         
-    if re.match(file_names_patern['ed'],  file.name):
+    elif re.match(file_names_patern['ed'],  file.name):
         try:
             df = pd.DataFrame(pd.read_excel(file, engine='openpyxl'))
         except openpyxl.utils.exceptions.InvalidFileException as notXL:
-            return None
+            raise FileError("Le type de fichiers n'est pas .xlsx")
         if ed_col.issubset(df.columns.to_list()):
             return "ED"
         else:
             missing_col = ed_col - set(df.columns.to_list())
-            raise ValueError(
+            raise FileError(
                 "Les colonnes {0} du fichier '{1}' semblent être manquantes ou mal écrite dans les fichiers "
                 "fournis".format(missing_col, file.name)
             )
 
-    if re.match(file_names_patern['tcc'], file.name):
+    elif re.match(file_names_patern['tcc'], file.name):
         try:
             df_tcc, _ = parse_excel_sheet(file, header=[0, 1])
             df = df_tcc[0]
@@ -126,12 +130,16 @@ def validate_file_epow(file):
                 return "TCC"
             else:
                 missing_col = ("infos manquantes")
-                raise ValueError(
+                raise FileError(
                     "Les colonnes {0} du fichier '{1}' semblent être manquantes ou mal écrite dans les fichiers "
                     "fournis".format(missing_col, file.name)
                 )
         except openpyxl.utils.exceptions.InvalidFileException:
-            return None
+            raise FileError("Le type de fichiers n'est pas .xlsx")
+
+    else:
+        raise FileError(
+            "Le fichier '{0}' ne semblent pas être un fichier géré par cet outil".format(file.name))
 
 
 def full_paths(upload_dir):
@@ -155,12 +163,12 @@ def zip_files(list_of_files, zip_file_name=''):
     """
 
     if zip_file_name == '':
-        file_name = Path(list_of_files[0]).parent
+        file_name = list_of_files[0].parent
 
     # the current working directory is changed to the directory of the first file in the list
     # return to the previous directory after saving
     previous_dir = Path.cwd()
-    wd = Path(list_of_files[0]).parent
+    wd = list_of_files[0].parent
     os.chdir(wd)
     zip_file_name += '.zip'
     with zipfile.ZipFile(zip_file_name,
@@ -168,9 +176,9 @@ def zip_files(list_of_files, zip_file_name=''):
                          zipfile.ZIP_DEFLATED,
                          allowZip64=True) as zf:
         for file in list_of_files:
-            zf.write(Path(file).name)
+            zf.write(file.name)
 
-    zippath = wd.joinpath(zip_file_name)
+    zippath = wd/zip_file_name
     os.chdir(previous_dir)
     return zippath.name
 
@@ -242,3 +250,7 @@ def render_document(template_path, doc_path, projects, persons=None):
     doc.save(doc_path)
 
     return doc_path.split('\\')[-1]
+
+
+
+

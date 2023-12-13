@@ -48,8 +48,8 @@ def report_tcc(data, target_rep):
                         Path(target_rep).joinpath(MT_TEX_FILE_NAME)]
 
     try:
-        f = [f for f in data["FILE_PATHS"] if "tcc_coordination" in Path(f).name.lower()][0]
-        reports = simple_tcc_reports(f, bus_excluded=data["BUS_EXCLUS"])
+        f = [f for f in data["FILES"] if "tcc_coordination" in f.name.lower()][0]
+        reports = simple_tcc_reports(str(f), bus_excluded=data["BUS_EXCLUS"])
     except IndexError:
         raise FileNotFoundError("Aucun fichier de réglages de protections")
 
@@ -97,8 +97,8 @@ def report_ed(data, target_rep):
     xl_output_path = Path(target_rep).joinpath(ED_XL_FILE_NAME)
     tex_output_path = Path(target_rep).joinpath(ED_TEX_FILE_NAME)
     try:
-        f = [f for f in data["FILE_PATHS"] if "equipment_duty" in Path(f).name.lower()][0]
-        report = simple_ed_report(f, bus_excluded=data["BUS_EXCLUS"])
+        f = [f for f in data["FILES"] if "equipment_duty" in f.name.lower()][0]
+        report = simple_ed_report(str(f), bus_excluded=data["BUS_EXCLUS"])
     except IndexError:
         raise FileNotFoundError("Aucun fichier de capacité d'équipement")
 
@@ -135,8 +135,8 @@ def report_af(data, target_rep):
     xl_output_path = Path(target_rep).joinpath(AF_XL_FILE_NAME)
     tex_output_path = Path(target_rep).joinpath(AF_TEX_FILE_NAME)
     try:
-        f = [f for f in data["FILE_PATHS"] if "arc_flash_scenario_report" in Path(f).name.lower()][0]
-        report = simple_af_report(f, bus_excluded=data["BUS_EXCLUS"])
+        f = [f for f in data["FILES"] if "arc_flash_scenario_report" in f.name.lower()][0]
+        report = simple_af_report(str(f), bus_excluded=data["BUS_EXCLUS"])
     except IndexError:
         raise FileNotFoundError("Aucun fichier de niveau d'arc-flash")
 
@@ -162,8 +162,8 @@ def report_cc(data, target_rep):
     :type data["BUS_EXCLUS"]: list of str
     :param data["FILE_PATHS"]: list of path to the files
     :type data["FILE_PATHS"]: list of str
-    :param data["FILE_NAME"]: list of name of the files
-    :type data["FILE_NAME"]: list of str
+    :param data["FILE"]: list of name of the files
+    :type data["FILE"]: list of str
     :param data["NB_SCEN"]: number of scenario
     :type data["NB_SCEN"]: list of str
     :param target_rep: the path to the target path
@@ -173,24 +173,24 @@ def report_cc(data, target_rep):
     """
     reports = []
     hv = None
-    xl_output_path = Path(target_rep).joinpath(CC_XL_FILE_NAME)
-    tex_output_path = Path(target_rep).joinpath(CC_TEX_FILE_NAME)
+    xl_output_path = Path(target_rep)/CC_XL_FILE_NAME
+    tex_output_path = Path(target_rep)/CC_TEX_FILE_NAME
 
     scenarios = data["SCENARIOS"]
 
     for scenario in scenarios:
-        group = group_by_scenario(data["FILE_PATHS"], data["FILE_NAMES"], scenario)
+        group = group_by_scenario(data["FILES"], scenario)
         file30, file1, _type = None, None, None
-        for path, name in group:
-            if '30_Cycle_Report' in name or '30 Cycle' in name:
-                file30 = path
-            elif 'LV' in name or 'LM' in name:
-                file1 = path
-            elif 'HV' in name:
-                hv = path
-            if '.csv' in path:
+        for file in group:
+            if '30_Cycle_Report' in file.name or '30 Cycle' in file.name:
+                file30 = file
+            elif 'LV' in file.name or 'LM' in file.name:
+                file1 = file
+            elif 'HV' in file.name:
+                hv = file
+            if '.csv' in file.suffix:
                 _type = 'csv'
-            elif '.xls' in path:
+            elif '.xls' in file.suffix:
                 _type = 'xlsx'
 
         if not _type:
@@ -198,7 +198,7 @@ def report_cc(data, target_rep):
         elif not file1 or not file30:
             raise FileNotFoundError("Il faut au moins un fichier 30s et un fichier instantané")
 
-        tmp_report = simple_cc_report(file30, file1, hv=hv, typefile=_type, bus_excluded=data["BUS_EXCLUS"])
+        tmp_report = simple_cc_report(str(file30), str(file1), hv=hv, typefile=_type, bus_excluded=data["BUS_EXCLUS"])
         reports.append(tmp_report)
 
     pire_cas_rap = pire_cas(reports, scenarios)
