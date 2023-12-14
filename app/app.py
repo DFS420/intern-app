@@ -4,7 +4,7 @@ import pathlib
 
 from requests import ReadTimeout, ConnectTimeout, HTTPError, Timeout, ConnectionError
 
-from flask import Flask, render_template, request, redirect, url_for, Response, flash, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory
 from werkzeug.utils import secure_filename
 from .utils import eep_traitement as eep
 from .utils import eepower_utils as eeu
@@ -22,6 +22,9 @@ app = Flask(__name__)
 app.register_blueprint(db_dev_api)
 
 app.secret_key = secrets.token_bytes()
+
+app.config['ROOT_DIR'] = pathlib.Path(__file__)
+
 app.config['MAX_CONTENT_LENGTH'] = 3072 * 3072
 app.config['UPLOAD_EXTENSIONS'] = ['.csv', '.xlsx', '.xls']
 app.config['UPLOAD_PATH'] = create_dir('uploads')
@@ -46,6 +49,12 @@ EEP_DATA = {"BUS_EXCLUS": get_items_from_file(BUSES_FILE),
             "SCENARIOS": [],
             "NB_SCEN": 0,
             "REPORT_TYPE": []}
+
+
+def get_config():
+    if 'config' not in g:
+        g.config = app.config
+    return g.config
 
 
 @app.route('/')
