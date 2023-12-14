@@ -18,7 +18,7 @@ SST_XL_FILE_NAME = 'eep-sst-output.xlsx'
 SST_TEX_FILE_NAME = "tab_sst.tex"
 MT_XL_FILE_NAME = 'eep-mt-output.xlsx'
 MT_TEX_FILE_NAME = "tab_mt.tex"
-tex_ref_file = Path(r"app/static/config/tex_ref.json")
+tex_ref_file = Path().cwd()/Path(r"app/static/config/tex_ref.json")
 with open(tex_ref_file, encoding='utf-8') as file:
     TEX_REF = json.loads(file.read())
 
