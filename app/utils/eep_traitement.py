@@ -56,13 +56,14 @@ def report_tcc(data, target_rep):
     for report_name, report in reports.items():
         try:
             idx = 0
-            match report_name:
-                case 'fuse':
-                    idx = 0
-                case 'magnetothermique':
-                    idx = 1
-                case 'electronique':
+            if report_name == 'fuse':
+                idx = 0
+            elif report_name == 'magnetothermique':
+                idx = 1
+            elif report_name == 'electronique':
                     idx = 2
+            else:
+                raise ValueError("report_name n'a pas la bonne valeurs : {0}".format(report_name))
 
             with ExcelWriter(xl_output_paths[idx], engine="openpyxl") as writer:
                 report.to_excel(writer)
