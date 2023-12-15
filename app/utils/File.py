@@ -180,18 +180,8 @@ def zip_files(list_of_files, zip_file_name=''):
 
     zippath = wd/zip_file_name
     os.chdir(previous_dir)
-    return zippath.name
+    return zippath
 
-
-def decode_str_filename(str_filename):
-    try:
-        test_str = eval(str_filename)
-        if len(test_str[0]) > 1:
-            return test_str, 'list'
-        else:
-            return str_filename, 'str'
-    except NameError or IndexError:
-        return str_filename, 'str'
 
 
 def add_to_list_file(filename, *items):

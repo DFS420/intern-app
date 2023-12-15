@@ -1,7 +1,9 @@
 from app import app
 
 
-intern_app = app.app
+intern_app = app.create_app()
+
 
 if __name__ == "__main__":
-    intern_app.run()
+    with intern_app.app_context():
+        intern_app.run()
