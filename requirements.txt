@@ -32,7 +32,7 @@ geopy~=2.1.0
 shapely>=1.7.1
 fastkml~=0.11
 colour~=0.1.5
-pydantic~=1.10.2
+Flask-Pydantic~=0.11
 tinydb~=4.7.0
 uvicorn
 requests

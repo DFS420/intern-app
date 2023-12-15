@@ -1,14 +1,13 @@
 import re
 import pandas as pd
 import openpyxl
-from pathlib import Path
 import os
 import json
 import zipfile
 from pathlib import Path
 from docxtpl import DocxTemplate
 
-from app.utils.eepower_utils import parse_excel_sheet
+from app.eep.eepower_utils import parse_excel_sheet
 
 
 class FileError(Exception):
@@ -183,7 +182,6 @@ def zip_files(list_of_files, zip_file_name=''):
     return zippath
 
 
-
 def add_to_list_file(filename, *items):
     with open(filename, 'a') as file:
         for item in items:
@@ -193,7 +191,7 @@ def add_to_list_file(filename, *items):
 
 
 def get_items_from_file(filename):
-    if os.path.exists(filename):
+    if Path(filename).exists():
         with open(filename, 'r') as file:
             lines = [line.rstrip('\n') for line in file]
         file.close()
@@ -205,7 +203,7 @@ def get_items_from_file(filename):
 
 
 def get_items_from_json(filename):
-    if os.path.exists(filename):
+    if Path(filename).exists():
         with open('data.json') as json_file:
             data = json.load(json_file)
 
@@ -213,12 +211,13 @@ def get_items_from_json(filename):
 
 
 def save_items_as_json(data, path, filename="data.json"):
+    file = Path(filename)
     json_object = json.dumps(data, indent=4)
-    filepath = os.path.join(path, filename)
+    filepath = path/file
     with open(filepath, "w") as outfile:
         outfile.write(json_object)
 
-    return filename, filepath
+    return file
 
 
 def render_document(template_path, doc_path, projects, persons=None):
@@ -239,7 +238,7 @@ def render_document(template_path, doc_path, projects, persons=None):
     doc.render(context)
     doc.save(doc_path)
 
-    return doc_path.split('\\')[-1]
+    return doc_path
 
 
 

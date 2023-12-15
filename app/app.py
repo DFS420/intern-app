@@ -8,8 +8,7 @@ from werkzeug.utils import secure_filename
 
 from .linepole import settings as kml_settings
 from .linepole.KMLHandler import KMLHandler
-from .utils import eep_traitement as eep
-from .utils import eepower_utils as eeu
+from .eep import eepower_utils as eeu, eep_traitement as eep
 
 from .utils.File import validate_file_epow as validate, get_uploads_files, purge_file, full_paths, \
     create_dir_if_dont_exist as create_dir, zip_files, add_to_list_file, get_items_from_file, \
@@ -49,7 +48,7 @@ def create_app():
                 "REPORT_TYPE": []}
 
     with app.app_context():
-        from app.DevApp.DbDevApi import db_dev_api
+        from app.dev_app.DbDevApi import db_dev_api
         app.register_blueprint(db_dev_api)
 
     @app.route('/')

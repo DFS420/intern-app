@@ -1,16 +1,18 @@
 import requests
-from flask import Blueprint, current_app, Response, request, render_template, flash, redirect, url_for
+import simplejson.errors
+from flask import Blueprint, current_app, request, render_template, flash, redirect, url_for
 from requests import ReadTimeout, ConnectTimeout, HTTPError, Timeout, ConnectionError
 from werkzeug.utils import secure_filename
 from pathlib import Path
 import re
 from app.utils.File import create_dir_if_dont_exist as create_dir,\
-    save_items_as_json, render_document
-from app.utils.dev_db_utils import prep_data_for_db, prefill_prep, get_max_len
-from app.DevApp.model import Person, Project, Getter
+    save_items_as_json, render_document, get_uploads_files
+from app.dev_app.dev_db_utils import prep_data_for_db, prefill_prep, get_max_len
+from app.dev_app.model import Person, Project, Getter
 from tinydb import TinyDB, Query
 import pandas as pd
 import json
+from flask_pydantic import validate
 
 db_dev_api = Blueprint('db_dev_api', __name__)
 
@@ -39,6 +41,7 @@ def root():
 
 
 @db_dev_api.route("/dev/project/ADD", methods=['GET', 'POST'])
+@validate()
 def add_project(request: Project):
     project = {}
     for k, v in request:
@@ -53,6 +56,7 @@ def add_project(request: Project):
 
 
 @db_dev_api.route("/dev/person/ADD", methods=['GET', 'POST'])
+@validate()
 def add_person(request: Person):
     person = {}
     for k, v in request:
@@ -66,7 +70,8 @@ def add_person(request: Person):
         raise ValueError("L'entrée {0} existe déjà".format(person['name']))
 
 
-@db_dev_api.route("/dev/GET", methods=['GET', 'POST'])
+@db_dev_api.route("/dev/GET", methods=['GET'])
+@validate()
 def get(request: Getter):
     _type = ''
     entry = {}
@@ -102,6 +107,7 @@ def get(request: Getter):
 
 
 @db_dev_api.route("/dev/edit/project", methods=['GET', 'POST'])
+@validate()
 def edit_project(request: Project):
     entry = {}
     for k, v in request:
@@ -111,6 +117,7 @@ def edit_project(request: Project):
 
 
 @db_dev_api.route("/dev/edit/person", methods=['GET', 'POST'])
+@validate()
 def edit_person(request: Person):
     entry = {}
     for k, v in request:
@@ -185,7 +192,7 @@ def developpement_add():
                                        max_slan=current_app.config['MAX_SLAN'],
                                        max_degrees=current_app.config['MAX_DEGREES'])
 
-            return redirect(url_for("developpement_add") + '?type=' + _type)
+            return redirect(url_for("db_dev_api.developpement_add") + '?type=' + _type)
 
         elif request.form.get('load', False):
             data = {'name': request.form['name'], 'type': _type, 'language': request.form['language']}
@@ -208,13 +215,13 @@ def developpement_add():
 
             except AttributeError as e:
                 flash("Problème de requests : {0}".format(e), 'error')
-                return redirect(url_for("developpement_add") + '?type=' + _type)
+                return redirect(url_for("db_dev_api.developpement_add") + '?type=' + _type)
             except FileNotFoundError:
                 flash("Aucun résultat trouvé", 'error')
-                return redirect(url_for("developpement_add") + '?type=' + _type)
+                return redirect(url_for("db_dev_api.developpement_add") + '?type=' + _type)
             except Exception as e:
                 flash("Erreur : {0}".format(e), 'error')
-                return redirect(url_for("developpement_add") + '?type=' + _type)
+                return redirect(url_for("db_dev_api.developpement_add") + '?type=' + _type)
 
         if request.form.get('tag_search', False) or request.form.get('save_json', False):
             tags_raw = 'tags_searched'
@@ -227,23 +234,23 @@ def developpement_add():
                         raise FileNotFoundError
                     if request.form.get('save_json', False):
                         dirpath = create_dir(current_app.config['GENERATED_PATH']/'developpement')
-                        filename, _ = save_items_as_json(results, dirpath)
-                        return redirect(url_for('download', app_name=app_name, filename=filename))
+                        file = save_items_as_json(results, dirpath)
+                        return redirect(url_for('download', app_name=app_name, filename=file.name))
                     else:
                         return render_template('json_output.html', results=results)
                 except AttributeError as e:
                     flash("Problème de requests : {0}".format(e.message), 'error')
-                    return redirect(url_for("developpement_add") + '?type=' + _type)
+                    return redirect(url_for("db_dev_api.developpement_add") + '?type=' + _type)
                 except FileNotFoundError:
                     flash("Aucun résultat trouvé", 'error')
-                    return redirect(url_for("developpement_add") + '?type=' + _type)
+                    return redirect(url_for("db_dev_api.developpement_add") + '?type=' + _type)
                 except Exception as e:
                     flash("Erreur : {0}".format(e.message), 'error')
-                    return redirect(url_for("developpement_add") + '?type=' + _type)
+                    return redirect(url_for("db_dev_api.developpement_add") + '?type=' + _type)
 
             else:
                 flash("Aucun tags soumis", 'error')
-                return redirect(url_for("developpement_add") + '?type=' + _type)
+                return redirect(url_for("db_dev_api.developpement_add") + '?type=' + _type)
 
         elif request.form.get('edit', False):
             data = prep_data_for_db(request.form, _type)
@@ -258,7 +265,7 @@ def developpement_add():
 
             except (ConnectTimeout, HTTPError, ReadTimeout, Timeout, ConnectionError) as e:
                 flash("Problème lors de la création de l'entrée : {0}".format(e), category='error')
-                return redirect(url_for("developpement_add") + '?type=' + _type)
+                return redirect(url_for("db_dev_api.developpement_add") + '?type=' + _type)
 
         elif request.form.get("add_xp", False):
             current_xp_len = get_max_len(request.form, 'xp')
@@ -336,7 +343,7 @@ def doc_assembler():
     """
     app_name = 'developpement'
     metadata = get_metadata()
-    templates = current_app.get_uploads_files(dir_name='./uploads/developpement/templates')
+    templates = get_uploads_files(upload_dir='uploads/developpement/templates')
     page = 'doc_assembler.html'
 
     if request.method == 'POST':
@@ -355,8 +362,8 @@ def doc_assembler():
                         'countries': countries, "countries_ls": request.form['countries_ls'],}
 
             try:
-                results = (requests.get("{0}dev/GET".format(request.host_url), json=proj_data).json(),
-                           requests.get("{0}dev/GET".format(request.host_url), json=per_data).json())
+                results = (requests.get("{0}dev/GET".format(request.host_url), params=proj_data).json(),
+                           requests.get("{0}dev/GET".format(request.host_url), params=per_data).json())
 
                 if not results[0] and not results[1]:
                     raise FileNotFoundError
@@ -368,13 +375,16 @@ def doc_assembler():
 
             except AttributeError as e:
                 flash("Problème de requests : {0}".format(e.message), 'error')
-                return redirect(url_for('doc_assembler'))
+                return redirect(url_for('db_dev_api.doc_assembler'))
             except FileNotFoundError:
                 flash("Aucun résultat trouvé", 'error')
-                return redirect(url_for('doc_assembler'))
+                return redirect(url_for('db_dev_api.doc_assembler'))
+            except simplejson.errors.JSONDecodeError as e:
+                flash("Erreur lors de la lecture de la base de donneés : {0}".format(e.doc), 'error')
+                return redirect(url_for('db_dev_api.doc_assembler'))
             except Exception as e:
-                flash("Erreur : {0}".format(e.message), 'error')
-                return redirect(url_for('doc_assembler'))
+                flash("Erreur : {0}".format(e.args[0]), 'error')
+                return redirect(url_for('db_dev_api.doc_assembler'))
 
         if request.form.get('generate', False):
             template_path = current_app.config['DEV_TEMPLATE_DOC']/request.form['template']
@@ -408,7 +418,7 @@ def doc_assembler():
                     # valide si l'extension des fichiers est bonne
                     if file_ext not in ['.docx']:
                         flash("Les fichiers reçus ne sont des fichiers .docx", 'error')
-                        return redirect(url_for('doc_assembler'))
+                        return redirect(url_for('db_dev_api.doc_assembler'))
                     uploaded_file.save(current_app.config['DEV_TEMPLATE_DOC']/file)
                     flash("Template(s) téléversé(s)", 'message')
 
