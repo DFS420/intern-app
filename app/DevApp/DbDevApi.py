@@ -127,7 +127,7 @@ def download_db(_type: str):
             data = json.loads(f.read())['_default']
             df = pd.DataFrame(data).T
             csv_path = current_app.config['UPLOAD_PATH_DEV']/'dev_db.csv'
-            df.to_csv(csv_path, encoding='UTF-8', sep=';')
+            df.to_csv(csv_path, encoding='UTF-8-sig', sep=';')
             return redirect(url_for('download', app_name='developpement', filename=csv_path))
     else:
         return redirect(url_for('download', app_name='developpement', filename=current_app.config['DB_PATH']))
