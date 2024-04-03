@@ -18,7 +18,7 @@ class Project(BaseModel):
     locations: List[str] = []
     client: str
     client_address: str = ''
-    founder = ''
+    founder: str = ''
     reference: List[str] = []
 
     contract_value: int = 0
@@ -39,7 +39,7 @@ class Project(BaseModel):
 
     custom_entry: Dict = {}
 
-    type = 'project'
+    type: str = 'project'
 
 
     @validator('start_date', 'stop_date')
@@ -72,7 +72,7 @@ class Person(BaseModel):
     spoken_languages: Dict = {}
     countries: List[str] = []
     custom_entry: Dict = {}
-    type = 'person'
+    type: str = 'person'
 
 
 class Getter(BaseModel):
