@@ -254,7 +254,7 @@ def create_app():
 
         return render_template('linepole.html', uploaded_files=uploaded_files, file_ready=0, file_submit=0, loader=0)
 
-    @app.route('/<file>/', methods=['GET', 'POST'])
+    @app.route('/download/<file>/', methods=['GET', 'POST'])
     def download(file):
         directory = pathlib.Path(file).parent.absolute()
         filename = pathlib.Path(file).name
