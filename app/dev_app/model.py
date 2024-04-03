@@ -9,7 +9,7 @@ class Project(BaseModel):
     Define a project inputs
     """
     name: str
-    language = 'fr'
+    language: str = 'fr'
     start_date: str
     stop_date: str
     duration: str
