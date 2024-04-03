@@ -139,7 +139,7 @@ def create_app():
                         return render_template('easy_power_traitement.html', nb_scen=EEP_DATA["NB_SCEN"],
                                                bus_exclus=EEP_DATA["BUS_EXCLUS"],
                                                file_ready=file_ready)
-                    app.config['CURRENT_OUTPUT_FILE'] = zip_files(file_list, zip_file_name=app_name + '_result')
+                    app.config['CURRENT_OUTPUT_FILE'] = pathlib.Path(zip_files(file_list, zip_file_name=app_name + '_result'))
 
                 except FileNotFoundError as e:
                     flash(e, 'error')
@@ -155,7 +155,7 @@ def create_app():
                 return redirect(url_for('eepower'))
 
             elif request.form['btn_id'] == 'telecharger':
-                return redirect(url_for('download', app_name='eepower', filename=app.config['CURRENT_OUTPUT_FILE']))
+                return redirect(url_for('download', app_name='eepower', file=app.config['CURRENT_OUTPUT_FILE']))
 
             elif request.form['btn_id'] == 'terminer':
                 return redirect(url_for('purge', app_name='eepower'))
@@ -216,7 +216,7 @@ def create_app():
 
                 outputs = [kml_file_name, cam_file_name, csv_name]
 
-                app.config['CURRENT_OUTPUT_FILE'] = os.path.basename(zip_files(outputs, zip_file_name=app_name + '_result'))
+                app.config['CURRENT_OUTPUT_FILE'] = pathlib.Path(zip_files(outputs, zip_file_name=app_name + '_result'))
                 return render_template('linepole.html', uploaded_files=uploaded_files, file_ready=1, file_submit=1,
                                        pole=1, parallele=0)
 
@@ -239,7 +239,7 @@ def create_app():
 
                 outputs = [kml_file_name, csv_name]
 
-                app.config['CURRENT_OUTPUT_FILE'] = os.path.basename(zip_files(outputs, zip_file_name=app_name + '_result'))
+                app.config['CURRENT_OUTPUT_FILE'] = pathlib.Path(zip_files(outputs, zip_file_name=app_name + '_result'))
                 return render_template('linepole.html', uploaded_files=uploaded_files, file_ready=1, file_submit=1,
                                        pole=0, parallele=1)
 
@@ -247,21 +247,18 @@ def create_app():
                 return redirect(url_for('purge', app_name=app_name, file_submit=0))
 
             elif request.form['btn_id'] == 'telecharger':
-                return redirect(url_for('download', app_name=app_name, filename=app.config['CURRENT_OUTPUT_FILE']))
+                return redirect(url_for('download', app_name=app_name, file=app.config['CURRENT_OUTPUT_FILE']))
 
             elif request.form['btn_id'] == 'terminer':
                 return redirect(url_for('purge', app_name=app_name))
 
         return render_template('linepole.html', uploaded_files=uploaded_files, file_ready=0, file_submit=0, loader=0)
 
-
-    @app.route('/<app_name>/<filename>/', methods=['GET', 'POST'])
-    def download(app_name, filename):
-        if isinstance(filename, list):
-            file = pathlib.Path(zip_files(filename, zip_file_name=app_name + '_result'))
-        else:
-            file = pathlib.Path(filename)
-        return send_from_directory(directory=str(file.parent.absolute()), path=file.name,
+    @app.route('/<app_name>/<file>/', methods=['GET', 'POST'])
+    def download(app_name, file):
+        directory = os.path.abspath(os.path.join(app.config['GENERATED_PATH'], app_name))
+        filename = pathlib.Path(file).name
+        return send_from_directory(directory=directory, path=filename,
                                    as_attachment=True)
 
 
