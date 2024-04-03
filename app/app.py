@@ -256,7 +256,7 @@ def create_app():
 
     @app.route('/<app_name>/<file>/', methods=['GET', 'POST'])
     def download(app_name, file):
-        directory = os.path.abspath(os.path.join(app.config['GENERATED_PATH'], app_name))
+        directory = pathlib.Path(file).parent.absolute()
         filename = pathlib.Path(file).name
         return send_from_directory(directory=directory, path=filename,
                                    as_attachment=True)
