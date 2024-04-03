@@ -164,8 +164,8 @@ def simple_ed_report(rap_ed, bus_excluded=None):
     :rtype: pd.DataFrame
     """
     columns = {
+        "Bus Name": "Bus",
         "Equipment\nName": "Équipement",
-        "Worst Case Scenario": "Scénario",
         "Fault\nType": "Type de défault",
         "Bus Base\nkV": "Bus (V)",
         "Manufacturer": "Manufacturier",
@@ -184,6 +184,9 @@ def simple_ed_report(rap_ed, bus_excluded=None):
         rapport = rapport[~rapport.index.str.contains('|'.join(bus_excluded))]
 
     rapport = rapport.rename(columns=columns)
+    rapport.index.name = "Équipement"
+    rapport['Bus'].fillna(method='ffill', inplace=True)
+    rapport.sort_values(by=['Bus', 'Équipement'])
 
     #on élimine les colonnes inutile
     column_to_keep = {v for k, v in columns.items()}
