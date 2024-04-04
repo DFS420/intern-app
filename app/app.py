@@ -20,22 +20,24 @@ def create_app():
 
     app.secret_key = secrets.token_bytes()
 
-    app.config['ROOT_DIR'] = pathlib.Path(__file__)
+    app.config['ROOT_DIR'] = pathlib.Path(__file__).parent.parent
 
     app.config['MAX_CONTENT_LENGTH'] = 3072 * 3072
     app.config['UPLOAD_EXTENSIONS'] = ['.csv', '.xlsx', '.xls']
-    app.config['UPLOAD_PATH'] = create_dir('uploads')
-    app.config['UPLOAD_PATH_EPOW'] = create_dir(r'uploads/eepower')
 
-    app.config['UPLOAD_PATH_LP'] = create_dir(r'uploads/linepole_generator')
-    app.config['GENERATED_PATH'] = create_dir(r'generated')
+    app.config['UPLOAD_PATH'] = create_dir(app.config['ROOT_DIR']/'uploads')
+
+    app.config['UPLOAD_PATH_EPOW'] = create_dir(app.config['UPLOAD_PATH']/'eepower')
+
+    app.config['UPLOAD_PATH_LP'] = create_dir(app.config['UPLOAD_PATH']/'linepole_generator')
+    app.config['GENERATED_PATH'] = create_dir(app.config['ROOT_DIR']/'generated')
     app.config['CURRENT_OUTPUT_FILE'] = ''
 
     app.config['MAX_XP'] = 3
     app.config['MAX_SLAN'] = 2
     app.config['MAX_DEGREES'] = 2
 
-    app.config['UPLOAD_PATH_DEV'] = create_dir(r'uploads/developpement')
+    app.config['UPLOAD_PATH_DEV'] = create_dir(app.config['UPLOAD_PATH']/'developpement')
     app.config['DEV_TEMPLATE_DOC'] = app.config['UPLOAD_PATH_DEV'] / 'templates'
     app.config['GENERATED_DEV_DOC_PATH'] = app.config['GENERATED_PATH'] / 'developpement'
 
@@ -254,9 +256,9 @@ def create_app():
 
         return render_template('linepole.html', uploaded_files=uploaded_files, file_ready=0, file_submit=0, loader=0)
 
-    @app.route('/<file>/', methods=['GET', 'POST'])
-    def download(file):
-        directory = pathlib.Path(file).parent.absolute()
+    @app.route('/download/<app_name>/<file>/', methods=['GET', 'POST'])
+    def download(app_name, file):
+        directory = os.path.abspath(os.path.join(app.config['GENERATED_PATH'], app_name))
         filename = pathlib.Path(file).name
         return send_from_directory(directory=directory, path=filename,
                                    as_attachment=True)
