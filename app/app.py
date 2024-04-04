@@ -157,10 +157,10 @@ def create_app():
                 return redirect(url_for('eepower'))
 
             elif request.form['btn_id'] == 'telecharger':
-                return redirect(url_for('download', file=app.config['CURRENT_OUTPUT_FILE']))
+                return redirect(url_for('download', app_name=app_name, filename=app.config['CURRENT_OUTPUT_FILE'].name))
 
             elif request.form['btn_id'] == 'terminer':
-                return redirect(url_for('purge', app_name='eepower'))
+                return redirect(url_for('purge', app_name=app_name))
 
         return render_template('easy_power_traitement.html', nb_scen=EEP_DATA["NB_SCEN"], bus_exclus=EEP_DATA["BUS_EXCLUS"],
                                file_ready=file_ready)
@@ -249,17 +249,17 @@ def create_app():
                 return redirect(url_for('purge', app_name=app_name, file_submit=0))
 
             elif request.form['btn_id'] == 'telecharger':
-                return redirect(url_for('download', file=app.config['CURRENT_OUTPUT_FILE']))
+                return redirect(url_for('download', app_name=app_name, filename=app.config['CURRENT_OUTPUT_FILE'].name))
 
             elif request.form['btn_id'] == 'terminer':
                 return redirect(url_for('purge', app_name=app_name))
 
         return render_template('linepole.html', uploaded_files=uploaded_files, file_ready=0, file_submit=0, loader=0)
 
-    @app.route('/download/<app_name>/<file>/', methods=['GET', 'POST'])
-    def download(app_name, file):
-        directory = os.path.abspath(os.path.join(app.config['GENERATED_PATH'], app_name))
-        filename = pathlib.Path(file).name
+    @app.route('/download/<app_name>/<filename>/', methods=['GET', 'POST'])
+    def download(app_name, filename):
+        directory = pathlib.Path(app.config['GENERATED_PATH']/app_name).absolute()
+        # filename = pathlib.Path(file).name
         return send_from_directory(directory=directory, path=filename,
                                    as_attachment=True)
 
