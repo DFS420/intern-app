@@ -6,7 +6,7 @@ from pathlib import Path
 
 SCEN_PATERN = r"(?i)(lv|lm|hv|30_cycle_report).+(scen\D*)(\s*_*-*)(\d+\w{0,1})"
 
-def parse_excel_sheet(file, sheet_name=0, threshold=5, header=0):
+def parse_excel_sheet(file, sheet_name=0, header=0):
     """
     parses multiple tables from an excel sheet into multiple data frame objects. Returns [dfs, df_mds],
     where dfs is a list of data frames and df_mds their potential associated metadata
@@ -16,44 +16,38 @@ def parse_excel_sheet(file, sheet_name=0, threshold=5, header=0):
     try:
         entire_sheet = xl.parse(sheet_name=sheet_name)
 
-        # count the number of non-Nan cells in each row and then the change in that number between adjacent rows
-        n_values = np.logical_not(entire_sheet.isnull()).sum(axis=1)
-        n_values_deltas = n_values[1:] - n_values[:-1].values
+        lines = np.logical_not(entire_sheet['TCC Coordination Report'].isnull())
+        starts = []
+        ends = []
+        for line, value in lines.items():
+            if line != 0:
+                previous_value = lines[line-1]
+            if line != len(lines) - 1:
+                next_value = lines[line+1]
+            if value and not previous_value:
+                starts.append(line+1)
+            elif value and not next_value:
+                ends.append(line)
+            elif value and line == len(lines) - 1:
+                ends.append(line)
 
-        # define the beginnings and ends of tables using delta in n_values
-        table_beginnings = n_values_deltas > threshold
-        table_beginnings = table_beginnings[table_beginnings].index
-        table_endings = n_values_deltas < -threshold
-        table_endings = table_endings[table_endings].index
-        if len(table_beginnings) < len(table_endings) or len(table_beginnings) > len(table_endings)+1:
+        if len(starts) < len(ends) or len(starts) > len(ends)+1:
             raise BaseException('Could not detect equal number of beginnings and ends')
-
-        # look for metadata before the beginnings of tables
-        md_beginnings = []
-        for start in table_beginnings:
-            md_start = n_values.iloc[:start][n_values==0].index[-1] + 1
-            md_beginnings.append(md_start)
 
         # make data frames
         dfs = []
         df_mds = []
-        for ind in range(len(table_beginnings)):
-            start = int(table_beginnings[ind])
-            if md_start != start:
-                if ind < len(table_endings):
-                    stop = int(table_endings[ind] + 1)
-                else:
-                    stop = int(entire_sheet.shape[0])
-                df = xl.parse(sheet_name=sheet_name, skiprows=start, nrows=stop-start, header=header)
-                dfs.append(df)
-                if start-md_beginnings[ind] > 0:
-                    md = xl.parse(sheet_name=sheet_name, skiprows=md_beginnings[ind],
-                                  nrows=start-md_beginnings[ind]).dropna(axis=1)
-                else:
-                    md = pd.DataFrame()
-                df_mds.append(md)
+        for ind in range(len(starts)):
+            start = int(starts[ind])
+
+            if ind < len(ends):
+                stop = int(ends[ind] + 1)
+            else:
+                stop = int(entire_sheet.shape[0])
+            df = xl.parse(sheet_name=sheet_name, skiprows=start, nrows=stop-start, header=header)
+            dfs.append(df)
         xl.close()
-        return dfs, df_mds
+        return dfs
     except BaseException as e:
         xl.close()
         raise e
@@ -121,14 +115,15 @@ def simple_tcc_reports(rap_tcc, bus_excluded=None):
         }
     }
 
-    rapports, _ = parse_excel_sheet(rap_tcc, header=[0, 1])
+    rapports = parse_excel_sheet(rap_tcc, header=[0, 1])
     for df in rapports:
         prim_cols = set([prim for prim, sec in df.columns.to_list()])
-        if "Fuse" in prim_cols:
+        sec_cols = set([sec for prim, sec in df.columns.to_list()])
+        if "Fuse" in prim_cols or "Fuse" in sec_cols:
             tables["fuse"] = df.set_index(("Fuse", "ID"))
-        elif "SST" in prim_cols:
+        elif "SST" in prim_cols or "SST" in sec_cols:
             tables["electronique"] = df.set_index(("SST", "ID"))
-        elif "Thermal Magnetic Breaker" in prim_cols:
+        elif "Thermal Magnetic Breaker" in prim_cols or "Thermal Magnetic Breaker" in sec_cols:
             tables["magnetothermique"] = df.set_index(("Thermal Magnetic Breaker", "ID"))
 
     for rapport_name, rapport_df in tables.items():
