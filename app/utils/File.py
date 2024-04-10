@@ -135,6 +135,8 @@ def validate_file_epow(file):
                 )
         except openpyxl.utils.exceptions.InvalidFileException:
             raise FileError("Le type de fichiers n'est pas .xlsx")
+        except BaseException:
+            raise FileError("Impossible de déterminer les fins et le débuts des tableaux des protections")
 
     else:
         raise FileError(

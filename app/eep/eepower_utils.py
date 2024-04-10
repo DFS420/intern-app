@@ -54,6 +54,9 @@ def parse_excel_sheet(file, sheet_name=0, threshold=5, header=0):
                 df_mds.append(md)
         xl.close()
         return dfs, df_mds
+    except BaseException as e:
+        xl.close()
+        raise e
     except Exception as e:
         xl.close()
         raise e
