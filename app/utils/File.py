@@ -123,7 +123,7 @@ def validate_file_epow(file):
 
     elif re.match(file_names_patern['tcc'], file.name):
         try:
-            df_tcc, _ = parse_excel_sheet(file, header=[0, 1])
+            df_tcc = parse_excel_sheet(file, header=[0, 1])
             df = df_tcc[0]
             if set.intersection(tcc_col, df.columns.to_list()[0]) != set():
                 return "TCC"
