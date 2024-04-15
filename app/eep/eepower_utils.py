@@ -131,8 +131,8 @@ def simple_tcc_reports(rap_tcc, bus_excluded=None):
         if bus_excluded is not None and bus_excluded != []:
             try:
                 rapport_df = rapport_df[~rapport_df.index.str.contains('|'.join(bus_excluded))]
-            except Exception as e:
-                raise ValueError
+            except TypeError:
+                raise TypeError
 
 
         # rapport_df = rapport_df.reset_index()

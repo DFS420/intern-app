@@ -149,7 +149,7 @@ def create_app():
                                            bus_exclus=EEP_DATA["BUS_EXCLUS"],
                                            file_ready=file_ready)
 
-                except ValueError as e:
+                except TypeError as e:
                     flash(e, 'error')
                     return render_template('easy_power_traitement.html', nb_scen=EEP_DATA["NB_SCEN"],
                                            bus_exclus=EEP_DATA["BUS_EXCLUS"],
