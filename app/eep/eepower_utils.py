@@ -6,6 +6,7 @@ from pathlib import Path
 
 SCEN_PATERN = r"(?i)(lv|lm|hv|30_cycle_report).+(scen\D*)(\s*_*-*)(\d+\w{0,1})"
 
+
 def parse_excel_sheet(file, sheet_name=0, header=0):
     """
     parses multiple tables from an excel sheet into multiple data frame objects. Returns [dfs, df_mds],
@@ -178,8 +179,11 @@ def simple_ed_report(rap_ed, bus_excluded=None):
     rapport = pd.DataFrame(pd.read_excel(rap_ed, index_col=1))
 
     if bus_excluded is not None and bus_excluded != []:
-        rapport.fillna(method='ffill', inplace=True)
-        rapport = rapport[~rapport.index.str.contains('|'.join(bus_excluded))]
+        try:
+            rapport.fillna(method='ffill', inplace=True)
+            rapport = rapport[~rapport.index.str.contains('|'.join(bus_excluded))]
+        except Exception as e:
+            raise ValueError
 
     rapport = rapport.rename(columns=columns)
     rapport.index.name = "Équipement"
