@@ -128,12 +128,6 @@ def simple_tcc_reports(rap_tcc, bus_excluded=None):
             tables["magnetothermique"] = df.set_index(("Thermal Magnetic Breaker", "ID"))
 
     for rapport_name, rapport_df in tables.items():
-        if bus_excluded is not None and bus_excluded != []:
-            try:
-                rapport_df = rapport_df[~rapport_df.index.str.contains('|'.join(bus_excluded))]
-            except TypeError:
-                raise TypeError
-
 
         # rapport_df = rapport_df.reset_index()
         rapport_df = rapport_df.rename(columns=columns[rapport_name])
