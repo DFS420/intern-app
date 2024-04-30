@@ -178,7 +178,6 @@ def simple_ed_report(rap_ed, bus_excluded=None):
 
     if bus_excluded is not None and bus_excluded != []:
         try:
-            rapport.fillna(method='ffill', inplace=True)
             rapport = rapport[~rapport.index.str.contains('|'.join(bus_excluded))]
         except Exception as e:
             raise ValueError
@@ -186,6 +185,7 @@ def simple_ed_report(rap_ed, bus_excluded=None):
     rapport = rapport.rename(columns=columns)
     rapport.index.name = "Équipement"
     rapport['Bus'].fillna(method='ffill', inplace=True)
+    rapport['Commentaires'].fillna(value='OK', inplace=True)
     rapport.sort_values(by=['Bus', 'Équipement'])
 
     #on élimine les colonnes inutile
