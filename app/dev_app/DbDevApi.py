@@ -130,7 +130,7 @@ def edit_person(request: Person):
 @db_dev_api.route("/dev/download_db/<_type>", methods=['GET', 'POST'])
 def download_db(_type: str):
     if _type == 'csv':
-        with open(current_app.config['DB_PATH']) as f:
+        with open(current_app.config['DB_PATH'], encoding='utf-8') as f:
             data = json.loads(f.read())['_default']
             df = pd.DataFrame(data).T
             csv_path = current_app.config['UPLOAD_PATH_DEV']/'dev_db.csv'

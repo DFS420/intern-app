@@ -222,7 +222,7 @@ def save_items_as_json(data, path, filename="data.json"):
     return file
 
 
-def render_document(template_path, doc_path, projects, persons=None):
+def render_document(template_path, doc_path, projects, person):
     """
     Generate a docx file from a template
     :param template_path: path to the template file
@@ -236,12 +236,10 @@ def render_document(template_path, doc_path, projects, persons=None):
     """
 
     doc = DocxTemplate(template_path)
-    context = {'projects': projects, 'persons': persons}
+    context = {'projects': projects, 'person': person}
     doc.render(context)
     doc.save(doc_path)
 
     return doc_path
-
-
 
 

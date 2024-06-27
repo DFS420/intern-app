@@ -57,7 +57,6 @@ def parse_excel_sheet(file, sheet_name=0, header=0):
         raise e
 
 
-
 def simple_tcc_reports(rap_tcc, bus_excluded=None):
     """
     Créer un dataframe pandas avec les données nécessaires issues d'EasyPower:
@@ -303,8 +302,8 @@ def simple_cc_report(rap_30, rap_1, hv=None, typefile='csv', bus_excluded=None):
 
     rap = rap.sort_values(by='Bus (V)', ascending=False)
 
-    peak = pd.DataFrame(rap['Asym Amps'] * sqrt(2)).round(1)
-    rap.insert(4, 'I Peak', peak)
+    peak = pd.DataFrame(rap['Sym Amps'] * 2.6).round(1)
+    rap.insert(4, '2,6*I Sym', peak)
 
     if hv:
         hv_report = simple_cc_report(rap_30, hv, hv=None, typefile=typefile, bus_excluded=bus_excluded)
@@ -353,7 +352,7 @@ def scenario_finder(file_names):
 
 def pire_cas(reports, scenarios):
     pire_cas = pd.concat(reports, keys=scenarios, names=["Scénario", None])
-    pire_cas = pire_cas.loc[pire_cas.groupby(level=1)['I Peak'].idxmax()]
+    pire_cas = pire_cas.loc[pire_cas.groupby(level=1)['Asym Amps'].idxmax()]
     pire_cas = pire_cas.sort_values(by='Bus (V)', ascending=False)
     pire_cas = pire_cas.reset_index("Scénario")
     return pire_cas
