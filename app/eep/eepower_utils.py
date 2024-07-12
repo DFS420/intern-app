@@ -183,8 +183,8 @@ def simple_ed_report(rap_ed, bus_excluded=None):
 
     rapport = rapport.rename(columns=columns)
     rapport.index.name = "Équipement"
-    rapport['Bus'].fillna(method='ffill', inplace=True)
-    rapport['Commentaires'].fillna(value='OK', inplace=True)
+    rapport['Bus'] = rapport['Bus'].ffill()
+    rapport['Commentaires'] = rapport['Commentaires'].fillna('OK')
     rapport.sort_values(by=['Bus', 'Équipement'])
 
     #on élimine les colonnes inutile
