@@ -37,3 +37,4 @@ tinydb~=4.7.0
 uvicorn
 requests
 docxtpl
+pytest>=8.2.2
