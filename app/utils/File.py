@@ -87,7 +87,7 @@ def validate_file_epow(file):
         if col1.issubset(df.columns.to_list()) or col30.issubset(df.columns.to_list()):
             return "CC"
         else:
-            missing_col = col30 + col1 - set(df.columns.to_list())
+            missing_col = col30.union(col1) - set(df.columns.to_list())
             raise FileError(
                 "Les colonnes {0} du fichier '{1}' semblent être manquantes ou mal écrite dans les fichiers "
                 "fournis".format(missing_col, file)
