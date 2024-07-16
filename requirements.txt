@@ -38,3 +38,4 @@ uvicorn
 requests
 docxtpl
 pytest>=8.2.2
+pre-commit
