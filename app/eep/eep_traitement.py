@@ -2,8 +2,25 @@ from pandas import ExcelWriter
 from pathlib import Path
 from re import search
 import json
+from functools import wraps
 from .eepower_utils import simple_cc_report, simple_af_report, simple_ed_report, group_by_scenario, pire_cas,\
     parse_excel_sheet, simple_tcc_reports
+
+
+def setup_report_paths(xl_filename, tex_filename):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(data, target_rep, *args, **kwargs):
+            xl_output_path = Path(target_rep).joinpath(xl_filename)
+            tex_output_path = Path(target_rep).joinpath(tex_filename)
+
+            result = func(data, target_rep, xl_output_path, tex_output_path, *args, **kwargs)
+
+            return xl_output_path, tex_output_path
+
+        return wrapper
+
+    return decorator
 
 
 CC_XL_FILE_NAME = 'eep-cc-output.xlsx'
@@ -118,8 +135,8 @@ def report_ed(data, target_rep):
     except ValueError:
         raise ValueError
 
-
-def report_af(data, target_rep):
+@setup_report_paths(FUSE_XL_FILE_NAME, FUSE_TEX_FILE_NAME)
+def report_af(data, target_rep, xl_output_path, tex_output_path):
     """
     Generate a xlsx and latex report for arc-flash
     :param data: a dictionary that contains all information for the processs
@@ -136,8 +153,6 @@ def report_af(data, target_rep):
     :rtype: tuple of path
     """
 
-    xl_output_path = Path(target_rep).joinpath(AF_XL_FILE_NAME)
-    tex_output_path = Path(target_rep).joinpath(AF_TEX_FILE_NAME)
     try:
         f = [f for f in data["FILES"] if "arc_flash_scenario_report" in f.name.lower()][0]
         report = simple_af_report(str(f), bus_excluded=data["BUS_EXCLUS"])
@@ -149,7 +164,6 @@ def report_af(data, target_rep):
             report.to_excel(writer)
             df_to_tabularay(report, tex_output_path, type='af')
             # on retourne le repertoire et le fichier séparément
-        return xl_output_path, tex_output_path
 
     except PermissionError:
         raise PermissionError("Le fichier choisis est déjà ouvert ou vous n'avez pas la permission de l'écrire")
